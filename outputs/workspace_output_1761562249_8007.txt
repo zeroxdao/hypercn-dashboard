@@ -1,0 +1,8 @@
+266-        const universe = json?.[0]?.universe ?? []
+267-        const ctxs = json?.[1] ?? []
+268-
+269:        const rows: TokenInfo[] = universe.map((u: any, i: number) => {
+270:          const c = ctxs[i] || {}
+271-          const mark = Number.parseFloat(c.markPx ?? "0")
+272-          const prev = Number.parseFloat(c.prevDayPx ?? (mark || "0"))
+273-          const vol = Number.parseFloat(c.dayNtlVlm ?? "0")

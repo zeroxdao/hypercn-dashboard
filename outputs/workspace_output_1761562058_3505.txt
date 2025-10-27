@@ -1,0 +1,50 @@
+/**
+ * CoinGecko API 客户端
+ * 用于获取 HYPE 代币的市值、价格、流通量等数据
+ */
+
+const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY || ""
+const COINGECKO_BASE_URL = process.env.COINGECKO_API_URL || "https://api.coingecko.com/api/v3"
+
+export interface CoinGeckoTokenData {
+  id: string
+  symbol: string
+  name: string
+  market_data: {
+    current_price: {
+      usd: number
+    }
+    market_cap: {
+      usd: number
+    }
+    market_cap_change_percentage_24h: number
+    total_volume: {
+      usd: number
+    }
+    circulating_supply: number
+    total_supply: number
+    high_24h: {
+      usd: number
+    }
+    low_24h: {
+      usd: number
+    }
+    price_change_percentage_24h: number
+  }
+}
+
+export interface CoinGeckoSimplePrice {
+  usd: number
+  usd_24h_change: number
+  usd_24h_vol: number
+  usd_market_cap: number
+}
+
+export interface CoinGeckoMarketChart {
+  prices: [number, number][]
+  market_caps: [number, number][]
+  total_volumes: [number, number][]
+}
+
+/**
+ * 获取 HYPE 代币完整数据

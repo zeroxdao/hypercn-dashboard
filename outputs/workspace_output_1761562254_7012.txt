@@ -1,0 +1,8 @@
+lib/api/coingecko.ts:58:      next: { revalidate: 60 }, // 缓存 60 秒
+lib/api/coingecko.ts:84:        next: { revalidate: 30 }, // 缓存 30 秒
+lib/api/coingecko.ts:110:      next: { revalidate: 300 }, // 缓存 5 分钟
+lib/api/coingecko.ts:138:        next: { revalidate: 300 }, // 缓存 5 分钟
+lib/api/hyperliquid.ts:38:      next: { revalidate: 10 }, // 10秒缓存
+lib/api/hyperliquid.ts:157:      next: { revalidate: 60 },
+lib/api/defillama.ts:324:      next: { revalidate: 300 }, // 5min cache
+app/api/defillama-revenue/route.ts:12:      next: { revalidate: 300 },
