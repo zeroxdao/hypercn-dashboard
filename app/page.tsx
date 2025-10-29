@@ -10,7 +10,7 @@ import {
 } from "@/lib/api/dashboard"
 
 export const dynamic = "force-dynamic"
-export const revalidate = 10 // 每10秒重新验证数据
+export const revalidate = 0
 
 export default async function HyperliquidDashboard() {
   // 并行获取所有数据

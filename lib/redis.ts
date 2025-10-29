@@ -7,7 +7,15 @@ import { Redis } from "@upstash/redis"
 
 let redisClient: Redis | null = null
 
+function isBuildPhase(): boolean {
+  return process.env.NEXT_PHASE === "phase-production-build" || process.env.NEXT_PHASE === "phase-production-server"
+}
+
 function getRedis(): Redis | null {
+  if (isBuildPhase()) {
+    return null
+  }
+
   if (typeof window !== "undefined") {
     // Don't use Redis on client side
     return null
@@ -17,7 +25,9 @@ function getRedis(): Redis | null {
     try {
       redisClient = Redis.fromEnv()
     } catch (error) {
-      console.error("Failed to initialize Redis client:", error)
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to initialize Redis client:", error)
+      }
       return null
     }
   }
@@ -62,6 +72,10 @@ export const CACHE_TTL = {
  * @returns 是否允许请求
  */
 export async function checkRateLimit(ip: string, limit = 60): Promise<boolean> {
+  if (isBuildPhase()) {
+    return true
+  }
+
   try {
     const redis = getRedis()
     if (!redis) {
@@ -93,6 +107,10 @@ export async function checkRateLimit(ip: string, limit = 60): Promise<boolean> {
  * @returns 缓存的数据或 null
  */
 export async function getCached<T>(key: string): Promise<T | null> {
+  if (isBuildPhase()) {
+    return null
+  }
+
   try {
     const redis = getRedis()
     if (!redis) {
@@ -116,6 +134,10 @@ export async function getCached<T>(key: string): Promise<T | null> {
  * @param ttl - 过期时间（秒）
  */
 export async function setCache<T>(key: string, data: T, ttl: number): Promise<void> {
+  if (isBuildPhase()) {
+    return
+  }
+
   try {
     const redis = getRedis()
     if (!redis) {
@@ -135,6 +157,10 @@ export async function setCache<T>(key: string, data: T, ttl: number): Promise<vo
  * @param key - 缓存键
  */
 export async function deleteCache(key: string): Promise<void> {
+  if (isBuildPhase()) {
+    return
+  }
+
   try {
     const redis = getRedis()
     if (!redis) {
@@ -154,6 +180,10 @@ export async function deleteCache(key: string): Promise<void> {
  * @param pattern - 缓存键模式（例如：dashboard:*）
  */
 export async function deleteCachePattern(pattern: string): Promise<void> {
+  if (isBuildPhase()) {
+    return
+  }
+
   try {
     const redis = getRedis()
     if (!redis) {
