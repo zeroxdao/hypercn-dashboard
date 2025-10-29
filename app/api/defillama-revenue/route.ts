@@ -1,5 +1,24 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { checkRateLimit, getCached, setCache, CACHE_KEYS, CACHE_TTL } from "@/lib/redis"
+
+const rateLimit = new Map<string, { count: number; resetTime: number }>()
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const limit = rateLimit.get(ip)
+
+  if (!limit || now > limit.resetTime) {
+    rateLimit.set(ip, { count: 1, resetTime: now + 60000 }) // 1 minute window
+    return true
+  }
+
+  if (limit.count >= 60) {
+    // 60 requests per minute
+    return false
+  }
+
+  limit.count++
+  return true
+}
 
 /**
  * 返回 Hyperliquid 的 dailyRevenue（不是 fees）
@@ -8,17 +27,8 @@ import { checkRateLimit, getCached, setCache, CACHE_KEYS, CACHE_TTL } from "@/li
 export async function GET(request: NextRequest) {
   try {
     const ip = request.ip || request.headers.get("x-forwarded-for") || "unknown"
-    const allowed = await checkRateLimit(ip, 60)
-
-    if (!allowed) {
+    if (!checkRateLimit(ip)) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 })
-    }
-
-    const cacheKey = CACHE_KEYS.DEFILLAMA_REVENUE
-    const cachedData = await getCached<{ totalDataChart: [number, number][]; isMockData?: boolean }>(cacheKey)
-
-    if (cachedData) {
-      return NextResponse.json(cachedData)
     }
 
     const url = "https://api.llama.fi/summary/fees/hyperliquid?dataType=dailyRevenue"
@@ -34,14 +44,10 @@ export async function GET(request: NextRequest) {
         console.error("DefiLlama API error:", res.status, text)
       }
 
-      const mockData = {
+      return NextResponse.json({
         totalDataChart: generateMockRevenueData(),
         isMockData: true,
-      }
-
-      await setCache(cacheKey, mockData, 60)
-
-      return NextResponse.json(mockData)
+      })
     }
 
     const json = await res.json()
@@ -50,32 +56,22 @@ export async function GET(request: NextRequest) {
     const totalDataChart: [number, number][] = json?.totalDataChart || []
 
     if (totalDataChart.length === 0) {
-      const mockData = {
+      return NextResponse.json({
         totalDataChart: generateMockRevenueData(),
         isMockData: true,
-      }
-
-      await setCache(cacheKey, mockData, 60)
-
-      return NextResponse.json(mockData)
+      })
     }
 
-    const responseData = { totalDataChart }
-
-    await setCache(cacheKey, responseData, CACHE_TTL.DEFILLAMA_REVENUE)
-
-    return NextResponse.json(responseData)
+    return NextResponse.json({ totalDataChart })
   } catch (err: any) {
     if (process.env.NODE_ENV === "development") {
       console.error("Error fetching DefiLlama revenue:", err)
     }
 
-    const mockData = {
+    return NextResponse.json({
       totalDataChart: generateMockRevenueData(),
       isMockData: true,
-    }
-
-    return NextResponse.json(mockData)
+    })
   }
 }
 

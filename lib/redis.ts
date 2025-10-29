@@ -2,8 +2,12 @@ import { Redis } from "@upstash/redis"
 
 let _redis: ReturnType<typeof Redis.fromEnv> | null = null
 
-/** 单例：仅在第一次调用时创建 */
+/** 单例：仅在第一次调用时创建，构建期跳过 */
 export const redis = (() => {
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    return null as any
+  }
+
   if (_redis) return _redis
   _redis = Redis.fromEnv()
   return _redis!

@@ -7,28 +7,20 @@ import { getMetaAndAssetCtxs, getSpotMetaAndAssetCtxs } from "./hyperliquid"
 import { getHypeTokenData, getHypeMarketChart } from "./coingecko"
 import { getHyperliquidData } from "./defillama"
 import type { DashboardStats, HypePrice, BuybackData, RevenueData, TokenInfo } from "@/lib/types/hyperliquid"
-import { getCached, setCache, CACHE_KEYS, CACHE_TTL } from "@/lib/redis"
 
 /**
  * 获取仪表板统计数据
  */
 export async function getDashboardStats(): Promise<DashboardStats> {
   try {
-    const cachedStats = await getCached<DashboardStats>(CACHE_KEYS.DASHBOARD_STATS)
-    if (cachedStats) {
-      return cachedStats
-    }
-
     const [hypeData, defiLlamaData] = await Promise.all([getHypeTokenData(), getHyperliquidData()])
 
     const perpsVolume = await fetchPerpsVolume()
 
     const tvl = defiLlamaData.tvl || 0
 
-    let stats: DashboardStats
-
     if (hypeData) {
-      stats = {
+      return {
         totalUsers: 0,
         totalMarketCap: `US$${Math.round(hypeData.market_data.market_cap.usd).toLocaleString("en-US")}`,
         marketCapChange: Number.parseFloat(hypeData.market_data.market_cap_change_percentage_24h.toFixed(2)),
@@ -37,23 +29,19 @@ export async function getDashboardStats(): Promise<DashboardStats> {
         volume24h: `US$${Math.round(perpsVolume).toLocaleString("en-US")}`,
         hyperevmTps: 0,
       }
-    } else {
-      console.warn("CoinGecko API failed, using Hyperliquid API as fallback")
-
-      stats = {
-        totalUsers: 0,
-        totalMarketCap: "US$0",
-        marketCapChange: 0,
-        totalValueLocked: `US$${Math.round(tvl).toLocaleString("en-US")}`,
-        tvlChange: 0,
-        volume24h: `US$${Math.round(perpsVolume).toLocaleString("en-US")}`,
-        hyperevmTps: 0,
-      }
     }
 
-    await setCache(CACHE_KEYS.DASHBOARD_STATS, stats, CACHE_TTL.DASHBOARD_STATS)
+    console.warn("CoinGecko API failed, using Hyperliquid API as fallback")
 
-    return stats
+    return {
+      totalUsers: 0,
+      totalMarketCap: "US$0",
+      marketCapChange: 0,
+      totalValueLocked: `US$${Math.round(tvl).toLocaleString("en-US")}`,
+      tvlChange: 0,
+      volume24h: `US$${Math.round(perpsVolume).toLocaleString("en-US")}`,
+      hyperevmTps: 0,
+    }
   } catch (error) {
     console.error("Error fetching dashboard stats:", error)
     return {
@@ -97,14 +85,7 @@ async function fetchPerpsVolume(): Promise<number> {
  */
 export async function getHypePrice(): Promise<HypePrice> {
   try {
-    const cachedPrice = await getCached<HypePrice>(CACHE_KEYS.HYPE_PRICE)
-    if (cachedPrice) {
-      return cachedPrice
-    }
-
     const hypeData = await getHypeTokenData()
-
-    let priceData: HypePrice
 
     if (hypeData) {
       const chartData = await getHypeMarketChart(1)
@@ -115,50 +96,46 @@ export async function getHypePrice(): Promise<HypePrice> {
           }))
         : []
 
-      priceData = {
+      return {
         current: hypeData.market_data.current_price.usd.toFixed(4),
         change24h: Number.parseFloat(hypeData.market_data.price_change_percentage_24h.toFixed(2)),
         low24h: hypeData.market_data.low_24h.usd.toFixed(4),
         high24h: hypeData.market_data.high_24h.usd.toFixed(4),
         chartData: priceHistory,
       }
-    } else {
-      console.warn("CoinGecko API failed, using Hyperliquid API as fallback")
-      const { data: metaAndAssetCtxs } = await getMetaAndAssetCtxs()
-
-      if (!metaAndAssetCtxs) {
-        throw new Error("Failed to fetch price data")
-      }
-
-      const [meta, assetCtxs] = metaAndAssetCtxs
-      const hypeIndex = meta.universe.findIndex((asset) => asset.name === "HYPE")
-
-      if (hypeIndex === -1) {
-        throw new Error("HYPE not found in universe")
-      }
-
-      const hypeCtx = assetCtxs[hypeIndex]
-      const currentPrice = Number.parseFloat(hypeCtx.markPx)
-      const prevPrice = Number.parseFloat(hypeCtx.prevDayPx)
-      const change24h = ((currentPrice - prevPrice) / prevPrice) * 100
-
-      const chartData = Array.from({ length: 24 }, (_, i) => ({
-        time: Date.now() - (24 - 1 - i) * 3600000,
-        price: currentPrice * (0.95 + Math.random() * 0.1),
-      }))
-
-      priceData = {
-        current: currentPrice.toFixed(4),
-        change24h: Number.parseFloat(change24h.toFixed(2)),
-        low24h: hypeCtx.impactPxs[0],
-        high24h: hypeCtx.impactPxs[1],
-        chartData,
-      }
     }
 
-    await setCache(CACHE_KEYS.HYPE_PRICE, priceData, CACHE_TTL.HYPE_PRICE)
+    console.warn("CoinGecko API failed, using Hyperliquid API as fallback")
+    const { data: metaAndAssetCtxs } = await getMetaAndAssetCtxs()
 
-    return priceData
+    if (!metaAndAssetCtxs) {
+      throw new Error("Failed to fetch price data")
+    }
+
+    const [meta, assetCtxs] = metaAndAssetCtxs
+    const hypeIndex = meta.universe.findIndex((asset) => asset.name === "HYPE")
+
+    if (hypeIndex === -1) {
+      throw new Error("HYPE not found in universe")
+    }
+
+    const hypeCtx = assetCtxs[hypeIndex]
+    const currentPrice = Number.parseFloat(hypeCtx.markPx)
+    const prevPrice = Number.parseFloat(hypeCtx.prevDayPx)
+    const change24h = ((currentPrice - prevPrice) / prevPrice) * 100
+
+    const chartData = Array.from({ length: 24 }, (_, i) => ({
+      time: Date.now() - (24 - 1 - i) * 3600000,
+      price: currentPrice * (0.95 + Math.random() * 0.1),
+    }))
+
+    return {
+      current: currentPrice.toFixed(4),
+      change24h: Number.parseFloat(change24h.toFixed(2)),
+      low24h: hypeCtx.impactPxs[0],
+      high24h: hypeCtx.impactPxs[1],
+      chartData,
+    }
   } catch (error) {
     console.error("Error fetching HYPE price:", error)
     return {
@@ -333,11 +310,6 @@ async function getDailyRevenueData(defiLlamaData: any): Promise<RevenueData[]> {
  */
 export async function getHotTokens(): Promise<TokenInfo[]> {
   try {
-    const cachedTokens = await getCached<TokenInfo[]>(CACHE_KEYS.HOT_TOKENS)
-    if (cachedTokens) {
-      return cachedTokens
-    }
-
     const { data: spotData } = await getSpotMetaAndAssetCtxs()
 
     if (!spotData) {
@@ -378,7 +350,7 @@ export async function getHotTokens(): Promise<TokenInfo[]> {
       .sort((a, b) => Number.parseFloat(b.ctx.dayNtlVlm) - Number.parseFloat(a.ctx.dayNtlVlm))
       .slice(0, 5)
 
-    const tokens = sortedTokens.map(({ ctx, meta }) => {
+    return sortedTokens.map(({ ctx, meta }) => {
       const currentPrice = Number.parseFloat(ctx.markPx)
       const prevPrice = Number.parseFloat(ctx.prevDayPx)
       const change24h = prevPrice > 0 ? ((currentPrice - prevPrice) / prevPrice) * 100 : 0
@@ -391,10 +363,6 @@ export async function getHotTokens(): Promise<TokenInfo[]> {
         volume24h: ctx.dayNtlVlm,
       }
     })
-
-    await setCache(CACHE_KEYS.HOT_TOKENS, tokens, CACHE_TTL.HOT_TOKENS)
-
-    return tokens
   } catch (error) {
     console.error("Error fetching hot tokens:", error)
     return []
@@ -406,11 +374,6 @@ export async function getHotTokens(): Promise<TokenInfo[]> {
  */
 export async function getTopGainers(): Promise<TokenInfo[]> {
   try {
-    const cachedGainers = await getCached<TokenInfo[]>(CACHE_KEYS.TOP_GAINERS)
-    if (cachedGainers) {
-      return cachedGainers
-    }
-
     const { data: spotData } = await getSpotMetaAndAssetCtxs()
 
     if (!spotData) {
@@ -458,7 +421,7 @@ export async function getTopGainers(): Promise<TokenInfo[]> {
       .sort((a, b) => b.change24h - a.change24h)
       .slice(0, 5)
 
-    const gainers = sortedTokens.map(({ ctx, meta, change24h, currentPrice }) => {
+    return sortedTokens.map(({ ctx, meta, change24h, currentPrice }) => {
       return {
         name: meta.name,
         symbol: meta.name,
@@ -467,10 +430,6 @@ export async function getTopGainers(): Promise<TokenInfo[]> {
         volume24h: ctx.dayNtlVlm,
       }
     })
-
-    await setCache(CACHE_KEYS.TOP_GAINERS, gainers, CACHE_TTL.TOP_GAINERS)
-
-    return gainers
   } catch (error) {
     console.error("Error fetching top gainers:", error)
     return []
@@ -483,11 +442,6 @@ export async function getTopGainers(): Promise<TokenInfo[]> {
  */
 export async function getNewTokens(): Promise<TokenInfo[]> {
   try {
-    const cachedNewTokens = await getCached<TokenInfo[]>(CACHE_KEYS.NEW_TOKENS)
-    if (cachedNewTokens) {
-      return cachedNewTokens
-    }
-
     const { data: spotData } = await getSpotMetaAndAssetCtxs()
 
     if (!spotData) {
@@ -535,8 +489,6 @@ export async function getNewTokens(): Promise<TokenInfo[]> {
         }
       })
       .filter((token): token is NonNullable<typeof token> => token !== null)
-
-    await setCache(CACHE_KEYS.NEW_TOKENS, newTokens, CACHE_TTL.NEW_TOKENS)
 
     return newTokens
   } catch (error) {
