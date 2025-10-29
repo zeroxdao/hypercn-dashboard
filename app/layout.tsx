@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="overflow-y-auto">
+    <html lang="en" className="dark overflow-y-auto">
       <body className={`font-sans antialiased overflow-y-auto`}>{children}</body>
     </html>
   )

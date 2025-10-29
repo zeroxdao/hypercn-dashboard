@@ -1,11 +1,36 @@
-import { NextResponse } from "next/server"
+import { NextResponse, type NextRequest } from "next/server"
+
+const rateLimit = new Map<string, { count: number; resetTime: number }>()
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const limit = rateLimit.get(ip)
+
+  if (!limit || now > limit.resetTime) {
+    rateLimit.set(ip, { count: 1, resetTime: now + 60000 }) // 1 minute window
+    return true
+  }
+
+  if (limit.count >= 60) {
+    // 60 requests per minute
+    return false
+  }
+
+  limit.count++
+  return true
+}
 
 /**
  * 返回 Hyperliquid 的 dailyRevenue（不是 fees）
  * 结构：{ totalDataChart: [ [timestamp, value], ... ] }
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const ip = request.ip || request.headers.get("x-forwarded-for") || "unknown"
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 })
+    }
+
     const url = "https://api.llama.fi/summary/fees/hyperliquid?dataType=dailyRevenue"
 
     const res = await fetch(url, {
@@ -15,7 +40,9 @@ export async function GET() {
 
     if (!res.ok) {
       const text = await res.text()
-      console.error("[v0] DefiLlama API error:", res.status, text)
+      if (process.env.NODE_ENV === "development") {
+        console.error("DefiLlama API error:", res.status, text)
+      }
 
       return NextResponse.json({
         totalDataChart: generateMockRevenueData(),
@@ -37,7 +64,9 @@ export async function GET() {
 
     return NextResponse.json({ totalDataChart })
   } catch (err: any) {
-    console.error("[v0] Error fetching DefiLlama revenue:", err)
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error fetching DefiLlama revenue:", err)
+    }
 
     return NextResponse.json({
       totalDataChart: generateMockRevenueData(),

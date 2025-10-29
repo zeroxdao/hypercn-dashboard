@@ -4,10 +4,10 @@ import type React from "react"
 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { useState, useMemo, useEffect, useRef } from "react"
+import { useState, useMemo, useEffect, useRef, useCallback } from "react"
 import type { DashboardStats, HypePrice, BuybackData, RevenueData, TokenInfo } from "@/lib/types/hyperliquid"
 import { reformatCurrency } from "@/lib/utils/format"
-import { ExternalLink } from "lucide-react"
+import { ExternalLink, Menu, X } from "lucide-react"
 import dayjs from "dayjs"
 
 type UIProject = {
@@ -185,6 +185,7 @@ export default function DashboardClient({
   newTokens,
 }: DashboardClientProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   const [timePeriod, setTimePeriod] = useState<"month" | "day">("month")
   const [currentRevenueData, setCurrentRevenueData] = useState<RevenueData[]>(revenueData)
   const [isLoading, setIsLoading] = useState(false)
@@ -193,8 +194,24 @@ export default function DashboardClient({
 
   // 分页（每页 9 项）
   const [currentPage, setCurrentPage] = useState(1)
-  const [goToPage, setGoToPage] = useState("")
+  // Renamed goToPage to goToPageInput
+  const [goToPageInput, setGoToPageInput] = useState("")
   const itemsPerPage = 9
+
+  const firstCardAnchorRef = useRef<HTMLDivElement | null>(null)
+
+  const HEADER_OFFSET = 72
+
+  const scrollToFirstCard = useCallback(() => {
+    const el = firstCardAnchorRef.current
+    if (!el) return
+
+    const rectTop = el.getBoundingClientRect().top + window.pageYOffset
+    window.scrollTo({
+      top: Math.max(rectTop - HEADER_OFFSET, 0),
+      behavior: "smooth",
+    })
+  }, [])
 
   const [defiLlamaRevenue, setDefiLlamaRevenue] = useState<DefiLlamaRevenueData | null>(null)
   const [revenueLoading, setRevenueLoading] = useState(true)
@@ -252,23 +269,32 @@ export default function DashboardClient({
   useEffect(() => {
     const fetchTopVolumePerps = async () => {
       try {
-        const res = await fetch("/api/perps-volume")
-        if (!res.ok) return
-        
-        const { data } = await res.json()
-        if (!data || !Array.isArray(data)) return
+        const res = await fetch("https://api.hyperliquid.xyz/info", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "metaAndAssetCtxs" }),
+        })
+        if (!res.ok) {
+          return
+        }
 
-        const rows: TokenInfo[] = data.map((item: any) => {
-          const { u, c } = item
-          const mark = Number.parseFloat(c?.markPx ?? "0")
-          const prev = Number.parseFloat(c?.prevDayPx ?? (mark || "0"))
-          const vol = Number.parseFloat(c?.dayNtlVlm ?? "0")
+        const json = await res.json()
+
+        const universe = json?.[0]?.universe ?? []
+        const ctxs = json?.[1] ?? []
+
+        const rows: TokenInfo[] = universe.map((u: any, i: number) => {
+          const c = ctxs[i] || {}
+          const mark = Number.parseFloat(c.markPx ?? "0")
+          const prev = Number.parseFloat(c.prevDayPx ?? (mark || "0"))
+          const vol = Number.parseFloat(c.dayNtlVlm ?? "0")
           const changePct = prev > 0 ? ((mark - prev) / prev) * 100 : 0
 
           return {
-            name: u?.name || "Unknown",
+            name: u.name,
             price: mark.toFixed(5),
             change24h: Number(changePct.toFixed(2)),
+            // @ts-ignore
             volume24h: vol,
           }
         })
@@ -405,15 +431,20 @@ export default function DashboardClient({
       .filter((d) => d && d.price != null && !Number.isNaN(d.price))
       .sort((a, b) => normTs(a.timestamp) - normTs(b.timestamp))
 
-    // Calculate price range
     const minPrice = Math.min(...series.map((d) => d.price))
     const maxPrice = Math.max(...series.map((d) => d.price))
     const priceRange = Math.max(1e-12, maxPrice - minPrice)
 
-    // Map to viewBox coordinates
+    // Add 10% padding on top and bottom
+    const padding = priceRange * 0.1
+    const paddedMin = minPrice - padding
+    const paddedMax = maxPrice + padding
+    const paddedRange = paddedMax - paddedMin
+
+    // Map to viewBox coordinates with padding
     return series.map((d, i) => {
       const x = (i / (series.length - 1)) * W
-      const y = H - ((d.price - minPrice) / priceRange) * H
+      const y = H - ((d.price - paddedMin) / paddedRange) * H
       return { x, y, ts: normTs(d.timestamp), price: d.price, i }
     })
   }, [hypePrice.chartData])
@@ -447,37 +478,52 @@ export default function DashboardClient({
     setDisplayChange(Number.parseFloat(changePercent.toFixed(2)))
   }
 
-  const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
+  const updateHoverFromClientX = (svg: SVGSVGElement, clientX: number) => {
+    if (!svg || chartPoints.length === 0) return
+
+    const rect = svg.getBoundingClientRect()
+    let x = clientX - rect.left
+
+    // Map to viewBox coordinates
+    x = Math.max(0, Math.min(400, (x / rect.width) * 400))
+    const idxFloat = (x / 400) * (chartPoints.length - 1)
+    const i = Math.round(idxFloat)
+
+    const point = chartPoints[i]
+    if (!point) return
+
+    setHoveredPoint(point)
+
+    const firstPrice = chartPoints[0]?.price ?? point.price
+    const changePercent = ((point.price - firstPrice) / firstPrice) * 100
+
+    setDisplayPrice(point.price.toFixed(2))
+    setDisplayChange(Number.parseFloat(changePercent.toFixed(2)))
+  }
+
+  const handlePointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
+    const svg = e.currentTarget
+    svg.setPointerCapture?.(e.pointerId)
     setIsDragging(true)
-    handleChartInteraction(e)
+    updateHoverFromClientX(svg, e.clientX)
   }
-  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (isDragging) handleChartInteraction(e)
+
+  const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
+    // Mouse: only update when dragging; Touch: always update
+    const isMouse = e.pointerType === "mouse"
+    if ((isMouse && !isDragging) || !chartRef.current) return
+    updateHoverFromClientX(e.currentTarget, e.clientX)
   }
-  const handleMouseUp = () => {
+
+  const handlePointerUp = (e: React.PointerEvent<SVGSVGElement>) => {
+    e.currentTarget.releasePointerCapture?.(e.pointerId)
     setIsDragging(false)
     setHoveredPoint(null)
     setDisplayPrice(hypePrice.current)
     setDisplayChange(hypePrice.change24h)
   }
-  const handleMouseLeave = () => {
-    if (isDragging) {
-      setIsDragging(false)
-      setHoveredPoint(null)
-      setDisplayPrice(hypePrice.current)
-      setDisplayChange(hypePrice.change24h)
-    }
-  }
-  const handleTouchStart = (e: React.TouchEvent<SVGSVGElement>) => {
-    e.preventDefault()
-    setIsDragging(true)
-    handleChartInteraction(e)
-  }
-  const handleTouchMove = (e: React.TouchEvent<SVGSVGElement>) => {
-    e.preventDefault()
-    if (isDragging) handleChartInteraction(e)
-  }
-  const handleTouchEnd = () => {
+
+  const handlePointerLeave = () => {
     setIsDragging(false)
     setHoveredPoint(null)
     setDisplayPrice(hypePrice.current)
@@ -529,7 +575,6 @@ export default function DashboardClient({
   const pillHot = "bg-orange-500/10 text-orange-400 border-orange-500/30 hover:bg-orange-500/15"
   const pillLatest = "bg-[#43b8e5]/10 text-[#43b8e5] border-[#43b8e5]/30 hover:bg-[#43b8e5]/15"
   const pillNormal = "bg-[#041713]/70 text-[#43e5c9]/80 border-[#43e5c9]/40"
-  // </CHANGE>
 
   const filteredProjects = useMemo(() => {
     if (activeCategory === "全部") {
@@ -561,16 +606,27 @@ export default function DashboardClient({
     if (currentPage > totalPages) setCurrentPage(1)
   }, [currentPage, totalPages])
 
-  const goToPreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1)
-  const goToNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1)
-  const goToSpecificPage = (page: number) => page >= 1 && page <= totalPages && setCurrentPage(page)
+  const goToPage = useCallback(
+    (page: number) => {
+      if (page >= 1 && page <= totalPages) {
+        setCurrentPage(page)
+        requestAnimationFrame(scrollToFirstCard)
+      }
+    },
+    [totalPages, scrollToFirstCard],
+  )
+
+  const goToPreviousPage = () => currentPage > 1 && goToPage(currentPage - 1)
+  const goToNextPage = () => currentPage < totalPages && goToPage(currentPage + 1)
+  const goToSpecificPage = (page: number) => goToPage(page)
   const handleGoToPageSubmit = () => {
-    const page = Number.parseInt(goToPage)
-    if (!isNaN(page) && page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
-      setGoToPage("")
+    const page = Number.parseInt(goToPageInput)
+    if (!isNaN(page)) {
+      goToPage(page)
+      setGoToPageInput("")
     }
   }
+
   const getVisiblePageNumbers = () => {
     const pages: (number | string)[] = []
     if (totalPages <= 1) return [1]
@@ -586,31 +642,31 @@ export default function DashboardClient({
 
   return (
     <div className="grid min-h-screen grid-rows-[auto_auto_1fr_auto] bg-[#010807] text-white lg:min-h-screen">
-      {/* 顶部统计栏 */}
-      <div className="hidden border-b border-[#072027] bg-[#010807] px-6 py-2.5 lg:block">
+      <div className="hidden lg:block border-b border-[#072027] bg-[#010807] px-6 py-2.5">
         <div className="flex w-full items-center justify-between text-sm">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2">
               <span className="text-[#43e5c9]">总市值:</span>
-              <span className="font-medium text-white">{reformatCurrency(stats.totalMarketCap)}</span>
+              <span className="text-white lg:text-[14px] lg:font-medium tabular-nums">
+                {reformatCurrency(stats.totalMarketCap)}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[#43e5c9]">总锁仓:</span>
-              <span className="font-medium text-white">{reformatCurrency(stats.totalValueLocked)}</span>
+              <span className="text-white lg:text-[14px] lg:font-medium tabular-nums">
+                {reformatCurrency(stats.totalValueLocked)}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[#43e5c9]">24小时成交量:</span>
-              <span className="font-medium text-white">{reformatCurrency(stats.volume24h)}</span>
+              <span className="text-white lg:text-[14px] lg:font-medium tabular-nums">
+                {reformatCurrency(stats.volume24h)}
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <a href="/admin" target="_blank" rel="noopener noreferrer">
-              <Button className="h-8 rounded-lg border border-[#43e5c9] bg-transparent px-4 text-sm font-medium text-[#43e5c9] hover:bg-[#43e5c9] hover:text-[#010807] transition-colors">
-                管理面板
-              </Button>
-            </a>
+          <div>
             <a href="https://t.me/chinesehyperliquid" target="_blank" rel="noopener noreferrer">
-              <Button className="h-8 rounded-lg bg-[#43e5c9] px-5 text-sm font-medium text-[#010807] hover:bg-[#2da691]">
+              <Button className="h-11 px-6 text-base rounded-xl bg-[#43e5c9] text-[#010807] hover:bg-[#2da691] font-medium">
                 加入我们
               </Button>
             </a>
@@ -618,20 +674,42 @@ export default function DashboardClient({
         </div>
       </div>
 
-      {/* 顶部导航（保持原样） */}
+      <div className="block lg:hidden border-b border-[#072027] bg-[#010807] px-3 py-3 max-[639px]:order-1">
+        <div className="flex w-full flex-col gap-2">
+          <div className="flex items-center gap-2 w-full justify-between">
+            <span className="text-[#43e5c9] text-xs">总市值:</span>
+            <span className="text-white text-[12px] font-normal tabular-nums">
+              {reformatCurrency(stats.totalMarketCap)}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 w-full justify-between">
+            <span className="text-[#43e5c9] text-xs">总锁仓:</span>
+            <span className="text-white text-[12px] font-normal tabular-nums">
+              {reformatCurrency(stats.totalValueLocked)}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 w-full justify-between">
+            <span className="text-[#43e5c9] text-xs">24小时成交量:</span>
+            <span className="text-white text-[12px] font-normal tabular-nums">{reformatCurrency(stats.volume24h)}</span>
+          </div>
+        </div>
+      </div>
+
       <nav className="border-b border-[#072027] bg-[#010807] px-4 py-3 lg:px-6">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 mr-20 md:mr-16 shrink-0">
+        <div className="flex items-center justify-between gap-10">
+          <div className="flex items-center gap-2 shrink-0">
             <img
               src="https://hyperliquid.gitbook.io/hyperliquid-docs/~gitbook/image?url=https%3A%2F%2F2356094849-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FyUdp569E6w18GdfqlGvJ%252Ficon%252FsIAjqhKKIUysM08ahKPh%252FHL-logoSwitchDISliStat.png%3Falt%3Dmedia%26token%3Da81fa25c-0510-4d97-87ff-3fb8944935b1&width=32&dpr=4&quality=100&sign=3e1219e3&sv=2"
               alt="Hyperliquid Logo"
               className="h-8 w-8 rounded-lg"
             />
-            <span className="italic font-semibold text-white">
+            <span className="italic font-semibold text-white text-sm md:text-base">
               Hyperliquid<span className="italic">中文社区</span>
             </span>
           </div>
-          <div className="flex flex-1 items-center gap-6">
+
+          {/* Desktop navigation */}
+          <div className="hidden md:flex flex-1 items-center gap-6">
             <a
               href="https://stats.hyperliquid.xyz/"
               target="_blank"
@@ -643,7 +721,7 @@ export default function DashboardClient({
             <a
               href="https://hyperdash.info/"
               target="_blank"
-              className="flex items-center flex items-center gap-1 text-sm text-white hover:text-[#43e5c9] transition-colors"
+              className="flex items-center gap-1 text-sm text-white hover:text-[#43e5c9] transition-colors"
               rel="noreferrer"
             >
               Hyperdash <ExternalLink className="h-3 w-3" />
@@ -659,7 +737,7 @@ export default function DashboardClient({
             <a
               href="https://liquidscan.io/"
               target="_blank"
-              className="flex items-center flex items-center gap-1 text-sm text-white hover:text-[#43e5c9] transition-colors"
+              className="flex items-center gap-1 text-sm text-white hover:text-[#43e5c9] transition-colors"
               rel="noreferrer"
             >
               Liquidscan <ExternalLink className="h-3 w-3" />
@@ -672,273 +750,638 @@ export default function DashboardClient({
             >
               博客区
             </a>
-            <a
-              href="/admin"
-              target="_blank"
-              className="flex items-center text-sm text-[#43e5c9] hover:text-white transition-colors lg:hidden"
-              rel="noreferrer"
-            >
-              管理面板
-            </a>
           </div>
+
+          {/* Mobile hamburger menu button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-white hover:text-[#43e5c9] transition-colors"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
+
+        {/* Mobile side menu */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            <div className="absolute inset-0 bg-black/60" onClick={() => setMobileMenuOpen(false)} />
+            <div className="absolute right-0 top-0 h-full w-64 bg-[#010807] border-l border-[#072027] p-4 shadow-xl">
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-white font-semibold">菜单</span>
+                <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-white hover:text-[#43e5c9]">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="flex flex-col gap-4">
+                <a
+                  href="https://stats.hyperliquid.xyz/"
+                  target="_blank"
+                  className="flex items-center text-white gap-2 hover:text-[#43e5c9] transition-colors py-2"
+                  rel="noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Hyperliquid Stats <ExternalLink className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://hyperdash.info/"
+                  target="_blank"
+                  className="flex items-center gap-2 text-white hover:text-[#43e5c9] transition-colors py-2"
+                  rel="noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Hyperdash <ExternalLink className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://hypurrscan.io/"
+                  target="_blank"
+                  className="flex items-center text-white gap-2 hover:text-[#43e5c9] transition-colors py-2"
+                  rel="noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Hypurrscan <ExternalLink className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://liquidscan.io/"
+                  target="_blank"
+                  className="flex items-center gap-2 text-white hover:text-[#43e5c9] transition-colors py-2"
+                  rel="noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Liquidscan <ExternalLink className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://t.me/chinesehyperliquid"
+                  target="_blank"
+                  className="flex items-center text-white hover:text-[#43e5c9] transition-colors py-2"
+                  rel="noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  博客区
+                </a>
+                <div className="px-4 pb-6 md:px-0 md:pb-0 mt-4">
+                  <a
+                    href="https://t.me/chinesehyperliquid"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Button className="mx-auto block text-sm md:text-base h-9 md:h-11 px-4 md:px-6 w-[75%] max-w-[280px] md:w-auto rounded-xl bg-[#43e5c9] text-[#010807] hover:bg-[#2da691] font-medium">
+                      加入我们
+                    </Button>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
-      <main className="w-full mx-auto px-6 md:px-8 xl:px-10 2xl:px-12 max-w-[1600px] pb-24 overflow-y-auto">
+      <main className="w-full mx-auto px-6 md:px-8 xl:px-10 2xl:px-12 max-w-[1600px] pb-24 overflow-y-auto mobile-main max-[639px]:order-2">
         <div className="py-3 lg:py-5">
           {/* 12 栏网格 */}
           <div className="grid w-full max-w-none grid-cols-1 items-start gap-3 lg:grid-cols-12 lg:gap-4">
-            {/* 左：HYPE 价格卡片 */}
-            <Card className="col-span-1 min-h-[180px] h-[180px] px-5 py-4 rounded-2xl bg-[#101419] border-[#072027] grid grid-cols-12 gap-3 items-start overflow-hidden lg:col-span-6">
-              <div className="col-span-12 flex items-center gap-2 text-[12px] text-[#96fce4]">
-                <img
-                  src="https://hyperliquid.gitbook.io/hyperliquid-docs/~gitbook/image?url=https%3A%2F%2F2356094849-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FyUdp569E6w18GdfqlGvJ%252Ficon%252FsIAjqhKKIUysM08ahKPh%252FHL-logoSwitchDISliStat.png%3Falt%3Dmedia%26token%3Da81fa25c-0510-4d97-87ff-3fb8944935b1&width=32&dpr=4&quality=100&sign=3e1219e3&sv=2"
-                  alt="Hyperliquid Logo"
-                  className="h-4 w-4 rounded"
-                />
-                <span>$HYPE 价格</span>
-              </div>
+            <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
+              {/* Mobile version: block md:hidden */}
+              <div className="block md:hidden">
+                <div className="rounded-2xl bg-[#0F1519] p-3">
+                  {/* Title */}
+                  <div className="flex items-center gap-2 px-1 mb-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                    <span className="text-[13px] font-semibold text-emerald-300">$HYPE 价格</span>
+                  </div>
 
-              <div className="col-span-5 flex flex-col relative z-10">
-                <div className="mb-1 flex items-baseline gap-2">
-                  <span className="text-4xl font-extrabold leading-none tracking-tight text-white">
-                    US${Number.parseFloat(displayPrice).toFixed(2)}
-                  </span>
+                  {/* Price & Change */}
+                  <div className="flex items-baseline gap-2 px-1 whitespace-nowrap mb-2">
+                    <div className="text-2xl font-extrabold tracking-tight text-white">
+                      US${Number.parseFloat(displayPrice).toFixed(2)}
+                    </div>
+                    <div
+                      className={`flex items-center gap-1 text-xs ${displayChange >= 0 ? "text-emerald-400" : "text-rose-400"}`}
+                    >
+                      <span>{displayChange >= 0 ? "▲" : "▼"}</span>
+                      <span className="font-semibold">{Math.abs(displayChange).toFixed(2)}%</span>
+                    </div>
+                  </div>
+
+                  <div className="px-1 mb-3">
+                    <div className="flex items-center justify-between text-[10px] text-white mb-1.5">
+                      <span>US${Number.parseFloat(hypePrice.low24h).toFixed(2)}</span>
+                      <span className="text-[#96fce4]">24小时范围</span>
+                      <span>US${Number.parseFloat(hypePrice.high24h).toFixed(2)}</span>
+                    </div>
+                    <div className="relative h-[6px] w-full overflow-hidden rounded-full bg-[#072027]">
+                      <div
+                        className="absolute left-0 h-full rounded-full bg-gradient-to-r from-[#e54366] via-[#43e5c9] to-[#43e5c9]"
+                        style={{ width: `${pricePositionPercent}%` }}
+                      />
+                      <div
+                        className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-[#43e5c9] shadow-lg"
+                        style={{ left: `${pricePositionPercent}%` }}
+                      />
+                    </div>
+                  </div>
+
                   <div
-                    className={`flex items-center gap-1 ${displayChange >= 0 ? "text-[#43e5c9]" : "text-[#e54366]"}`}
+                    className="h-[180px] w-full overflow-hidden rounded-xl relative md:touch-auto"
+                    style={{ touchAction: "pan-y" }}
                   >
-                    <span className="text-sm">{displayChange >= 0 ? "▲" : "▼"}</span>
-                    <span className="text-[13px] font-semibold">{Math.abs(displayChange)}%</span>
-                  </div>
-                </div>
-
-                <div className="mt-2 space-y-2">
-                  <div className="flex items-center justify-between text-[11px] text-white">
-                    <span>US${Number.parseFloat(hypePrice.low24h).toFixed(2)}</span>
-                    <span className="text-[#96fce4]">24小时范围</span>
-                    <span>US${Number.parseFloat(hypePrice.high24h).toFixed(2)}</span>
-                  </div>
-                  <div className="relative h-[8px] w-full overflow-hidden rounded-full bg-[#072027]">
-                    <div
-                      className="absolute left-0 h-full rounded-full bg-gradient-to-r from-[#e54366] via-[#43e5c9] to-[#43e5c9]"
-                      style={{ width: `${pricePositionPercent}%` }}
-                    />
-                    <div
-                      className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-[#43e5c9] shadow-lg"
-                      style={{ left: `${pricePositionPercent}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-span-7 relative h-full min-h-[120px] max-h-[160px] overflow-hidden rounded-xl">
-                {chartPoints.length === 0 ? (
-                  <div className="h-full bg-black/20 animate-pulse rounded-xl" />
-                ) : (
-                  <svg
-                    ref={chartRef}
-                    viewBox="0 0 400 100"
-                    className="h-full w-full cursor-crosshair"
-                    preserveAspectRatio="none"
-                    onMouseDown={handleMouseDown}
-                    onMouseMove={handleMouseMove}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseLeave}
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    style={{ touchAction: "none" }}
-                  >
-                    <defs>
-                      <linearGradient id="priceGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#43e5c9" stopOpacity="0.4" />
-                        <stop offset="100%" stopColor="#43e5c9" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d={`M 0,100 L ${chartPoints.map((p) => `${p.x},${p.y}`).join(" L ")} L 400,100 Z`}
-                      fill="url(#priceGradient)"
-                    />
-                    <path
-                      d={(() => {
-                        if (chartPoints.length < 2) return ""
-                        let path = `M ${chartPoints[0].x},${chartPoints[0].y}`
-                        for (let i = 0; i < chartPoints.length - 1; i++) {
-                          const p0 = chartPoints[Math.max(0, i - 1)]
-                          const p1 = chartPoints[i]
-                          const p2 = chartPoints[i + 1]
-                          const p3 = chartPoints[Math.min(chartPoints.length - 1, i + 2)]
-                          const cp1x = p1.x + (p2.x - p0.x) / 6
-                          const cp1y = p1.y + (p2.y - p0.y) / 6
-                          const cp2x = p2.x - (p3.x - p1.x) / 6
-                          const cp2y = p2.y - (p3.y - p1.y) / 6
-                          path += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`
-                        }
-                        return path
-                      })()}
-                      fill="none"
-                      stroke="#43e5c9"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    {hoveredPoint && (
+                    {chartPoints.length === 0 ? (
+                      <div className="h-full w-full bg-black/20 animate-pulse rounded-xl" />
+                    ) : (
                       <>
-                        <line
-                          x1={hoveredPoint.x}
-                          y1="0"
-                          x2={hoveredPoint.x}
-                          y2="100"
-                          stroke="#43e5c9"
-                          strokeWidth="1"
-                          strokeDasharray="2,2"
-                          opacity="0.6"
-                        />
-                        <circle
-                          cx={hoveredPoint.x}
-                          cy={hoveredPoint.y}
-                          r="4"
-                          fill="#43e5c9"
-                          stroke="#010807"
-                          strokeWidth="2"
-                        />
+                        <svg
+                          ref={chartRef}
+                          viewBox="0 0 400 100"
+                          className="h-full w-full cursor-crosshair"
+                          preserveAspectRatio="none"
+                          onPointerDown={handlePointerDown}
+                          onPointerMove={handlePointerMove}
+                          onPointerUp={handlePointerUp}
+                          onPointerLeave={handlePointerLeave}
+                          style={{ touchAction: "none" }}
+                        >
+                          <defs>
+                            <linearGradient id="priceGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                              <stop offset="0%" stopColor="#43e5c9" stopOpacity="0.4" />
+                              <stop offset="100%" stopColor="#43e5c9" stopOpacity="0" />
+                            </linearGradient>
+                          </defs>
+                          <path
+                            d={`M 0,100 L ${chartPoints.map((p) => `${p.x},${p.y}`).join(" L ")} L 400,100 Z`}
+                            fill="url(#priceGradient)"
+                          />
+                          <path
+                            d={(() => {
+                              if (chartPoints.length < 2) return ""
+                              let path = `M ${chartPoints[0].x},${chartPoints[0].y}`
+                              for (let i = 0; i < chartPoints.length - 1; i++) {
+                                const p0 = chartPoints[Math.max(0, i - 1)]
+                                const p1 = chartPoints[i]
+                                const p2 = chartPoints[i + 1]
+                                const p3 = chartPoints[Math.min(chartPoints.length - 1, i + 2)]
+                                const cp1x = p1.x + (p2.x - p0.x) / 6
+                                const cp1y = p1.y + (p2.y - p0.y) / 6
+                                const cp2x = p2.x - (p3.x - p1.x) / 6
+                                const cp2y = p2.y - (p3.y - p1.y) / 6
+                                path += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`
+                              }
+                              return path
+                            })()}
+                            fill="none"
+                            stroke="#43e5c9"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          {hoveredPoint && (
+                            <>
+                              <line
+                                x1={hoveredPoint.x}
+                                y1="0"
+                                x2={hoveredPoint.x}
+                                y2="100"
+                                stroke="#43e5c9"
+                                strokeWidth="1"
+                                strokeDasharray="2,2"
+                                opacity="0.6"
+                              />
+                              <circle
+                                cx={hoveredPoint.x}
+                                cy={hoveredPoint.y}
+                                r="4"
+                                fill="#43e5c9"
+                                stroke="#010807"
+                                strokeWidth="2"
+                              />
+                            </>
+                          )}
+                        </svg>
+                        {hoveredPoint &&
+                          (() => {
+                            const tooltipWidth = 120
+                            const tooltipHeight = 50
+                            const svgWidth = 400
+                            const svgHeight = 100
+
+                            let horizontalAlign = "center"
+                            let translateX = "-50%"
+
+                            if (hoveredPoint.x < tooltipWidth / 2) {
+                              horizontalAlign = "left"
+                              translateX = "0%"
+                            } else if (hoveredPoint.x > svgWidth - tooltipWidth / 2) {
+                              horizontalAlign = "right"
+                              translateX = "-100%"
+                            }
+
+                            let verticalAlign = "top"
+                            let translateY = "-120%"
+
+                            if (hoveredPoint.y < tooltipHeight + 10) {
+                              verticalAlign = "bottom"
+                              translateY = "20%"
+                            }
+
+                            return (
+                              <div
+                                className="pointer-events-none absolute rounded-lg bg-[#010807] px-2 py-1 text-[10px] shadow-lg"
+                                style={{
+                                  left: `${(hoveredPoint.x / svgWidth) * 100}%`,
+                                  top: `${(hoveredPoint.y / svgHeight) * 100}%`,
+                                  transform: `translate(${translateX}, ${translateY})`,
+                                  border: "1px solid #43e5c9",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                <div className="text-[#96fce4]">
+                                  {dayjs(hoveredPoint.ts).format("YYYY-MM-DD HH:mm")}
+                                </div>
+                                <div className="font-semibold text-white">US${hoveredPoint.price.toFixed(2)}</div>
+                              </div>
+                            )
+                          })()}
                       </>
                     )}
-                  </svg>
-                )}
-                {hoveredPoint && (
-                  <div
-                    className="pointer-events-none absolute rounded-lg bg-[#010807] px-2 py-1 text-[11px] shadow-lg"
-                    style={{
-                      left: `${(Math.min(Math.max(hoveredPoint.x, 12), 400 - 12) / 400) * 100}%`,
-                      top: `${(Math.min(Math.max(hoveredPoint.y, 12), 100 - 12) / 100) * 100}%`,
-                      transform: "translate(-50%, -120%)",
-                      border: "1px solid #43e5c9",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    <div className="text-[#96fce4]">{dayjs(hoveredPoint.ts).format("YYYY-MM-DD HH:mm")}</div>
-                    <div className="font-semibold text-white">US${hoveredPoint.price.toFixed(2)}</div>
                   </div>
-                )}
+                </div>
               </div>
 
-              <div className="col-span-12 flex gap-2">
-                <Button className="flex-1 rounded-lg border border-[#072027] bg-[#041713] text-[12px] text-white hover:bg-[#072027]">
-                  价格
-                </Button>
-                <Button className="flex-1 rounded-lg border border-[#072027] bg-[#041713] text-[12px] text-white hover:bg-[#072027]">
-                  总市值
-                </Button>
-                <Button className="flex-1 rounded-lg border border-[#072027] bg-[#041713] text-[12px] text-white hover:bg-[#072027]">
-                  TradingView
-                </Button>
+              {/* Desktop version: hidden md:block - 100% unchanged */}
+              <div className="hidden md:block">
+                <div className="h-[180px] px-5 py-4 grid grid-cols-12 gap-3 items-start overflow-hidden">
+                  <div className="col-span-12 mb-2 flex items-center gap-2">
+                    <img
+                      src="https://hyperliquid.gitbook.io/hyperliquid-docs/~gitbook/image?url=https%3A%2F%2F2356094849-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FyUdp569E6w18GdfqlGvJ%252Ficon%252FsIAjqhKKIUysM08ahKPh%252FHL-logoSwitchDISliStat.png%3Falt%3Dmedia%26token%3Da81fa25c-0510-4d97-87ff-3fb8944935b1&width=32&dpr=4&quality=100&sign=3e1219e3&sv=2"
+                      alt="Hyperliquid Logo"
+                      className="h-5 w-5 rounded"
+                    />
+                    <span className="text-sm font-semibold text-[#96fce4]">$HYPE 价格</span>
+                  </div>
+
+                  <div className="col-span-5 flex flex-col relative z-10">
+                    <div className="mb-1 flex items-baseline gap-2">
+                      <span className="text-3xl font-extrabold leading-none tracking-tight text-white">
+                        US${Number.parseFloat(displayPrice).toFixed(2)}
+                      </span>
+                      <div
+                        className={`flex items-center gap-1 ${displayChange >= 0 ? "text-[#43e5c9]" : "text-[#e54366]"}`}
+                      >
+                        <span className="text-sm">{displayChange >= 0 ? "▲" : "▼"}</span>
+                        <span className="text-[12px] font-semibold">{Math.abs(displayChange)}%</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-2 space-y-1.5">
+                      <div className="flex items-center justify-between text-[10px] text-white">
+                        <span>US${Number.parseFloat(hypePrice.low24h).toFixed(2)}</span>
+                        <span className="text-[#96fce4]">24小时范围</span>
+                        <span>US${Number.parseFloat(hypePrice.high24h).toFixed(2)}</span>
+                      </div>
+                      <div className="relative h-[6px] w-full overflow-hidden rounded-full bg-[#072027]">
+                        <div
+                          className="absolute left-0 h-full rounded-full bg-gradient-to-r from-[#e54366] via-[#43e5c9] to-[#43e5c9]"
+                          style={{ width: `${pricePositionPercent}%` }}
+                        />
+                        <div
+                          className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-[#43e5c9] shadow-lg"
+                          style={{ left: `${pricePositionPercent}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-span-7 relative h-full flex items-center justify-center overflow-hidden">
+                    {chartPoints.length === 0 ? (
+                      <div className="h-full w-full bg-black/20 animate-pulse rounded-xl" />
+                    ) : (
+                      <svg
+                        ref={chartRef}
+                        viewBox="0 0 400 100"
+                        className="h-full w-full cursor-crosshair"
+                        preserveAspectRatio="none"
+                        onPointerDown={handlePointerDown}
+                        onPointerMove={handlePointerMove}
+                        onPointerUp={handlePointerUp}
+                        onPointerLeave={handlePointerLeave}
+                        style={{ touchAction: "none" }}
+                      >
+                        <defs>
+                          <linearGradient id="priceGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#43e5c9" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="#43e5c9" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          d={`M 0,100 L ${chartPoints.map((p) => `${p.x},${p.y}`).join(" L ")} L 400,100 Z`}
+                          fill="url(#priceGradient)"
+                        />
+                        <path
+                          d={(() => {
+                            if (chartPoints.length < 2) return ""
+                            let path = `M ${chartPoints[0].x},${chartPoints[0].y}`
+                            for (let i = 0; i < chartPoints.length - 1; i++) {
+                              const p0 = chartPoints[Math.max(0, i - 1)]
+                              const p1 = chartPoints[i]
+                              const p2 = chartPoints[i + 1]
+                              const p3 = chartPoints[Math.min(chartPoints.length - 1, i + 2)]
+                              const cp1x = p1.x + (p2.x - p0.x) / 6
+                              const cp1y = p1.y + (p2.y - p0.y) / 6
+                              const cp2x = p2.x - (p3.x - p1.x) / 6
+                              const cp2y = p2.y - (p3.y - p1.y) / 6
+                              path += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`
+                            }
+                            return path
+                          })()}
+                          fill="none"
+                          stroke="#43e5c9"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        {hoveredPoint && (
+                          <>
+                            <line
+                              x1={hoveredPoint.x}
+                              y1="0"
+                              x2={hoveredPoint.x}
+                              y2="100"
+                              stroke="#43e5c9"
+                              strokeWidth="1"
+                              strokeDasharray="2,2"
+                              opacity="0.6"
+                            />
+                            <circle
+                              cx={hoveredPoint.x}
+                              cy={hoveredPoint.y}
+                              r="4"
+                              fill="#43e5c9"
+                              stroke="#010807"
+                              strokeWidth="2"
+                            />
+                          </>
+                        )}
+                      </svg>
+                    )}
+                    {hoveredPoint &&
+                      (() => {
+                        const tooltipWidth = 120
+                        const tooltipHeight = 50
+                        const svgWidth = 400
+                        const svgHeight = 100
+
+                        let horizontalAlign = "center"
+                        let translateX = "-50%"
+
+                        if (hoveredPoint.x < tooltipWidth / 2) {
+                          horizontalAlign = "left"
+                          translateX = "0%"
+                        } else if (hoveredPoint.x > svgWidth - tooltipWidth / 2) {
+                          horizontalAlign = "right"
+                          translateX = "-100%"
+                        }
+
+                        let verticalAlign = "top"
+                        let translateY = "-120%"
+
+                        if (hoveredPoint.y < tooltipHeight + 10) {
+                          verticalAlign = "bottom"
+                          translateY = "20%"
+                        }
+
+                        return (
+                          <div
+                            className="pointer-events-none absolute rounded-lg bg-[#010807] px-2 py-1 text-[10px] shadow-lg"
+                            style={{
+                              left: `${(hoveredPoint.x / svgWidth) * 100}%`,
+                              top: `${(hoveredPoint.y / svgHeight) * 100}%`,
+                              transform: `translate(${translateX}, ${translateY})`,
+                              border: "1px solid #43e5c9",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            <div className="text-[#96fce4]">{dayjs(hoveredPoint.ts).format("YYYY-MM-DD HH:mm")}</div>
+                            <div className="font-semibold text-white">US${hoveredPoint.price.toFixed(2)}</div>
+                          </div>
+                        )
+                      })()}
+                  </div>
+                </div>
               </div>
             </Card>
 
-            {/* 中：Hyperliquid 收入卡片 */}
-            <Card className="col-span-1 min-h-[180px] h-[180px] px-5 py-4 rounded-2xl bg-[#101419] border-[#072027] overflow-hidden lg:col-span-6">
-              <div className="mb-2 flex items-center gap-2 text-[13px] text-[#96fce4]">
-                <img
-                  src="https://hyperliquid.gitbook.io/hyperliquid-docs/~gitbook/image?url=https%3A%2F%2F2356094849-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FyUdp569E6w18GdfqlGvJ%252Ficon%252FsIAjqhKKIUysM08ahKPh%252FHL-logoSwitchDISliStat.png%3Falt%3Dmedia%26token%3Da81fa25c-0510-4d97-87ff-3fb8944935b1&width=32&dpr=4&quality=100&sign=3e1219e3&sv=2"
-                  alt="Hyperliquid Logo"
-                  className="h-4 w-4 rounded"
-                />
-                <span>Hyperliquid费用</span>
-              </div>
+            <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
+              {/* Mobile version: block md:hidden */}
+              <div className="block md:hidden">
+                <div className="rounded-2xl bg-[#0F1519] p-3">
+                  {/* Title */}
+                  <div className="flex items-center gap-2 px-1 mb-3">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                    <span className="text-[13px] font-semibold text-emerald-300">Hyperliquid手续费</span>
+                  </div>
 
-              {revenueLoading ? (
-                <div className="flex h-[120px] items-center justify-center">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#43e5c9] border-t-transparent" />
-                </div>
-              ) : defiLlamaRevenue && defiLlamaRevenue.totalDataChart.length > 0 ? (
-                <div className="grid grid-cols-[minmax(220px,28%)_1fr] xl:grid-cols-[280px_1fr] 2xl:grid-cols-[300px_1fr] gap-4 items-start min-w-0">
-                  <div className="flex flex-col gap-1 min-w-0">
-                    <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
-                      <span className="text-sm leading-5 text-[#96fce4] truncate">30 日费用</span>
-                      <span className="text-lg font-semibold tabular-nums leading-6 text-white whitespace-nowrap">
+                  {/* KPIs */}
+                  <div className="flex items-center gap-3 flex-wrap px-1 mb-3">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-[11px] text-[#96fce4]">30日</span>
+                      <span className="text-sm font-semibold text-white whitespace-nowrap">
                         {formatRevenue(revenueKPIs.total30d)}
                       </span>
                     </div>
-                    <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
-                      <span className="text-sm leading-5 text-[#96fce4] truncate">7 日费用</span>
-                      <span className="text-lg font-semibold tabular-nums leading-6 text-white whitespace-nowrap">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-[11px] text-[#96fce4]">7日</span>
+                      <span className="text-sm font-semibold text-white whitespace-nowrap">
                         {formatRevenue(revenueKPIs.total7d)}
                       </span>
                     </div>
-                    <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
-                      <span className="text-sm leading-5 text-[#96fce4] truncate">24 小时费用</span>
-                      <span className="text-lg font-semibold tabular-nums leading-6 text-white whitespace-nowrap">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-[11px] text-[#96fce4]">24小时</span>
+                      <span className="text-sm font-semibold text-white whitespace-nowrap">
                         {formatRevenue(revenueKPIs.total24h)}
                       </span>
                     </div>
                   </div>
 
-                  <div className="relative min-w-0 flex items-end justify-end h-[110px] overflow-visible">
-                    <div className="w-full h-full">
-                      {revenueChartData.data.length > 0 && (
-                        <svg viewBox="0 0 400 110" className="h-full w-full" preserveAspectRatio="none">
-                          {revenueChartData.data.map(([timestamp, value], i) => {
-                            const margin = { top: 4, right: 8, bottom: 6, left: 8 }
-                            const chartWidth = 400 - margin.left - margin.right
-                            const chartHeight = 110 - margin.top - margin.bottom
-                            const barGap = 0.18
-                            const barWidth = (chartWidth / revenueChartData.data.length) * (1 - barGap)
-                            const barSpacing = chartWidth / revenueChartData.data.length
-                            const x = margin.left + i * barSpacing + (barSpacing * barGap) / 2
-                            const barHeight = (value / revenueChartData.yMax) * chartHeight
-                            const y = margin.top + chartHeight - barHeight
-                            return (
-                              <rect
-                                key={i}
-                                x={x}
-                                y={y}
-                                width={barWidth}
-                                height={barHeight}
-                                fill="#43e5c9"
-                                fillOpacity={1}
-                                rx="2"
-                              />
-                            )
-                          })}
-                        </svg>
-                      )}
-                    </div>
+                  {/* Chart */}
+                  <div className="h-[160px] w-full overflow-hidden rounded-xl px-1">
+                    {revenueLoading ? (
+                      <div className="flex h-full items-center justify-center">
+                        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#43e5c9] border-t-transparent" />
+                      </div>
+                    ) : defiLlamaRevenue && defiLlamaRevenue.totalDataChart.length > 0 ? (
+                      <svg viewBox="0 0 400 110" className="h-full w-full" preserveAspectRatio="none">
+                        {revenueChartData.data.map(([timestamp, value], i) => {
+                          const margin = { top: 4, right: 8, bottom: 6, left: 8 }
+                          const chartWidth = 400 - margin.left - margin.right
+                          const chartHeight = 110 - margin.top - margin.bottom
+                          const barGap = 0.18
+                          const barWidth = (chartWidth / revenueChartData.data.length) * (1 - barGap)
+                          const barSpacing = chartWidth / revenueChartData.data.length
+                          const x = margin.left + i * barSpacing + (barSpacing * barGap) / 2
+                          const barHeight = (value / revenueChartData.yMax) * chartHeight
+                          const y = margin.top + chartHeight - barHeight
+                          return (
+                            <rect
+                              key={i}
+                              x={x}
+                              y={y}
+                              width={barWidth}
+                              height={barHeight}
+                              fill="#43e5c9"
+                              fillOpacity={1}
+                              rx="2"
+                            />
+                          )
+                        })}
+                      </svg>
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-[#96fce4]">暂无数据</div>
+                    )}
                   </div>
                 </div>
-              ) : (
-                <div className="flex h-[120px] items-center justify-center text-[#96fce4]">暂无数据</div>
-              )}
-            </Card>
-
-            {/* 右：代币交易量榜 —— 加宽一格（col-start-10 / col-span-3） */}
-            <Card className="col-span-1 h-auto max-w-none overflow-hidden rounded-xl border-[#072027] bg-[#101419] p-4 lg:col-span-3 lg:col-start-10 lg:row-span-2 lg:h-full lg:self-stretch lg:rounded-2xl">
-              <div className="mb-3 flex items-center gap-2 text-[13px] text-[#96fce4]">
-                <span>📊</span>
-                <span>Hyperliquid 今日交易额</span>
               </div>
 
-              <div className="flex flex-col gap-2 overflow-hidden lg:grid lg:grid-rows-10">
-                {(hlTopVolume.length ? hlTopVolume : topGainers).slice(0, 10).map((token, i) => (
-                  <div key={i} className="flex h-[36px] items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate text-[13px] text-white">{token.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-right text-[13px] tabular-nums text-white">{token.price}</span>
-                      <span className="text-right text-[13px] tabular-nums text-[#43e5c9]">
-                        {/* @ts-ignore */}
-                        {token.volume24h ? formatVolume(token.volume24h) : formatVolume(0)}
-                      </span>
-                    </div>
+              {/* Desktop version: hidden md:block - 100% unchanged */}
+              <div className="hidden md:block">
+                <div className="h-[180px] px-5 py-4 overflow-hidden">
+                  <div className="mb-3 flex items-center gap-2">
+                    <img
+                      src="https://hyperliquid.gitbook.io/hyperliquid-docs/~gitbook/image?url=https%3A%2F%2F2356094849-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FyUdp569E6w18GdfqlGvJ%252Ficon%252FsIAjqhKKIUysM08ahKPh%252FHL-logoSwitchDISliStat.png%3Falt%3Dmedia%26token%3Da81fa25c-0510-4d97-87ff-3fb8944935b1&width=32&dpr=4&quality=100&sign=3e1219e3&sv=2"
+                      alt="Hyperliquid Logo"
+                      className="h-5 w-5 rounded"
+                    />
+                    <span className="text-sm font-semibold text-[#96fce4]">Hyperliquid手续费</span>
                   </div>
-                ))}
+
+                  {revenueLoading ? (
+                    <div className="flex h-full items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#43e5c9] border-t-transparent" />
+                    </div>
+                  ) : defiLlamaRevenue && defiLlamaRevenue.totalDataChart.length > 0 ? (
+                    <div className="grid grid-cols-[minmax(200px,26%)_1fr] xl:grid-cols-[240px_1fr] gap-3 items-start h-[calc(100%-2rem)]">
+                      <div className="flex flex-col gap-1.5 min-w-0">
+                        <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
+                          <span className="text-xs leading-tight text-[#96fce4] truncate">30 日手续费</span>
+                          <span className="text-base font-semibold tabular-nums leading-tight text-white whitespace-nowrap">
+                            {formatRevenue(revenueKPIs.total30d)}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
+                          <span className="text-xs leading-tight text-[#96fce4] truncate">7 日手续费</span>
+                          <span className="text-base font-semibold tabular-nums leading-tight text-white whitespace-nowrap">
+                            {formatRevenue(revenueKPIs.total7d)}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
+                          <span className="text-xs leading-tight text-[#96fce4] truncate">24 小时手续费</span>
+                          <span className="text-base font-semibold tabular-nums leading-tight text-white whitespace-nowrap">
+                            {formatRevenue(revenueKPIs.total24h)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="relative min-w-0 flex items-end justify-end h-full overflow-visible">
+                        <div className="w-full h-full">
+                          {revenueChartData.data.length > 0 && (
+                            <svg viewBox="0 0 400 110" className="h-full w-full" preserveAspectRatio="none">
+                              {revenueChartData.data.map(([timestamp, value], i) => {
+                                const margin = { top: 4, right: 8, bottom: 6, left: 8 }
+                                const chartWidth = 400 - margin.left - margin.right
+                                const chartHeight = 110 - margin.top - margin.bottom
+                                const barGap = 0.18
+                                const barWidth = (chartWidth / revenueChartData.data.length) * (1 - barGap)
+                                const barSpacing = chartWidth / revenueChartData.data.length
+                                const x = margin.left + i * barSpacing + (barSpacing * barGap) / 2
+                                const barHeight = (value / revenueChartData.yMax) * chartHeight
+                                const y = margin.top + chartHeight - barHeight
+                                return (
+                                  <rect
+                                    key={i}
+                                    x={x}
+                                    y={y}
+                                    width={barWidth}
+                                    height={barHeight}
+                                    fill="#43e5c9"
+                                    fillOpacity={1}
+                                    rx="2"
+                                  />
+                                )
+                              })}
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-[#96fce4]">暂无数据</div>
+                  )}
+                </div>
+              </div>
+            </Card>
+
+            <Card className="col-span-1 lg:col-span-3 lg:col-start-10 lg:row-span-2 lg:h-full lg:self-stretch p-0 overflow-hidden bg-[#101419] border-[#072027]">
+              {/* Mobile version: block md:hidden */}
+              <div className="block md:hidden">
+                <div className="rounded-2xl bg-[#0F1519] p-3 max-h-[300px] overflow-y-auto">
+                  {/* Title */}
+                  <div className="flex items-center gap-2 px-1 mb-3">
+                    <span>📊</span>
+                    <span className="text-[13px] font-semibold text-emerald-300">Hyperliquid 热门代币交易量</span>
+                  </div>
+
+                  {/* Token List */}
+                  <div className="flex flex-col gap-2">
+                    {(hlTopVolume.length ? hlTopVolume : topGainers).slice(0, 10).map((token, i) => (
+                      <div key={i} className="flex items-center justify-between px-1">
+                        <span className="text-sm text-white truncate">{token.name}</span>
+                        <div className="flex items-center gap-3 ml-2">
+                          <span className="text-sm tabular-nums text-white whitespace-nowrap">{token.price}</span>
+                          <span className="text-sm tabular-nums text-[#43e5c9] whitespace-nowrap">
+                            {/* @ts-ignore */}
+                            {token.volume24h ? formatVolume(token.volume24h) : formatVolume(0)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop version: hidden md:block - 100% unchanged */}
+              <div className="hidden md:block h-full">
+                <div className="h-full overflow-hidden px-5 py-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <span>📊</span>
+                    <span className="text-sm font-semibold text-[#96fce4]">Hyperliquid 热门代币交易量</span>
+                  </div>
+
+                  <div className="flex flex-col gap-2 overflow-hidden lg:grid lg:grid-rows-10">
+                    {(hlTopVolume.length ? hlTopVolume : topGainers).slice(0, 10).map((token, i) => (
+                      <div key={i} className="flex h-[36px] items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-sm text-white">{token.name}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-right text-sm tabular-nums text-white whitespace-nowrap">
+                            {token.price}
+                          </span>
+                          <span className="text-right text-sm tabular-nums text-[#43e5c9] whitespace-nowrap">
+                            {/* @ts-ignore */}
+                            {token.volume24h ? formatVolume(token.volume24h) : formatVolume(0)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </Card>
 
             {/* 项目列表 —— 左移一格（col-span-9），并缩小卡片尺寸 */}
-            <div className="col-span-1 flex flex-col gap-2 overflow-hidden lg:col-span-9 lg:row-start-2">
-              <div className="flex flex-wrap gap-2">
+            <div className="col-span-1 flex flex-col gap-2 overflow-hidden lg:col-span-9 lg:row-start-2 max-[639px]:order-60">
+              <div ref={firstCardAnchorRef} aria-hidden />
+
+              <div className="flex flex-wrap gap-2 max-[639px]:-mx-3 max-[639px]:px-3 max-[639px]:flex max-[639px]:gap-2 max-[639px]:overflow-x-auto max-[639px]:no-scrollbar">
                 {categoriesList.map((category) => {
                   const isActive = activeCategory === category
                   const isHot = category === "热门"
@@ -968,7 +1411,11 @@ export default function DashboardClient({
                         : `${base} ${normalInactive}`
 
                   return (
-                    <button key={category} onClick={() => setActiveCategory(category)} className={cls}>
+                    <button
+                      key={category}
+                      onClick={() => setActiveCategory(category)}
+                      className={`${cls} max-[639px]:px-3 max-[639px]:h-8 max-[639px]:text-xs max-[639px]:rounded-xl max-[639px]:whitespace-nowrap`}
+                    >
                       {category}
                     </button>
                   )
@@ -980,22 +1427,17 @@ export default function DashboardClient({
                   <div className="mb-4 text-6xl">📦</div>
                   <h3 className="mb-2 text-xl font-semibold text-white">暂无项目</h3>
                   <p className="mb-4 text-sm text-[#96fce4]/70">
-                    {activeCategory === "全部" ? "请前往管理面板添加项目" : `"${activeCategory}" 分类下暂无项目`}
+                    {activeCategory === "全部" ? "暂无项目数据" : `"${activeCategory}" 分类下暂无项目`}
                   </p>
-                  <a href="/admin" target="_blank" rel="noopener noreferrer">
-                    <Button className="rounded-lg bg-[#43e5c9] px-6 py-2 text-sm font-medium text-[#010807] hover:bg-[#2da691]">
-                      前往管理面板
-                    </Button>
-                  </a>
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 gap-5 overflow-hidden sm:grid-cols-2 lg:grid-cols-3 lg:gap-3">
+                  <div className="grid grid-cols-1 gap-5 overflow-hidden sm:grid-cols-2 lg:grid-cols-3 lg:gap-3 max-[639px]:grid max-[639px]:grid-cols-1 max-[639px]:gap-3">
                     {currentProjects.map((project) => {
                       return (
                         <Card
                           key={project.id}
-                          className="flex flex-col overflow-hidden rounded-xl border-[#072027] bg-[#101419] p-2 lg:p-1.5"
+                          className="flex flex-col overflow-hidden rounded-xl border-[#072027] bg-[#101419] p-2 lg:p-1.5 max-[639px]:min-w-0 max-[639px]:overflow-hidden max-[639px]:rounded-2xl max-[639px]:p-4"
                         >
                           <div className="mb-2 flex items-start gap-3 lg:mb-1.5">
                             <img
@@ -1004,7 +1446,7 @@ export default function DashboardClient({
                               className="h-8 w-8 flex-shrink-0 rounded-lg object-cover lg:h-7 lg:w-7"
                             />
                             <div className="min-w-0 flex-1">
-                              <h3 className="mb-1 truncate text-[14px] lg:text-[13px] font-extrabold leading-tight text-white lg:mb-0.5">
+                              <h3 className="mb-1 truncate text-[14px] lg:text-[13px] font-extrabold leading-tight text-white lg:mb-0.5 max-[639px]:text-sm max-[639px]:font-semibold max-[639px]:truncate">
                                 {project.name}
                               </h3>
                               <div className="flex flex-wrap gap-2 text-[11px] leading-tight text-[#96fce4]/80 lg:text-[10px]">
@@ -1066,7 +1508,7 @@ export default function DashboardClient({
                           </div>
 
                           <div className="mb-2 lg:mb-1.5">
-                            <p className="mb-2 text-[11px] leading-relaxed text-[#96fce4]/90 line-clamp-2 lg:mb-1.5 lg:text-[10px]">
+                            <p className="mb-2 text-[11px] leading-relaxed text-[#96fce4]/90 line-clamp-2 lg:mb-1.5 lg:text-[10px] max-[639px]:text-sm max-[639px]:leading-6 max-[639px]:line-clamp-3">
                               {project.description}
                             </p>
 
@@ -1086,13 +1528,16 @@ export default function DashboardClient({
                             )}
                           </div>
 
-                          <div className="mt-auto flex flex-wrap gap-1">
+                          <div className="mt-auto flex flex-wrap gap-1 max-[639px]:flex max-[639px]:flex-wrap max-[639px]:gap-2">
                             {(project.categories ?? []).map((cat, i) => {
                               const isHot = cat === "热门"
                               const isLatest = cat === "最新"
                               const color = isHot ? pillHot : isLatest ? pillLatest : pillNormal
                               return (
-                                <span key={`c-${i}`} className={`${pillShape} ${pillTypo} ${color}`}>
+                                <span
+                                  key={`c-${i}`}
+                                  className={`${pillShape} ${pillTypo} ${color} max-[639px]:h-8 max-[639px]:px-3 max-[639px]:text-xs max-[639px]:rounded-xl`}
+                                >
                                   {cat}
                                 </span>
                               )
@@ -1103,26 +1548,28 @@ export default function DashboardClient({
                               const isLatest = tag === "最新"
                               const color = isHot ? pillHot : isLatest ? pillLatest : pillNormal
                               return (
-                                <span key={`t-${i}`} className={`${pillShape} ${pillTypo} ${color}`}>
+                                <span
+                                  key={`t-${i}`}
+                                  className={`${pillShape} ${pillTypo} ${color} max-[639px]:h-8 max-[639px]:px-3 max-[639px]:text-xs max-[639px]:rounded-xl`}
+                                >
                                   {tag}
                                 </span>
                               )
                             })}
                           </div>
-                          {/* </CHANGE> */}
                         </Card>
                       )
                     })}
                   </div>
 
                   {/* 分页 */}
-                  <div className="flex flex-wrap items-center justify-center gap-2 text-[13px]">
+                  <div className="flex flex-wrap items-center justify-center gap-2 text-[13px] max-[639px]:order-70 max-[639px]:py-3 max-[639px]:flex max-[639px]:items-center max-[639px]:justify-center max-[639px]:gap-2">
                     <span className="text-[#96fce4]">共 {totalItems} 条</span>
 
                     <button
                       onClick={goToPreviousPage}
                       disabled={currentPage === 1}
-                      className="rounded-lg border border-[#072027] bg-[#101419] px-2.5 py-1 text-white hover:bg-[#072027] disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="rounded-lg border border-[#072027] bg-[#101419] px-2.5 py-1 text-white hover:bg-[#072027] disabled:opacity-50 disabled:cursor-not-allowed max-[639px]:h-8 max-[639px]:min-w-8 max-[639px]:text-xs max-[639px]:rounded-xl"
                     >
                       &lt;
                     </button>
@@ -1141,7 +1588,7 @@ export default function DashboardClient({
                               page === currentPage
                                 ? "bg-[#43e5c9] text-[#010807]"
                                 : "border border-[#072027] bg-[#101419] text-white hover:bg-[#072027]"
-                            }`}
+                            } max-[639px]:h-8 max-[639px]:min-w-8 max-[639px]:text-xs max-[639px]:rounded-xl`}
                           >
                             {page}
                           </button>
@@ -1165,7 +1612,7 @@ export default function DashboardClient({
                                 page === currentPage
                                   ? "bg-[#43e5c9] text-[#010807]"
                                   : "border border-[#072027] bg-[#101419] text-white hover:bg-[#072027]"
-                              }`}
+                              } max-[639px]:h-8 max-[639px]:min-w-8 max-[639px]:text-xs max-[639px]:rounded-xl`}
                             >
                               {page}
                             </button>
@@ -1176,7 +1623,7 @@ export default function DashboardClient({
                     <button
                       onClick={goToNextPage}
                       disabled={currentPage === totalPages}
-                      className="rounded-lg border border-[#072027] bg-[#101419] px-2.5 py-1 text-white hover:bg-[#072027] disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="rounded-lg border border-[#072027] bg-[#101419] px-2.5 py-1 text-white hover:bg-[#072027] disabled:opacity-50 disabled:cursor-not-allowed max-[639px]:h-8 max-[639px]:min-w-8 max-[639px]:text-xs max-[639px]:rounded-xl"
                     >
                       &gt;
                     </button>
@@ -1187,8 +1634,8 @@ export default function DashboardClient({
                         type="number"
                         min="1"
                         max={totalPages}
-                        value={goToPage}
-                        onChange={(e) => setGoToPage(e.target.value)}
+                        value={goToPageInput}
+                        onChange={(e) => setGoToPageInput(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleGoToPageSubmit()}
                         className="w-10 rounded-lg border border-[#072027] bg-[#101419] px-2 py-1 text-center text-white"
                         placeholder={currentPage.toString()}
@@ -1205,7 +1652,7 @@ export default function DashboardClient({
       </main>
 
       {/* Footer with copyright text */}
-      <footer className="border-t border-[#072027] bg-[#010807] py-4 text-center">
+      <footer className="border-t border-[#072027] bg-[#010807] py-4 text-center max-[639px]:order-100">
         <p className="text-xs text-[#96fce4]/60">© 2025 Hyperliquid中文社区 All rights reserved.</p>
       </footer>
 

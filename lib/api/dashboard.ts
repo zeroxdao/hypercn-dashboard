@@ -3,10 +3,9 @@
  * 将 Hyperliquid API、CoinGecko API 和 DefiLlama API 数据转换为仪表板所需格式
  */
 
-import { getMetaAndAssetCtxs, getSpotMetaAndAssetCtxs, getPerpsVolume24hUsd } from "./hyperliquid"
+import { getMetaAndAssetCtxs, getSpotMetaAndAssetCtxs } from "./hyperliquid"
 import { getHypeTokenData, getHypeMarketChart } from "./coingecko"
 import { getHyperliquidData } from "./defillama"
-import { zipByMin } from "@/lib/utils"
 import type { DashboardStats, HypePrice, BuybackData, RevenueData, TokenInfo } from "@/lib/types/hyperliquid"
 
 /**
@@ -16,7 +15,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   try {
     const [hypeData, defiLlamaData] = await Promise.all([getHypeTokenData(), getHyperliquidData()])
 
-    const perpsVolume = await getPerpsVolume24hUsd()
+    const perpsVolume = await fetchPerpsVolume()
 
     const tvl = defiLlamaData.tvl || 0
 
@@ -27,7 +26,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
         marketCapChange: Number.parseFloat(hypeData.market_data.market_cap_change_percentage_24h.toFixed(2)),
         totalValueLocked: `US$${Math.round(tvl).toLocaleString("en-US")}`,
         tvlChange: 0,
-        volume24h: perpsVolume != null ? `US$${Math.round(perpsVolume).toLocaleString("en-US")}` : "—",
+        volume24h: `US$${Math.round(perpsVolume).toLocaleString("en-US")}`,
         hyperevmTps: 0,
       }
     }
@@ -40,7 +39,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       marketCapChange: 0,
       totalValueLocked: `US$${Math.round(tvl).toLocaleString("en-US")}`,
       tvlChange: 0,
-      volume24h: perpsVolume != null ? `US$${Math.round(perpsVolume).toLocaleString("en-US")}` : "—",
+      volume24h: `US$${Math.round(perpsVolume).toLocaleString("en-US")}`,
       hyperevmTps: 0,
     }
   } catch (error) {
@@ -51,9 +50,32 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       marketCapChange: 0,
       totalValueLocked: "US$0",
       tvlChange: 0,
-      volume24h: "—",
+      volume24h: "US$0",
       hyperevmTps: 0,
     }
+  }
+}
+
+/**
+ * 获取 Perps 24 小时交易量（从 Hyperliquid API）
+ */
+async function fetchPerpsVolume(): Promise<number> {
+  try {
+    const { data: metaAndCtxs } = await getMetaAndAssetCtxs()
+
+    if (metaAndCtxs) {
+      const [, assetCtxs] = metaAndCtxs
+      const totalVolume = assetCtxs.reduce((sum, ctx) => {
+        return sum + Number.parseFloat(ctx.dayNtlVlm)
+      }, 0)
+
+      return totalVolume
+    }
+
+    return 0
+  } catch (error) {
+    console.error("Error fetching perps volume:", error)
+    return 0
   }
 }
 
@@ -84,13 +106,13 @@ export async function getHypePrice(): Promise<HypePrice> {
     }
 
     console.warn("CoinGecko API failed, using Hyperliquid API as fallback")
-    const { data: metaAndCtxs } = await getMetaAndAssetCtxs()
+    const { data: metaAndAssetCtxs } = await getMetaAndAssetCtxs()
 
-    if (!metaAndCtxs) {
+    if (!metaAndAssetCtxs) {
       throw new Error("Failed to fetch price data")
     }
 
-    const [meta, assetCtxs] = metaAndCtxs
+    const [meta, assetCtxs] = metaAndAssetCtxs
     const hypeIndex = meta.universe.findIndex((asset) => asset.name === "HYPE")
 
     if (hypeIndex === -1) {
@@ -301,10 +323,20 @@ export async function getHotTokens(): Promise<TokenInfo[]> {
       return []
     }
 
-    const paired = zipByMin(assetCtxs, spotMeta.universe, "hl-hot-tokens")
+    const minLength = Math.min(assetCtxs.length, spotMeta.universe.length)
 
-    const sortedTokens = paired
-      .map(([ctx, meta]) => {
+    if (assetCtxs.length !== spotMeta.universe.length) {
+      if (process.env.NODE_ENV === "development") {
+        console.debug(
+          `Array length mismatch: assetCtxs(${assetCtxs.length}) vs universe(${spotMeta.universe.length}), using first ${minLength} items`,
+        )
+      }
+    }
+
+    const sortedTokens = assetCtxs
+      .slice(0, minLength)
+      .map((ctx, index) => {
+        const meta = spotMeta.universe[index]
         if (!meta || !ctx) {
           return null
         }
@@ -355,10 +387,20 @@ export async function getTopGainers(): Promise<TokenInfo[]> {
       return []
     }
 
-    const paired = zipByMin(assetCtxs, spotMeta.universe, "hl-top-gainers")
+    const minLength = Math.min(assetCtxs.length, spotMeta.universe.length)
 
-    const sortedTokens = paired
-      .map(([ctx, meta]) => {
+    if (assetCtxs.length !== spotMeta.universe.length) {
+      if (process.env.NODE_ENV === "development") {
+        console.debug(
+          `Array length mismatch: assetCtxs(${assetCtxs.length}) vs universe(${spotMeta.universe.length}), using first ${minLength} items`,
+        )
+      }
+    }
+
+    const sortedTokens = assetCtxs
+      .slice(0, minLength)
+      .map((ctx, index) => {
+        const meta = spotMeta.universe[index]
         if (!meta || !ctx) {
           return null
         }
@@ -413,12 +455,23 @@ export async function getNewTokens(): Promise<TokenInfo[]> {
       return []
     }
 
-    const paired = zipByMin(assetCtxs, spotMeta.universe, "hl-new-tokens")
+    const minLength = Math.min(assetCtxs.length, spotMeta.universe.length)
 
-    const startIndex = Math.max(0, paired.length - 5)
-    const newTokens = paired
-      .slice(startIndex)
-      .map(([ctx, meta]) => {
+    if (assetCtxs.length !== spotMeta.universe.length) {
+      if (process.env.NODE_ENV === "development") {
+        console.debug(
+          `Array length mismatch: assetCtxs(${assetCtxs.length}) vs universe(${spotMeta.universe.length}), using first ${minLength} items`,
+        )
+      }
+    }
+
+    const startIndex = Math.max(0, minLength - 5)
+    const newTokens = assetCtxs
+      .slice(startIndex, minLength)
+      .map((ctx, offset) => {
+        const index = startIndex + offset
+        const meta = spotMeta.universe[index]
+
         if (!meta || !ctx) {
           return null
         }

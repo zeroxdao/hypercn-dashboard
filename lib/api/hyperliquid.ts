@@ -12,7 +12,6 @@ import type {
   SpotMeta,
   ApiResponse,
 } from "@/lib/types/hyperliquid"
-import { logOnce } from "@/lib/utils"
 
 // API 配置
 const API_BASE_URL = process.env.HYPERLIQUID_API_URL || "https://api.hyperliquid.xyz"
@@ -142,40 +141,4 @@ export async function getUserFunding(
     startTime,
     ...(endTime && { endTime }),
   })
-}
-
-type AssetCtx = { dayNtlVlm?: string }
-type Meta = { universe?: any[] }
-
-/** 从 Info API 汇总 24h perp 名义成交额（USD） */
-export async function getPerpsVolume24hUsd(): Promise<number | null> {
-  try {
-    const r = await fetch(`${getApiUrl()}/info`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      // 避免频繁请求：1 分钟缓存
-      next: { revalidate: 60 },
-      body: JSON.stringify({ type: "metaAndAssetCtxs" }),
-    })
-
-    if (!r.ok) {
-      logOnce("hl-info-fail", `Hyperliquid info failed: ${r.status}`)
-      return null
-    }
-
-    const json = (await r.json()) as [Meta, AssetCtx[]] | any
-    const meta: Meta = Array.isArray(json) ? json[0] : (json?.meta ?? {})
-    const assetCtxs: AssetCtx[] = Array.isArray(json) ? json[1] : (json?.assetCtxs ?? [])
-
-    const n = Math.min(meta?.universe?.length ?? 0, assetCtxs?.length ?? 0)
-    let total = 0
-    for (let i = 0; i < n; i++) {
-      const v = Number(assetCtxs[i]?.dayNtlVlm ?? 0)
-      if (!Number.isNaN(v)) total += v
-    }
-    return Number.isFinite(total) ? total : null
-  } catch (error) {
-    logOnce("hl-perps-error", `Error fetching perps volume: ${error}`)
-    return null
-  }
 }

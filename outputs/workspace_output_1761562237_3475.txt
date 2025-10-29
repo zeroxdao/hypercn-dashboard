@@ -1,2 +1,0 @@
-6:  if (!request.nextUrl.pathname.startsWith("/admin")) {
-48:  matcher: "/admin/:path*",

@@ -1,1 +1,0 @@
-255:        const res = await fetch("https://api.hyperliquid.xyz/info", {

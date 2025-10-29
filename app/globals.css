@@ -123,7 +123,97 @@
     @apply bg-background text-foreground;
   }
 
-  /* 添加桌面断点下的全屏无滚动约束 */
+  /* 添加移动端样式隔离 */
+  /* 移动端主容器样式 */
+  @media (max-width: 768px) {
+    .mobile-main {
+      padding-left: 1rem;
+      padding-right: 1rem;
+      overflow-x: hidden;
+    }
+
+    /* 可折叠卡片样式 */
+    .mobile-collapsible-card {
+      min-height: auto;
+      height: auto;
+      padding: 0;
+      border-radius: 1rem;
+      background: #101419;
+      border: 1px solid #072027;
+      overflow: hidden;
+    }
+
+    .mobile-collapsible-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      background: #101419;
+      border: none;
+      cursor: pointer;
+      min-height: 44px;
+      color: white;
+      transition: background-color 0.2s;
+    }
+
+    .mobile-collapsible-header:hover {
+      background: #1a1f24;
+    }
+
+    .mobile-collapsible-header:active {
+      background: #0f1419;
+    }
+
+    .mobile-collapsible-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #43e5c9;
+    }
+
+    .mobile-collapsible-content {
+      overflow: hidden;
+      transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    }
+
+    .mobile-collapsible-content.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+
+    .mobile-collapsible-content.expanded {
+      max-height: 2000px;
+      opacity: 1;
+      padding: 1rem;
+    }
+
+    /* 确保触摸目标至少44px */
+    button,
+    a {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* 字体大小适配 */
+    body {
+      font-size: 14px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+    }
+
+    h3 {
+      font-size: 1.125rem;
+    }
+  }
+
+  /* 桌面断点下的全屏无滚动约束 */
   @media (min-width: 1280px) {
     html,
     body {

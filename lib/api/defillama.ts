@@ -195,53 +195,6 @@ export async function getProtocolFees(
 }
 
 /**
- * Get protocol perps (derivatives) volume data from DefiLlama
- */
-export async function getProtocolPerpsVolume(protocol: string): Promise<DefiLlamaVolumeData | null> {
-  try {
-    const endpoints = [
-      `/api/summary/derivatives/${protocol}?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=false`,
-      `/summary/derivatives/${protocol}?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=false`,
-      `/overview/derivatives/${protocol}?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=false`,
-    ]
-
-    for (const endpoint of endpoints) {
-      try {
-        console.log(`Trying perps volume endpoint: ${endpoint}`)
-        const response = await fetch(`${DEFILLAMA_BASE_URL}${endpoint}`)
-
-        if (response.ok) {
-          const data = await response.json()
-          console.log("✓ DefiLlama perps volume data fetched successfully:", data.name)
-          console.log("Perps volume 24h:", data.total24h)
-
-          return {
-            id: data.id,
-            name: data.name,
-            total24h: data.total24h || 0,
-            total48hto24h: data.total48hto24h || 0,
-            total7d: data.total7d || 0,
-            totalAllTime: data.totalAllTime || 0,
-            change_1d: data.change_1d || 0,
-            totalDataChart: data.totalDataChart || [],
-            totalDataChartBreakdown: data.totalDataChartBreakdown || [],
-          }
-        }
-      } catch (err) {
-        // Continue to next endpoint
-        continue
-      }
-    }
-
-    console.warn(`All perps volume endpoints failed for ${protocol}`)
-    return null
-  } catch (error) {
-    console.error("Error fetching DefiLlama perps volume data:", error)
-    return null
-  }
-}
-
-/**
  * Get all available chains from DefiLlama
  */
 export async function getAllChains(): Promise<string[]> {
@@ -310,33 +263,26 @@ export async function getAllChainsWithTVL(): Promise<Array<{ name: string; tvl: 
   }
 }
 
-import { isDev, logOnce } from "@/lib/utils"
-
 /**
  * Get Hyperliquid L1 TVL from the /v2/chains endpoint
  * This is the recommended way to get current TVL for a specific chain
  */
 export async function getHyperliquidL1TVL(): Promise<number> {
   try {
-    if (isDev) logOnce("fetch-llama", "Fetching Hyperliquid data from DefiLlama...")
+    const chains = await getAllChainsWithTVL()
 
-    const response = await fetch(`${DEFILLAMA_BASE_URL}/v2/chains`, {
-      next: { revalidate: 300 }, // 5min cache
-    })
+    // Find Hyperliquid L1 in the chains list
+    const hyperliquidChain = chains.find(
+      (chain) => chain.name === "Hyperliquid L1" || chain.name.toLowerCase().includes("hyperliquid"),
+    )
 
-    if (!response.ok) {
-      throw new Error("defillama_chains_failed")
-    }
-
-    const chains = await response.json()
-    const hyper = Array.isArray(chains) ? chains.find((c: any) => c?.name === "Hyperliquid L1") : null
-
-    if (hyper?.tvl) {
-      if (isDev) logOnce("tvl", `Hyperliquid L1 TVL fetched`)
-      return hyper.tvl
+    if (hyperliquidChain) {
+      console.log(`Hyperliquid L1 TVL: $${hyperliquidChain.tvl.toLocaleString()}`)
+      return hyperliquidChain.tvl
     }
 
     console.warn("Hyperliquid L1 not found in chains list, falling back to historicalChainTvl")
+    // Fallback to the historical endpoint
     return await getChainTVL("Hyperliquid L1")
   } catch (error) {
     console.error("Error fetching Hyperliquid L1 TVL:", error)
@@ -348,6 +294,8 @@ export async function getHyperliquidL1TVL(): Promise<number> {
  * Get Hyperliquid-specific data (convenience function)
  */
 export async function getHyperliquidData() {
+  console.log("Fetching Hyperliquid data from DefiLlama...")
+
   const [tvl, feesData, revenueData] = await Promise.all([
     getHyperliquidL1TVL(),
     getProtocolFees("hyperliquid", "dailyFees"),
@@ -358,6 +306,6 @@ export async function getHyperliquidData() {
     tvl,
     fees: feesData,
     revenue: revenueData,
-    volume: null,
+    volume: null, // Perps volume fetched from Hyperliquid API instead
   }
 }

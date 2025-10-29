@@ -7,9 +7,18 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Get credentials from environment variables
-  const validUser = process.env.BASIC_AUTH_USER || "Admin888"
-  const validPass = process.env.BASIC_AUTH_PASS || "Hyperliquid888"
+  const validUser = process.env.BASIC_AUTH_USER
+  const validPass = process.env.BASIC_AUTH_PASS
+
+  // If credentials not configured, return 503
+  if (!validUser || !validPass) {
+    return new NextResponse("Admin authentication not configured", {
+      status: 503,
+      headers: {
+        "Content-Type": "text/plain",
+      },
+    })
+  }
 
   // Get authorization header
   const authHeader = request.headers.get("authorization")

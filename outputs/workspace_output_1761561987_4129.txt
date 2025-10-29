@@ -1,6 +1,0 @@
-lib/utils.ts:export const isDev = process.env.NODE_ENV !== "production"
-lib/api/coingecko.ts:const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY || ""
-lib/api/coingecko.ts:const COINGECKO_BASE_URL = process.env.COINGECKO_API_URL || "https://api.coingecko.com/api/v3"
-lib/api/hyperliquid.ts:const API_BASE_URL = process.env.HYPERLIQUID_API_URL || "https://api.hyperliquid.xyz"
-lib/api/hyperliquid.ts:const API_TESTNET_URL = process.env.HYPERLIQUID_TESTNET_API_URL || "https://api.hyperliquid-testnet.xyz"
-lib/api/defillama.ts:const DEFILLAMA_BASE_URL = process.env.DEFILLAMA_API_URL || "https://api.llama.fi"
