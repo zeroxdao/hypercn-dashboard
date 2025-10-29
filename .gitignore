@@ -25,3 +25,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local build & tooling
+/dist
+/coverage
+
+# generated outputs (你本地用于调试导出的文件夹)
+outputs/
+
+# editor / os junk
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Office 临时文件（防止 ~$xxx 这种短文件混进来）
+~$*
+
+# bun
+.bun
+
+# logs（你已经列了常见的，补一个通配）
+*.log
