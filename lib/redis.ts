@@ -5,7 +5,25 @@
 
 import { Redis } from "@upstash/redis"
 
-export const redis = Redis.fromEnv()
+let redisClient: Redis | null = null
+
+function getRedis(): Redis | null {
+  if (typeof window !== "undefined") {
+    // Don't use Redis on client side
+    return null
+  }
+
+  if (!redisClient) {
+    try {
+      redisClient = Redis.fromEnv()
+    } catch (error) {
+      console.error("Failed to initialize Redis client:", error)
+      return null
+    }
+  }
+
+  return redisClient
+}
 
 /**
  * 缓存键前缀
@@ -45,6 +63,12 @@ export const CACHE_TTL = {
  */
 export async function checkRateLimit(ip: string, limit = 60): Promise<boolean> {
   try {
+    const redis = getRedis()
+    if (!redis) {
+      // Redis 不可用时允许请求通过
+      return true
+    }
+
     const key = CACHE_KEYS.RATE_LIMIT(ip)
     const current = await redis.incr(key)
 
@@ -56,7 +80,9 @@ export async function checkRateLimit(ip: string, limit = 60): Promise<boolean> {
     return current <= limit
   } catch (error) {
     // Redis 失败时允许请求通过（降级处理）
-    console.error("Rate limit check failed:", error)
+    if (process.env.NODE_ENV === "development") {
+      console.error("Rate limit check failed:", error)
+    }
     return true
   }
 }
@@ -68,10 +94,17 @@ export async function checkRateLimit(ip: string, limit = 60): Promise<boolean> {
  */
 export async function getCached<T>(key: string): Promise<T | null> {
   try {
+    const redis = getRedis()
+    if (!redis) {
+      return null
+    }
+
     const data = await redis.get<T>(key)
     return data
   } catch (error) {
-    console.error(`Failed to get cache for key ${key}:`, error)
+    if (process.env.NODE_ENV === "development") {
+      console.error(`Failed to get cache for key ${key}:`, error)
+    }
     return null
   }
 }
@@ -84,9 +117,16 @@ export async function getCached<T>(key: string): Promise<T | null> {
  */
 export async function setCache<T>(key: string, data: T, ttl: number): Promise<void> {
   try {
+    const redis = getRedis()
+    if (!redis) {
+      return
+    }
+
     await redis.setex(key, ttl, JSON.stringify(data))
   } catch (error) {
-    console.error(`Failed to set cache for key ${key}:`, error)
+    if (process.env.NODE_ENV === "development") {
+      console.error(`Failed to set cache for key ${key}:`, error)
+    }
   }
 }
 
@@ -96,9 +136,16 @@ export async function setCache<T>(key: string, data: T, ttl: number): Promise<vo
  */
 export async function deleteCache(key: string): Promise<void> {
   try {
+    const redis = getRedis()
+    if (!redis) {
+      return
+    }
+
     await redis.del(key)
   } catch (error) {
-    console.error(`Failed to delete cache for key ${key}:`, error)
+    if (process.env.NODE_ENV === "development") {
+      console.error(`Failed to delete cache for key ${key}:`, error)
+    }
   }
 }
 
@@ -108,11 +155,18 @@ export async function deleteCache(key: string): Promise<void> {
  */
 export async function deleteCachePattern(pattern: string): Promise<void> {
   try {
+    const redis = getRedis()
+    if (!redis) {
+      return
+    }
+
     const keys = await redis.keys(pattern)
     if (keys.length > 0) {
       await redis.del(...keys)
     }
   } catch (error) {
-    console.error(`Failed to delete cache pattern ${pattern}:`, error)
+    if (process.env.NODE_ENV === "development") {
+      console.error(`Failed to delete cache pattern ${pattern}:`, error)
+    }
   }
 }
