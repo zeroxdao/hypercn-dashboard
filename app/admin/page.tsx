@@ -28,6 +28,7 @@ const CATEGORY_OPTIONS = [
   "手机端",
   "社区",
 ]
+
 const MAX_DESC = 120
 
 function uid() {
@@ -45,20 +46,40 @@ export default function AdminPage() {
 
   const [list, setList] = useState<Project[]>([])
   const [q, setQ] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  // Load from localStorage
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (raw) setList(JSON.parse(raw))
-    } catch {}
-  }, [])
-
-  // Save to localStorage
-  const persist = (next: Project[]) => {
+  // 统一设置列表 & localStorage
+  const setListAndPersist = (next: Project[]) => {
     setList(next)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+    } catch {}
   }
+
+  // 初始化：优先服务端，失败则回退本地
+  useEffect(() => {
+    const boot = async () => {
+      try {
+        setLoading(true)
+        const res = await fetch("/api/project", { cache: "no-store" })
+        if (!res.ok) throw new Error("load from server failed")
+        const serverList: Project[] = await res.json()
+        if (Array.isArray(serverList)) {
+          setListAndPersist(serverList)
+        } else {
+          throw new Error("server returned non-array")
+        }
+      } catch {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY)
+          if (raw) setList(JSON.parse(raw))
+        } catch {}
+      } finally {
+        setLoading(false)
+      }
+    }
+    boot()
+  }, [])
 
   const onToggleCategory = (c: string) => {
     setCategories((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]))
@@ -74,25 +95,47 @@ export default function AdminPage() {
     setEditId(null)
   }
 
-  const onSave = () => {
+  const onSave = async () => {
     if (!name.trim()) return alert("请输入项目名")
     if (description.length > MAX_DESC) return alert(`简介不能超过 ${MAX_DESC} 字符`)
-    const p: Project = {
+
+    const project: Project = {
       id: editId ?? uid(),
       name: name.trim(),
       logo: logo.trim(),
-      categories: categories,
+      categories,
       website: website.trim(),
       social: social.trim(),
       description: description.trim(),
     }
-    if (editId) {
-      const next = list.map((x) => (x.id === editId ? p : x))
-      persist(next)
-    } else {
-      persist([p, ...list])
+
+    // 本地先行更新（更快 UI 反馈）
+    const optimistic = editId
+      ? list.map((x) => (x.id === project.id ? project : x))
+      : [project, ...list.filter((x) => x.id !== project.id)]
+    setListAndPersist(optimistic)
+
+    // 同步到服务端
+    try {
+      const res = await fetch("/api/project", {
+        method: editId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ project }),
+      })
+      if (!res.ok) {
+        const msg = await res.text()
+        throw new Error(msg || "保存失败")
+      }
+      const serverList: Project[] = await res.json()
+      if (Array.isArray(serverList)) {
+        setListAndPersist(serverList) // 以后端为准
+      }
+      resetForm()
+      alert("已保存到数据库")
+    } catch (e) {
+      console.error(e)
+      alert("保存到数据库失败，请检查 Vercel 环境变量和日志")
     }
-    resetForm()
   }
 
   const onEdit = (id: string) => {
@@ -108,9 +151,33 @@ export default function AdminPage() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  const onRemove = (id: string) => {
+  const onRemove = async (id: string) => {
     if (!confirm("确定删除该项目？")) return
-    persist(list.filter((x) => x.id !== id))
+
+    // 本地先删
+    const optimistic = list.filter((x) => x.id !== id)
+    setListAndPersist(optimistic)
+
+    try {
+      const res = await fetch("/api/project", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      })
+      if (!res.ok) {
+        const msg = await res.text()
+        throw new Error(msg || "删除失败")
+      }
+      const serverList: Project[] = await res.json()
+      if (Array.isArray(serverList)) {
+        setListAndPersist(serverList)
+      }
+    } catch (e) {
+      console.error(e)
+      alert("删除失败，请检查服务端日志")
+      // 失败回滚（可选）
+      setListAndPersist(list)
+    }
   }
 
   const filtered = useMemo(() => {
@@ -126,7 +193,7 @@ export default function AdminPage() {
   }, [list, q])
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 text-white bg-[#010807] min-h-screen">
+    <div className="mx-auto min-h-screen max-w-6xl bg-[#010807] px-4 py-6 text-white">
       <h1 className="mb-4 text-xl font-semibold">Admin 面板</h1>
 
       <div className="rounded-xl border border-[#133136] bg-[#0b1416] p-4">
@@ -225,6 +292,23 @@ export default function AdminPage() {
               取消编辑
             </button>
           )}
+          <button
+            onClick={async () => {
+              try {
+                setLoading(true)
+                const res = await fetch("/api/project", { cache: "no-store" })
+                if (!res.ok) throw new Error("refresh failed")
+                const data: Project[] = await res.json()
+                if (Array.isArray(data)) setListAndPersist(data)
+              } finally {
+                setLoading(false)
+              }
+            }}
+            className="rounded-lg border border-[#1e2c31] bg-[#0f1b1d] px-4 py-2 text-sm hover:bg-[#132224]"
+          >
+            刷新（服务端）
+          </button>
+          {loading && <span className="text-xs text-[#96fce4]">加载中...</span>}
         </div>
       </div>
 
@@ -306,7 +390,7 @@ export default function AdminPage() {
             </div>
           </div>
         ))}
-        {filtered.length === 0 && (
+        {filtered.length === 0 && !loading && (
           <div className="col-span-full rounded-xl border border-[#133136] bg-[#0b1416] p-6 text-sm text-[#96fce4]">
             暂无项目
           </div>
