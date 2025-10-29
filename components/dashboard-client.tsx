@@ -27,8 +27,6 @@ type UIProject = {
   }
 }
 
-const LS_KEY = "hl_admin_projects"
-
 function mapAdminProject(p: any, idx: number): UIProject {
   // Support both old (category: string) and new (categories: string[]) formats
   const catsRaw = p?.categories ?? p?.category ?? p?.tags ?? []
@@ -53,19 +51,6 @@ function mapAdminProject(p: any, idx: number): UIProject {
         (p?.website ? (p.website.startsWith("http") ? p.website : `https://${p.website}`) : undefined),
     },
   }
-}
-
-function readAdminProjects(): any[] {
-  const keys = ["hl_admin_projects", "hyper_admin_projects", "adminProjects"]
-  for (const key of keys) {
-    try {
-      const raw = localStorage.getItem(key)
-      if (!raw) continue
-      const arr = JSON.parse(raw)
-      if (Array.isArray(arr) && arr.length > 0) return arr
-    } catch {}
-  }
-  return []
 }
 
 function toHttp(s?: string) {
@@ -240,31 +225,26 @@ export default function DashboardClient({
   })
 
   useEffect(() => {
-    const rawProjects = readAdminProjects()
-
-    if (rawProjects.length === 0) {
-      setAllProjects([])
-      return
-    }
-
-    const mapped = rawProjects.map(mapAdminProject)
-
-    setAllProjects(mapped)
-
-    // Listen for storage events from other tabs
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === LS_KEY) {
-        const updated = readAdminProjects()
-        if (updated.length > 0) {
-          setAllProjects(updated.map(mapAdminProject))
-        } else {
-          setAllProjects([])
-        }
+    let cancelled = false
+    const run = async () => {
+      try {
+        const res = await fetch("/api/project", { cache: "no-store" })
+        if (!res.ok) throw new Error("failed to load projects")
+        const arr = await res.json()
+        if (!Array.isArray(arr)) return
+        const mapped = arr.map((p: any, i: number) => mapAdminProject(p, i))
+        if (!cancelled) setAllProjects(mapped)
+      } catch (e) {
+        console.error("load projects failed", e)
+        if (!cancelled) setAllProjects([])
       }
     }
-    window.addEventListener("storage", onStorage)
-    return () => window.removeEventListener("storage", onStorage)
+    run()
+    return () => {
+      cancelled = true
+    }
   }, [])
+
 
   useEffect(() => {
     const fetchTopVolumePerps = async () => {

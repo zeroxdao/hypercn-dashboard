@@ -12,8 +12,6 @@ type Project = {
   description?: string
 }
 
-const STORAGE_KEY = "hl_admin_projects"
-
 const CATEGORY_OPTIONS = [
   "热门",
   "最新",
@@ -48,15 +46,7 @@ export default function AdminPage() {
   const [q, setQ] = useState("")
   const [loading, setLoading] = useState(false)
 
-  // 统一设置列表 & localStorage
-  const setListAndPersist = (next: Project[]) => {
-    setList(next)
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-    } catch {}
-  }
-
-  // 初始化：优先服务端，失败则回退本地
+  // 初始化：只从服务端加载（不再读取 localStorage）
   useEffect(() => {
     const boot = async () => {
       try {
@@ -65,15 +55,8 @@ export default function AdminPage() {
         if (!res.ok) throw new Error("load from server failed")
         const serverList: Project[] = await res.json()
         if (Array.isArray(serverList)) {
-          setListAndPersist(serverList)
-        } else {
-          throw new Error("server returned non-array")
+          setList(serverList)
         }
-      } catch {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY)
-          if (raw) setList(JSON.parse(raw))
-        } catch {}
       } finally {
         setLoading(false)
       }
@@ -109,11 +92,11 @@ export default function AdminPage() {
       description: description.trim(),
     }
 
-    // 本地先行更新（更快 UI 反馈）
+    // 本地先行更新（不落地到 localStorage）
     const optimistic = editId
       ? list.map((x) => (x.id === project.id ? project : x))
       : [project, ...list.filter((x) => x.id !== project.id)]
-    setListAndPersist(optimistic)
+    setList(optimistic)
 
     // 同步到服务端
     try {
@@ -127,14 +110,13 @@ export default function AdminPage() {
         throw new Error(msg || "保存失败")
       }
       const serverList: Project[] = await res.json()
-      if (Array.isArray(serverList)) {
-        setListAndPersist(serverList) // 以后端为准
-      }
+      if (Array.isArray(serverList)) setList(serverList) // 以后端为准
       resetForm()
       alert("已保存到数据库")
     } catch (e) {
       console.error(e)
       alert("保存到数据库失败，请检查 Vercel 环境变量和日志")
+      // 失败不额外处理（保持 UI 当前状态或手动刷新）
     }
   }
 
@@ -154,9 +136,9 @@ export default function AdminPage() {
   const onRemove = async (id: string) => {
     if (!confirm("确定删除该项目？")) return
 
-    // 本地先删
+    // 本地先删（不落地到 localStorage）
     const optimistic = list.filter((x) => x.id !== id)
-    setListAndPersist(optimistic)
+    setList(optimistic)
 
     try {
       const res = await fetch("/api/project", {
@@ -169,14 +151,12 @@ export default function AdminPage() {
         throw new Error(msg || "删除失败")
       }
       const serverList: Project[] = await res.json()
-      if (Array.isArray(serverList)) {
-        setListAndPersist(serverList)
-      }
+      if (Array.isArray(serverList)) setList(serverList)
     } catch (e) {
       console.error(e)
       alert("删除失败，请检查服务端日志")
-      // 失败回滚（可选）
-      setListAndPersist(list)
+      // 失败回滚
+      setList(list)
     }
   }
 
@@ -299,7 +279,7 @@ export default function AdminPage() {
                 const res = await fetch("/api/project", { cache: "no-store" })
                 if (!res.ok) throw new Error("refresh failed")
                 const data: Project[] = await res.json()
-                if (Array.isArray(data)) setListAndPersist(data)
+                if (Array.isArray(data)) setList(data)
               } finally {
                 setLoading(false)
               }
