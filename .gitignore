@@ -46,3 +46,6 @@ Thumbs.db
 
 # logs（你已经列了常见的，补一个通配）
 *.log
+
+.vercel
+.env*.local
