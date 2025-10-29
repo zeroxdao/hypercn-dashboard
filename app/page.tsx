@@ -9,6 +9,8 @@ import {
   getNewTokens,
 } from "@/lib/api/dashboard"
 
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
 export const revalidate = 10 // 每10秒重新验证数据
 
 export default async function HyperliquidDashboard() {
