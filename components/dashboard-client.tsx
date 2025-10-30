@@ -177,6 +177,10 @@ export default function DashboardClient({
   const [hoveredBar, setHoveredBar] = useState<number | null>(null)
   const [activeCategory, setActiveCategory] = useState("全部")
 
+  const [hoveredRevenueBar, setHoveredRevenueBar] = useState<{ index: number; x: number; y: number } | null>(null)
+  const revenueChartWrapRefMobile = useRef<HTMLDivElement>(null)
+  const revenueChartWrapRefDesktop = useRef<HTMLDivElement>(null)
+
   // 分页（每页 9 项）
   const [currentPage, setCurrentPage] = useState(1)
   // Renamed goToPage to goToPageInput
@@ -244,7 +248,6 @@ export default function DashboardClient({
       cancelled = true
     }
   }, [])
-
 
   useEffect(() => {
     const fetchTopVolumePerps = async () => {
@@ -1150,6 +1153,7 @@ export default function DashboardClient({
               </div>
             </Card>
 
+            {/* ================= Hyperliquid手续费卡片 ================ */}
             <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
               {/* Mobile version: block md:hidden */}
               <div className="block md:hidden">
@@ -1182,38 +1186,98 @@ export default function DashboardClient({
                     </div>
                   </div>
 
-                  {/* Chart */}
-                  <div className="h-[160px] w-full overflow-hidden rounded-xl px-1">
+                  <div
+                    ref={revenueChartWrapRefMobile}
+                    className="h-[160px] w-full overflow-hidden rounded-xl px-1 relative"
+                  >
                     {revenueLoading ? (
                       <div className="flex h-full items-center justify-center">
                         <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#43e5c9] border-t-transparent" />
                       </div>
                     ) : defiLlamaRevenue && defiLlamaRevenue.totalDataChart.length > 0 ? (
-                      <svg viewBox="0 0 400 110" className="h-full w-full" preserveAspectRatio="none">
-                        {revenueChartData.data.map(([timestamp, value], i) => {
-                          const margin = { top: 4, right: 8, bottom: 6, left: 8 }
-                          const chartWidth = 400 - margin.left - margin.right
-                          const chartHeight = 110 - margin.top - margin.bottom
-                          const barGap = 0.18
-                          const barWidth = (chartWidth / revenueChartData.data.length) * (1 - barGap)
-                          const barSpacing = chartWidth / revenueChartData.data.length
-                          const x = margin.left + i * barSpacing + (barSpacing * barGap) / 2
-                          const barHeight = (value / revenueChartData.yMax) * chartHeight
-                          const y = margin.top + chartHeight - barHeight
-                          return (
-                            <rect
-                              key={i}
-                              x={x}
-                              y={y}
-                              width={barWidth}
-                              height={barHeight}
-                              fill="#43e5c9"
-                              fillOpacity={1}
-                              rx="2"
-                            />
-                          )
-                        })}
-                      </svg>
+                      <>
+                        <svg viewBox="0 0 400 110" className="h-full w-full" preserveAspectRatio="none">
+                          {revenueChartData.data.map(([timestamp, value], i) => {
+                            const margin = { top: 4, right: 8, bottom: 6, left: 8 }
+                            const chartWidth = 400 - margin.left - margin.right
+                            const chartHeight = 110 - margin.top - margin.bottom
+                            const barGap = 0.18
+                            const barWidth = (chartWidth / revenueChartData.data.length) * (1 - barGap)
+                            const barSpacing = chartWidth / revenueChartData.data.length
+                            const x = margin.left + i * barSpacing + (barSpacing * barGap) / 2
+                            const barHeight = (value / revenueChartData.yMax) * chartHeight
+                            const y = margin.top + chartHeight - barHeight
+                            return (
+                              <rect
+                                key={i}
+                                x={x}
+                                y={y}
+                                width={barWidth}
+                                height={barHeight}
+                                fill="#43e5c9"
+                                fillOpacity={hoveredRevenueBar?.index === i ? 0.8 : 1}
+                                rx="2"
+                                onMouseEnter={(e) => {
+                                  const barRect = e.currentTarget.getBoundingClientRect()
+                                  const wrapRect = revenueChartWrapRefMobile.current?.getBoundingClientRect()
+                                  if (!wrapRect) return
+                                  setHoveredRevenueBar({
+                                    index: i,
+                                    x: barRect.left + barRect.width / 2 - wrapRect.left,
+                                    y: barRect.top - wrapRect.top,
+                                  })
+                                }}
+                                onMouseLeave={() => setHoveredRevenueBar(null)}
+                                style={{ cursor: "pointer" }}
+                              />
+                            )
+                          })}
+                        </svg>
+                        {hoveredRevenueBar !== null &&
+                          (() => {
+                            const tooltipWidth = 120
+                            const tooltipHeight = 50
+                            const padding = 10
+                            const wrap = revenueChartWrapRefMobile.current
+                            if (!wrap) return null
+                            const cw = wrap.clientWidth
+                            const ch = wrap.clientHeight
+
+                            // 以 bar 中心为 anchor，不改 left/top，只变对齐方向
+                            const x = hoveredRevenueBar.x
+                            const y = hoveredRevenueBar.y
+
+                            const overflowLeft = x - tooltipWidth / 2 - padding < 0
+                            const overflowRight = x + tooltipWidth / 2 + padding > cw
+                            const overflowTop = y - tooltipHeight - padding < 0
+                            // 水平对齐：优先居中，左/右边缘再贴左/右
+                            const translateX = overflowLeft ? "0%" : overflowRight ? "-100%" : "-50%"
+                            // 垂直对齐：优先在上方，空间不足放到下方
+                            const translateY = overflowTop ? "0%" : "-100%"
+                            const topOffset = y + (overflowTop ? padding : -padding)
+                            const leftOffset = x
+
+                            return (
+                              <div
+                                className="pointer-events-none absolute z-50 rounded-lg bg-[#010807] px-2 py-1 text-[10px] shadow-lg"
+                                style={{
+                                  left: `${leftOffset}px`,
+                                  top: `${topOffset}px`,
+                                  transform: `translate(${translateX}, ${translateY})`,
+                                  border: "1px solid #43e5c9",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                <div className="text-[#96fce4]">
+                                  {dayjs(revenueChartData.data[hoveredRevenueBar.index][0] * 1000).format("YYYY-MM-DD")}
+                                </div>
+                                <div className="font-semibold text-white">
+                                  {formatRevenue(revenueChartData.data[hoveredRevenueBar.index][1])}
+                                </div>
+                              </div>
+                            )
+                          })()}
+                      </>
                     ) : (
                       <div className="flex h-full items-center justify-center text-[#96fce4]">暂无数据</div>
                     )}
@@ -1221,7 +1285,7 @@ export default function DashboardClient({
                 </div>
               </div>
 
-              {/* Desktop version: hidden md:block - 100% unchanged */}
+              {/* Desktop version: hidden md:block */}
               <div className="hidden md:block">
                 <div className="h-[180px] px-5 py-4 overflow-hidden">
                   <div className="mb-3 flex items-center gap-2">
@@ -1260,34 +1324,95 @@ export default function DashboardClient({
                         </div>
                       </div>
 
-                      <div className="relative min-w-0 flex items-end justify-end h-full overflow-visible">
+                      <div
+                        ref={revenueChartWrapRefDesktop}
+                        className="relative min-w-0 flex items-end justify-end h-full overflow-visible"
+                      >
                         <div className="w-full h-full">
                           {revenueChartData.data.length > 0 && (
-                            <svg viewBox="0 0 400 110" className="h-full w-full" preserveAspectRatio="none">
-                              {revenueChartData.data.map(([timestamp, value], i) => {
-                                const margin = { top: 4, right: 8, bottom: 6, left: 8 }
-                                const chartWidth = 400 - margin.left - margin.right
-                                const chartHeight = 110 - margin.top - margin.bottom
-                                const barGap = 0.18
-                                const barWidth = (chartWidth / revenueChartData.data.length) * (1 - barGap)
-                                const barSpacing = chartWidth / revenueChartData.data.length
-                                const x = margin.left + i * barSpacing + (barSpacing * barGap) / 2
-                                const barHeight = (value / revenueChartData.yMax) * chartHeight
-                                const y = margin.top + chartHeight - barHeight
-                                return (
-                                  <rect
-                                    key={i}
-                                    x={x}
-                                    y={y}
-                                    width={barWidth}
-                                    height={barHeight}
-                                    fill="#43e5c9"
-                                    fillOpacity={1}
-                                    rx="2"
-                                  />
-                                )
-                              })}
-                            </svg>
+                            <>
+                              <svg viewBox="0 0 400 110" className="h-full w-full" preserveAspectRatio="none">
+                                {revenueChartData.data.map(([timestamp, value], i) => {
+                                  const margin = { top: 4, right: 8, bottom: 6, left: 8 }
+                                  const chartWidth = 400 - margin.left - margin.right
+                                  const chartHeight = 110 - margin.top - margin.bottom
+                                  const barGap = 0.18
+                                  const barWidth = (chartWidth / revenueChartData.data.length) * (1 - barGap)
+                                  const barSpacing = chartWidth / revenueChartData.data.length
+                                  const x = margin.left + i * barSpacing + (barSpacing * barGap) / 2
+                                  const barHeight = (value / revenueChartData.yMax) * chartHeight
+                                  const y = margin.top + chartHeight - barHeight
+                                  return (
+                                    <rect
+                                      key={i}
+                                      x={x}
+                                      y={y}
+                                      width={barWidth}
+                                      height={barHeight}
+                                      fill="#43e5c9"
+                                      fillOpacity={hoveredRevenueBar?.index === i ? 0.8 : 1}
+                                      rx="2"
+                                      onMouseEnter={(e) => {
+                                        const barRect = e.currentTarget.getBoundingClientRect()
+                                        const wrapRect = revenueChartWrapRefDesktop.current?.getBoundingClientRect()
+                                        if (!wrapRect) return
+                                        setHoveredRevenueBar({
+                                          index: i,
+                                          x: barRect.left + barRect.width / 2 - wrapRect.left,
+                                          y: barRect.top - wrapRect.top,
+                                        })
+                                      }}
+                                      onMouseLeave={() => setHoveredRevenueBar(null)}
+                                      style={{ cursor: "pointer" }}
+                                    />
+                                  )
+                                })}
+                              </svg>
+                              {hoveredRevenueBar !== null &&
+                                (() => {
+                                  const tooltipWidth = 120
+                                  const tooltipHeight = 50
+                                  const padding = 10
+                                  const wrap = revenueChartWrapRefDesktop.current
+                                  if (!wrap) return null
+                                  const cw = wrap.clientWidth
+                                  const ch = wrap.clientHeight
+
+                                  const x = hoveredRevenueBar.x
+                                  const y = hoveredRevenueBar.y
+
+                                  const overflowLeft = x - tooltipWidth / 2 - padding < 0
+                                  const overflowRight = x + tooltipWidth / 2 + padding > cw
+                                  const overflowTop = y - tooltipHeight - padding < 0
+
+                                  const translateX = overflowLeft ? "0%" : overflowRight ? "-100%" : "-50%"
+                                  const translateY = overflowTop ? "0%" : "-100%"
+                                  const topOffset = y + (overflowTop ? padding : -padding)
+                                  const leftOffset = x
+
+                                  return (
+                                    <div
+                                      className="pointer-events-none absolute z-50 rounded-lg bg-[#010807] px-2 py-1 text-[10px] shadow-lg"
+                                      style={{
+                                        left: `${leftOffset}px`,
+                                        top: `${topOffset}px`,
+                                        transform: `translate(${translateX}, ${translateY})`,
+                                        border: "1px solid #43e5c9",
+                                        whiteSpace: "nowrap",
+                                      }}
+                                    >
+                                      <div className="text-[#96fce4]">
+                                        {dayjs(revenueChartData.data[hoveredRevenueBar.index][0] * 1000).format(
+                                          "YYYY-MM-DD",
+                                        )}
+                                      </div>
+                                      <div className="font-semibold text-white">
+                                        {formatRevenue(revenueChartData.data[hoveredRevenueBar.index][1])}
+                                      </div>
+                                    </div>
+                                  )
+                                })()}
+                            </>
                           )}
                         </div>
                       </div>
@@ -1298,6 +1423,7 @@ export default function DashboardClient({
                 </div>
               </div>
             </Card>
+            {/* ================= /Hyperliquid手续费卡片 ================= */}
 
             <Card className="col-span-1 lg:col-span-3 lg:col-start-10 lg:row-span-2 lg:h-full lg:self-stretch p-0 overflow-hidden bg-[#101419] border-[#072027]">
               {/* Mobile version: block md:hidden */}
