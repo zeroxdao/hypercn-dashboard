@@ -19,7 +19,7 @@ export default function LandingPage() {
     },
     {
       name: "Discord",
-      icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pnhaQXUVRXYpbOjVIe9RCyXJb5ez6B.png",
+      icon: "https://pbs.twimg.com/profile_images/1508090725455458309/qyQh84s5_400x400.jpg",
       url: "https://discord.gg/hyperliquid",
     },
     {
