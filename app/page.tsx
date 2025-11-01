@@ -245,7 +245,7 @@ export default function LandingPage() {
               {/* Cat image - dramatically increased size to be the main focal point */}
               <div className="relative z-10">
                 <img
-                  src="https://ibb.co/G4SNm7jg"
+                  src="https://freeimage.host/i/Ks8gfN2"
                   alt="Hyperliquid 中文社区吉祥物"
                   className="relative h-[280px] w-[280px] object-contain drop-shadow-2xl sm:h-[380px] sm:w-[380px] md:h-[480px] md:w-[480px] lg:h-[550px] lg:w-[550px]"
                 />
