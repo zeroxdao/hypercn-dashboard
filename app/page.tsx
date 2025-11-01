@@ -244,7 +244,7 @@ export default function LandingPage() {
               rel="noopener noreferrer"
               className="rounded-xl border border-[#43e5c9]/30 bg-[#0f1519]/50 px-8 py-4 text-base font-semibold text-[#43e5c9] backdrop-blur-sm transition-all hover:border-[#43e5c9]/50 hover:bg-[#0f1519]/80"
             >
-              关注我们
+              加入我们
             </a>
           </div>
         </section>
