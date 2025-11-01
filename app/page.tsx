@@ -14,7 +14,7 @@ export default function LandingPage() {
     },
     {
       name: "Telegram",
-      icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pnhaQXUVRXYpbOjVIe9RCyXJb5ez6B.png",
+      icon: "https://pbs.twimg.com/profile_images/1776750755703308288/vOpGyaH__400x400.jpg",
       url: "https://t.me/hyperliquid_cn",
     },
     {
