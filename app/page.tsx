@@ -8,32 +8,32 @@ export default function LandingPage() {
 
   const socialLinks = [
     {
-      name: "贡献者",
+      name: "Anon",
       icon: "https://media.istockphoto.com/id/170091505/photo/blue-question-mark.jpg?s=612x612&w=0&k=20&c=LPPlKrRZBRmHpoJWwYFo0CRB8vtZjGHLi2yuUCv6t8M=",
       url: "https://t.me/chinesehyperliquid",
     },
     {
-      name: "贡献者",
+      name: "Anon",
       icon: "https://media.istockphoto.com/id/170091505/photo/blue-question-mark.jpg?s=612x612&w=0&k=20&c=LPPlKrRZBRmHpoJWwYFo0CRB8vtZjGHLi2yuUCv6t8M=",
       url: "https://t.me/chinesehyperliquid",
     },
     {
-      name: "贡献者",
+      name: "Anon",
       icon: "https://media.istockphoto.com/id/170091505/photo/blue-question-mark.jpg?s=612x612&w=0&k=20&c=LPPlKrRZBRmHpoJWwYFo0CRB8vtZjGHLi2yuUCv6t8M=",
       url: "https://t.me/chinesehyperliquid",
     },
     {
-      name: "贡献者",
+      name: "Anon",
       icon: "https://media.istockphoto.com/id/170091505/photo/blue-question-mark.jpg?s=612x612&w=0&k=20&c=LPPlKrRZBRmHpoJWwYFo0CRB8vtZjGHLi2yuUCv6t8M=",
       url: "https://t.me/chinesehyperliquid",
     },
     {
-      name: "贡献者",
+      name: "Anon",
       icon: "https://media.istockphoto.com/id/170091505/photo/blue-question-mark.jpg?s=612x612&w=0&k=20&c=LPPlKrRZBRmHpoJWwYFo0CRB8vtZjGHLi2yuUCv6t8M=",
       url: "https://t.me/chinesehyperliquid",
     },
     {
-      name: "贡献者",
+      name: "Anon",
       icon: "https://media.istockphoto.com/id/170091505/photo/blue-question-mark.jpg?s=612x612&w=0&k=20&c=LPPlKrRZBRmHpoJWwYFo0CRB8vtZjGHLi2yuUCv6t8M=",
       url: "https://t.me/chinesehyperliquid",
     },
@@ -274,7 +274,7 @@ export default function LandingPage() {
               <div className="absolute inset-0 -z-0 bg-gradient-to-r from-[#2dd4bf] to-[#43e5c9] opacity-0 transition-opacity group-hover:opacity-100" />
             </Link>
             <a
-              href="https://x.com/"
+              href="https://t.me/chinesehyperliquid"
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-xl border border-[#43e5c9]/30 bg-[#0f1519]/50 px-8 py-4 text-base font-semibold text-[#43e5c9] backdrop-blur-sm transition-all hover:border-[#43e5c9]/50 hover:bg-[#0f1519]/80"
@@ -320,7 +320,7 @@ export default function LandingPage() {
                       <h3 className="text-lg font-semibold transition-colors group-hover:text-[#43e5c9]">
                         {social.name}
                       </h3>
-                      <p className="text-sm text-[#43e5c9]">关注我们</p>
+                      <p className="text-sm text-[#43e5c9]">贡献者</p>
                     </div>
                   </a>
                 ))}
