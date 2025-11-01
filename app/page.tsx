@@ -306,11 +306,11 @@ export default function LandingPage() {
                   >
                     <div className="relative">
                       <div className="absolute inset-0 rounded-full bg-[#43e5c9]/20 blur-xl transition-all group-hover:bg-[#43e5c9]/30" />
-                      <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#43e5c9]/20 to-[#2dd4bf]/20 ring-2 ring-[#43e5c9]/30 transition-all group-hover:ring-[#43e5c9]/50">
+                      <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-[#43e5c9]/30 transition-all group-hover:ring-[#43e5c9]/50">
                         <img
                           src={social.icon || "/placeholder.svg"}
                           alt={social.name}
-                          className="h-10 w-10 object-contain"
+                          className="h-full w-full object-cover"
                         />
                       </div>
                     </div>
