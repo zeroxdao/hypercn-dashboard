@@ -6,6 +6,39 @@ import { useEffect, useRef } from "react"
 export default function LandingPage() {
   const teamScrollRef = useRef<HTMLDivElement>(null)
 
+  const socialLinks = [
+    {
+      name: "Twitter",
+      icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pnhaQXUVRXYpbOjVIe9RCyXJb5ez6B.png",
+      url: "https://twitter.com/hyperliquid_cn",
+    },
+    {
+      name: "Telegram",
+      icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pnhaQXUVRXYpbOjVIe9RCyXJb5ez6B.png",
+      url: "https://t.me/hyperliquid_cn",
+    },
+    {
+      name: "Discord",
+      icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pnhaQXUVRXYpbOjVIe9RCyXJb5ez6B.png",
+      url: "https://discord.gg/hyperliquid",
+    },
+    {
+      name: "GitHub",
+      icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pnhaQXUVRXYpbOjVIe9RCyXJb5ez6B.png",
+      url: "https://github.com/hyperliquid",
+    },
+    {
+      name: "Medium",
+      icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pnhaQXUVRXYpbOjVIe9RCyXJb5ez6B.png",
+      url: "https://medium.com/@hyperliquid",
+    },
+    {
+      name: "YouTube",
+      icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pnhaQXUVRXYpbOjVIe9RCyXJb5ez6B.png",
+      url: "https://youtube.com/@hyperliquid",
+    },
+  ]
+
   useEffect(() => {
     const scrollContainer = teamScrollRef.current
     if (!scrollContainer) return
@@ -263,20 +296,7 @@ export default function LandingPage() {
 
             <div className="relative overflow-hidden">
               <div ref={teamScrollRef} className="flex gap-6 overflow-x-hidden" style={{ scrollBehavior: "auto" }}>
-                {[
-                  { name: "Twitter", icon: "𝕏", url: "https://twitter.com/hyperliquid_cn", color: "#1DA1F2" },
-                  { name: "Telegram", icon: "✈", url: "https://t.me/hyperliquid_cn", color: "#0088cc" },
-                  { name: "Discord", icon: "💬", url: "https://discord.gg/hyperliquid", color: "#5865F2" },
-                  { name: "GitHub", icon: "⚙", url: "https://github.com/hyperliquid", color: "#333" },
-                  { name: "Medium", icon: "Ⓜ", url: "https://medium.com/@hyperliquid", color: "#00ab6c" },
-                  { name: "YouTube", icon: "▶", url: "https://youtube.com/@hyperliquid", color: "#FF0000" },
-                  { name: "Twitter", icon: "𝕏", url: "https://twitter.com/hyperliquid_cn", color: "#1DA1F2" },
-                  { name: "Telegram", icon: "✈", url: "https://t.me/hyperliquid_cn", color: "#0088cc" },
-                  { name: "Discord", icon: "💬", url: "https://discord.gg/hyperliquid", color: "#5865F2" },
-                  { name: "GitHub", icon: "⚙", url: "https://github.com/hyperliquid", color: "#333" },
-                  { name: "Medium", icon: "Ⓜ", url: "https://medium.com/@hyperliquid", color: "#00ab6c" },
-                  { name: "YouTube", icon: "▶", url: "https://youtube.com/@hyperliquid", color: "#FF0000" },
-                ].map((social, index) => (
+                {[...socialLinks, ...socialLinks].map((social, index) => (
                   <a
                     key={index}
                     href={social.url}
@@ -286,8 +306,12 @@ export default function LandingPage() {
                   >
                     <div className="relative">
                       <div className="absolute inset-0 rounded-full bg-[#43e5c9]/20 blur-xl transition-all group-hover:bg-[#43e5c9]/30" />
-                      <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#43e5c9]/20 to-[#2dd4bf]/20 text-4xl ring-2 ring-[#43e5c9]/30 transition-all group-hover:ring-[#43e5c9]/50">
-                        {social.icon}
+                      <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#43e5c9]/20 to-[#2dd4bf]/20 ring-2 ring-[#43e5c9]/30 transition-all group-hover:ring-[#43e5c9]/50">
+                        <img
+                          src={social.icon || "/placeholder.svg"}
+                          alt={social.name}
+                          className="h-10 w-10 object-contain"
+                        />
                       </div>
                     </div>
                     <div className="text-center">
