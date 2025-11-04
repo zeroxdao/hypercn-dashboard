@@ -1198,7 +1198,7 @@ export default function DashboardClient({
               </div>
             </Card>
 
-            {/* ================= HYPE 推荐质押收益率 ================ */}
+            {/* ================= HYPE 推荐质押收益率 ================= */}
             <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
               <div className="block md:hidden">
                 <div
@@ -1206,23 +1206,12 @@ export default function DashboardClient({
                   onMouseEnter={() => setStakePaused(true)}
                   onMouseLeave={() => setStakePaused(false)}
                 >
-                  {/* 顶部：标题 + 轻量按钮 */}
+                  {/* 顶部：仅标题（移除按钮） */}
                   <div className="mb-2 flex items-center justify-between px-0.5">
                     <div className="flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-emerald-400" />
                       <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
                     </div>
-                    {hypeStakeItems[stakeIdx]?.link && (
-                      <a
-                        href={hypeStakeItems[stakeIdx].link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex h-6 items-center justify-center rounded-full bg-[#43e5c9] px-3
-                                   text-[11px] font-semibold leading-none text-[#010807] hover:opacity-90 transition"
-                      >
-                        去质押
-                      </a>
-                    )}
                   </div>
 
                   {/* 内容区 */}
@@ -1232,23 +1221,38 @@ export default function DashboardClient({
                       const tvl = `$${item.tvlUSD.toLocaleString()}`
                       return (
                         <div className="flex flex-col gap-3 p-1.5">
-                          {/* 顶部：Logo + 名称（更小更紧凑） */}
-                          <div className="flex items-center gap-2">
-                            <div className="h-6 w-6 overflow-hidden rounded-md bg-[#112224] flex-shrink-0">
-                              {item.logo && (
-                                <img
-                                  src={item.logo || "/placeholder.svg"}
-                                  alt={item.name}
-                                  className="h-full w-full object-cover"
-                                />
-                              )}
+                          {/* 顶部：Logo + 名称 + （右侧）去质押 按钮 */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="h-6 w-6 overflow-hidden rounded-md bg-[#112224] flex-shrink-0">
+                                {item.logo && (
+                                  <img
+                                    src={item.logo || "/placeholder.svg"}
+                                    alt={item.name}
+                                    className="h-full w-full object-cover"
+                                  />
+                                )}
+                              </div>
+                              <div className="truncate text-[12px] font-semibold text-white">{item.name}</div>
                             </div>
-                            <div className="truncate text-[12px] font-semibold text-white">{item.name}</div>
+
+                            {item?.link && (
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                /* 小一点、长方形、文字垂直水平居中 */
+                                className="inline-flex h-6 items-center justify-center rounded-md border border-[#43e5c9] px-2
+                                           text-[11px] font-semibold leading-none text-[#43e5c9]
+                                           bg-transparent hover:bg-[#43e5c9]/10 active:bg-[#43e5c9]/15 transition"
+                              >
+                                去质押
+                              </a>
+                            )}
                           </div>
 
-                          {/* 中部：APY / TVL / 更新时间 —— 同排等高卡片，保证可见 */}
+                          {/* 中部：APY / TVL / 更新时间 —— 同排等高卡片 */}
                           <div className="grid grid-cols-3 gap-1.5">
-                            {/* 统一卡片样式 */}
                             <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
                               <div className="text-[10px] text-[#96fce4] leading-none">净 APY</div>
                               <div className="mt-1 text-[13px] font-semibold leading-none text-white whitespace-nowrap">
@@ -1269,9 +1273,9 @@ export default function DashboardClient({
                             </div>
                           </div>
 
-                          {/* 底部：极简切换点（更小） */}
+                          {/* 底部：切换点更小并居中 */}
                           <div className="border-t border-[#133136]/60 pt-2">
-                            <div className="flex items-center justify-center gap-1.5">
+                            <div className="flex items-center justify-center gap-1">
                               {hypeStakeItems.map((_, i) => (
                                 <button
                                   key={i}
@@ -1279,8 +1283,8 @@ export default function DashboardClient({
                                   aria-label={`slide-${i}`}
                                   className={
                                     i === stakeIdx
-                                      ? "h-[2px] w-[18px] rounded-[1px] bg-[#43e5c9] transition-all"
-                                      : "h-[2px] w-[6px] rounded-[1px] bg-[#2a4b45] transition-all"
+                                      ? "h-1 w-3 rounded-full bg-[#43e5c9] transition-all"
+                                      : "h-1 w-1 rounded-full bg-[#2a4b45] transition-all"
                                   }
                                 />
                               ))}
@@ -1293,7 +1297,7 @@ export default function DashboardClient({
                 </div>
               </div>
 
-              {/* ========== Desktop：hidden md:block（h-[180px]） ========== */}
+              {/* ========== Desktop 保持不变 ========== */}
               <div className="hidden md:block">
                 <div
                   className="grid h-[180px] grid-cols-12 items-start gap-3 overflow-hidden px-5 py-4"
