@@ -8,34 +8,34 @@ export default function LandingPage() {
 
   const socialLinks = [
     {
-      name: "Twitter",
-      icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pnhaQXUVRXYpbOjVIe9RCyXJb5ez6B.png",
-      url: "https://twitter.com/hyperliquid_cn",
+      name: "Anon",
+      icon: "https://media.istockphoto.com/id/170091505/photo/blue-question-mark.jpg?s=612x612&w=0&k=20&c=LPPlKrRZBRmHpoJWwYFo0CRB8vtZjGHLi2yuUCv6t8M=",
+      url: "https://t.me/chinesehyperliquid",
     },
     {
-      name: "Telegram",
-      icon: "https://pbs.twimg.com/profile_images/1776750755703308288/vOpGyaH__400x400.jpg",
-      url: "https://t.me/hyperliquid_cn",
+      name: "Anon",
+      icon: "https://media.istockphoto.com/id/170091505/photo/blue-question-mark.jpg?s=612x612&w=0&k=20&c=LPPlKrRZBRmHpoJWwYFo0CRB8vtZjGHLi2yuUCv6t8M=",
+      url: "https://t.me/chinesehyperliquid",
     },
     {
-      name: "Discord",
-      icon: "https://pbs.twimg.com/profile_images/1508090725455458309/qyQh84s5_400x400.jpg",
-      url: "https://discord.gg/hyperliquid",
+      name: "Anon",
+      icon: "https://media.istockphoto.com/id/170091505/photo/blue-question-mark.jpg?s=612x612&w=0&k=20&c=LPPlKrRZBRmHpoJWwYFo0CRB8vtZjGHLi2yuUCv6t8M=",
+      url: "https://t.me/chinesehyperliquid",
     },
     {
-      name: "GitHub",
-      icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pnhaQXUVRXYpbOjVIe9RCyXJb5ez6B.png",
-      url: "https://github.com/hyperliquid",
+      name: "Anon",
+      icon: "https://media.istockphoto.com/id/170091505/photo/blue-question-mark.jpg?s=612x612&w=0&k=20&c=LPPlKrRZBRmHpoJWwYFo0CRB8vtZjGHLi2yuUCv6t8M=",
+      url: "https://t.me/chinesehyperliquid",
     },
     {
-      name: "Medium",
-      icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pnhaQXUVRXYpbOjVIe9RCyXJb5ez6B.png",
-      url: "https://medium.com/@hyperliquid",
+      name: "Anon",
+      icon: "https://media.istockphoto.com/id/170091505/photo/blue-question-mark.jpg?s=612x612&w=0&k=20&c=LPPlKrRZBRmHpoJWwYFo0CRB8vtZjGHLi2yuUCv6t8M=",
+      url: "https://t.me/chinesehyperliquid",
     },
     {
-      name: "YouTube",
-      icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pnhaQXUVRXYpbOjVIe9RCyXJb5ez6B.png",
-      url: "https://youtube.com/@hyperliquid",
+      name: "Anon",
+      icon: "https://media.istockphoto.com/id/170091505/photo/blue-question-mark.jpg?s=612x612&w=0&k=20&c=LPPlKrRZBRmHpoJWwYFo0CRB8vtZjGHLi2yuUCv6t8M=",
+      url: "https://t.me/chinesehyperliquid",
     },
   ]
 
@@ -245,9 +245,11 @@ export default function LandingPage() {
               {/* Cat image - dramatically increased size to be the main focal point */}
               <div className="relative z-10">
                 <img
-                  src="/images/design-mode/Untitled%20design%20%282%29.png"
+                  src="/images/design-mode/Hypurr(1).png"
                   alt="Hyperliquid 中文社区吉祥物"
                   className="relative h-[280px] w-[280px] object-contain drop-shadow-2xl sm:h-[380px] sm:w-[380px] md:h-[480px] md:w-[480px] lg:h-[550px] lg:w-[550px]"
+                  loading="eager"
+                  decoding="async"
                 />
               </div>
             </div>
@@ -272,7 +274,7 @@ export default function LandingPage() {
               <div className="absolute inset-0 -z-0 bg-gradient-to-r from-[#2dd4bf] to-[#43e5c9] opacity-0 transition-opacity group-hover:opacity-100" />
             </Link>
             <a
-              href="https://x.com/"
+              href="https://t.me/chinesehyperliquid"
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-xl border border-[#43e5c9]/30 bg-[#0f1519]/50 px-8 py-4 text-base font-semibold text-[#43e5c9] backdrop-blur-sm transition-all hover:border-[#43e5c9]/50 hover:bg-[#0f1519]/80"
@@ -318,7 +320,7 @@ export default function LandingPage() {
                       <h3 className="text-lg font-semibold transition-colors group-hover:text-[#43e5c9]">
                         {social.name}
                       </h3>
-                      <p className="text-sm text-[#43e5c9]">关注我们</p>
+                      <p className="text-sm text-[#43e5c9]">贡献者</p>
                     </div>
                   </a>
                 ))}
