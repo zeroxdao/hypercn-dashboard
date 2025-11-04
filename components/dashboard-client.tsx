@@ -1206,8 +1206,8 @@ export default function DashboardClient({
                   onMouseEnter={() => setStakePaused(true)}
                   onMouseLeave={() => setStakePaused(false)}
                 >
-                  {/* 顶部：标题 + 按钮 */}
-                  <div className="mb-3 flex items-center justify-between">
+                  {/* 顶部：标题 + 轻量按钮 */}
+                  <div className="mb-2 flex items-center justify-between px-0.5">
                     <div className="flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-emerald-400" />
                       <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
@@ -1217,7 +1217,9 @@ export default function DashboardClient({
                         href={hypeStakeItems[stakeIdx].link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex h-7 items-center justify-center rounded-lg bg-[#43e5c9] px-3 text-[11px] font-medium text-[#010807] hover:opacity-90"
+                        className="inline-flex h-6 items-center justify-center rounded-full border border-[#43e5c9] px-3
+                                   text-[11px] font-semibold leading-none text-[#43e5c9]
+                                   bg-transparent hover:bg-[#43e5c9]/10 active:bg-[#43e5c9]/15 transition"
                       >
                         去质押
                       </a>
@@ -1225,15 +1227,15 @@ export default function DashboardClient({
                   </div>
 
                   {/* 内容区 */}
-                  <div className="relative w-full">
+                  <div className="relative w-full rounded-xl">
                     {(() => {
                       const item = hypeStakeItems[stakeIdx]
                       const tvl = `$${item.tvlUSD.toLocaleString()}`
                       return (
-                        <div className="flex flex-col gap-3">
-                          {/* Logo + 名称（横向排列） */}
-                          <div className="flex items-center gap-2.5">
-                            <div className="h-8 w-8 flex-shrink-0 overflow-hidden rounded-lg bg-[#112224]">
+                        <div className="flex flex-col gap-3 p-1.5">
+                          {/* 顶部：Logo + 名称（更小更紧凑） */}
+                          <div className="flex items-center gap-2">
+                            <div className="h-6 w-6 overflow-hidden rounded-md bg-[#112224] flex-shrink-0">
                               {item.logo && (
                                 <img
                                   src={item.logo || "/placeholder.svg"}
@@ -1242,41 +1244,48 @@ export default function DashboardClient({
                                 />
                               )}
                             </div>
-                            <div className="text-[14px] font-semibold text-white">{item.name}</div>
+                            <div className="truncate text-[12px] font-semibold text-white">{item.name}</div>
                           </div>
 
-                          {/* APY / TVL / 更新时间（横向排列，等宽） */}
-                          <div className="grid grid-cols-3 gap-2">
-                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-2">
-                              <div className="text-[10px] leading-none text-[#96fce4]">净 APY</div>
-                              <div className="mt-1.5 text-[15px] font-bold leading-none text-white">
+                          {/* 中部：APY / TVL / 更新时间 —— 同排等高卡片，保证可见 */}
+                          <div className="grid grid-cols-3 gap-1.5">
+                            {/* 统一卡片样式 */}
+                            <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
+                              <div className="text-[10px] text-[#96fce4] leading-none">净 APY</div>
+                              <div className="mt-1 text-[13px] font-semibold leading-none text-white whitespace-nowrap">
                                 {item.netAPY.toFixed(1)}%
                               </div>
                             </div>
-                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-2">
-                              <div className="text-[10px] leading-none text-[#96fce4]">TVL</div>
-                              <div className="mt-1.5 truncate text-[15px] font-bold leading-none text-white">{tvl}</div>
+                            <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
+                              <div className="text-[10px] text-[#96fce4] leading-none">TVL</div>
+                              <div className="mt-1 text-[13px] font-semibold leading-none text-white truncate">
+                                {tvl}
+                              </div>
                             </div>
-                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-2">
-                              <div className="text-[10px] leading-none text-[#96fce4]">更新时间</div>
-                              <div className="mt-1.5 text-[13px] font-medium leading-none text-white">
+                            <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
+                              <div className="text-[10px] text-[#96fce4] leading-none">更新时间</div>
+                              <div className="mt-1 text-[12px] font-medium leading-none text-white whitespace-nowrap">
                                 {dayjs(item.updatedAt).format("MM-DD HH:mm")}
                               </div>
                             </div>
                           </div>
 
-                          {/* 底部：指示点 */}
-                          <div className="flex items-center justify-center gap-1 pt-1">
-                            {hypeStakeItems.map((_, i) => (
-                              <button
-                                key={i}
-                                onClick={() => setStakeIdx(i)}
-                                aria-label={`slide-${i}`}
-                                className={`rounded-full transition-all ${
-                                  i === stakeIdx ? "h-[6px] w-[6px] bg-[#43e5c9]" : "h-[4px] w-[4px] bg-[#2a4b45]"
-                                }`}
-                              />
-                            ))}
+                          {/* 底部：极简切换点（更小） */}
+                          <div className="border-t border-[#133136]/60 pt-2">
+                            <div className="flex items-center justify-center gap-1.5">
+                              {hypeStakeItems.map((_, i) => (
+                                <button
+                                  key={i}
+                                  onClick={() => setStakeIdx(i)}
+                                  aria-label={`slide-${i}`}
+                                  className={
+                                    i === stakeIdx
+                                      ? "h-1.5 w-[18px] rounded-full bg-[#43e5c9] transition-all"
+                                      : "h-1.5 w-1.5 rounded-full bg-[#2a4b45] transition-all"
+                                  }
+                                />
+                              ))}
+                            </div>
                           </div>
                         </div>
                       )
