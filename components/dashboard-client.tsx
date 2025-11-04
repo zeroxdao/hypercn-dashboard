@@ -1281,9 +1281,6 @@ export default function DashboardClient({
                                 />
                               ))}
                             </div>
-                            <div className="mt-1 text-center text-[10px] text-[#96fce4]">
-                              {stakePaused ? "已暂停" : "3.5秒自动切换"}
-                            </div>
                           </div>
                         </div>
                       )
@@ -1372,9 +1369,6 @@ export default function DashboardClient({
                               />
                             ))}
                           </div>
-                          <span className="mt-1 text-[11px] text-[#96fce4]">
-                            {stakePaused ? "已暂停（鼠标悬停）" : "3.5秒自动切换"}
-                          </span>
                         </div>
                       </>
                     )
