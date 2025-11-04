@@ -1269,22 +1269,20 @@ export default function DashboardClient({
                             </div>
                           </div>
 
-                          {/* 底部：更小的指示点，居中 */}
+                          {/* 底部：指示点居中 + 文案 */}
                           <div className="mt-1 border-t border-[#133136]/60 pt-2">
-                            <div className="flex items-center justify-center gap-1.5">
+                            {/* 底部：指示点居中 */}
+                            <div className="flex items-center justify-center gap-1">
                               {hypeStakeItems.map((_, i) => (
                                 <button
                                   key={i}
                                   onClick={() => setStakeIdx(i)}
-                                  className={`h-[3px] rounded-full transition-all ${
-                                    i === stakeIdx ? "w-[8px] bg-[#43e5c9]" : "w-[5px] bg-[#2a4b45]"
-                                  }`}
                                   aria-label={`slide-${i}`}
+                                  className={`rounded-full transition-all ${
+                                    i === stakeIdx ? "h-[6px] w-[6px] bg-[#43e5c9]" : "h-[4px] w-[4px] bg-[#2a4b45]"
+                                  }`}
                                 />
                               ))}
-                            </div>
-                            <div className="mt-1 text-center text-[10px] text-[#96fce4]">
-                              {stakePaused ? "已暂停" : "3.5秒自动切换"}
                             </div>
                           </div>
                         </div>
