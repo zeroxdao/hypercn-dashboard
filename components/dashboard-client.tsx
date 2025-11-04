@@ -1241,9 +1241,8 @@ export default function DashboardClient({
                                 href={item.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                /* 小一点、长方形、文字垂直水平居中 */
-                                className="inline-flex h-6 items-center justify-center rounded-md border border-[#43e5c9] px-2
-                                           text-[11px] font-semibold leading-none text-[#43e5c9]
+                                className="inline-flex h-5 items-center justify-center rounded-md border border-[#43e5c9] px-1.5
+                                           text-[10px] font-semibold leading-none text-[#43e5c9]
                                            bg-transparent hover:bg-[#43e5c9]/10 active:bg-[#43e5c9]/15 transition"
                               >
                                 去质押
@@ -1273,9 +1272,8 @@ export default function DashboardClient({
                             </div>
                           </div>
 
-                          {/* 底部：切换点更小并居中 */}
                           <div className="border-t border-[#133136]/60 pt-2">
-                            <div className="flex items-center justify-center gap-1">
+                            <div className="flex items-center justify-center gap-0.5">
                               {hypeStakeItems.map((_, i) => (
                                 <button
                                   key={i}
@@ -1283,8 +1281,8 @@ export default function DashboardClient({
                                   aria-label={`slide-${i}`}
                                   className={
                                     i === stakeIdx
-                                      ? "h-1 w-3 rounded-full bg-[#43e5c9] transition-all"
-                                      : "h-1 w-1 rounded-full bg-[#2a4b45] transition-all"
+                                      ? "h-0.5 w-2 rounded-full bg-[#43e5c9] transition-all"
+                                      : "h-0.5 w-1 rounded-full bg-[#2a4b45] transition-all"
                                   }
                                 />
                               ))}
