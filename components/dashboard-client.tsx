@@ -1198,7 +1198,7 @@ export default function DashboardClient({
               </div>
             </Card>
 
-            {/* ================= HYPE 推荐质押收益率 ================= */}
+            {/* ================= HYPE 推荐质押收益率 ================ */}
             <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
               <div className="block md:hidden">
                 <div
@@ -1206,6 +1206,7 @@ export default function DashboardClient({
                   onMouseEnter={() => setStakePaused(true)}
                   onMouseLeave={() => setStakePaused(false)}
                 >
+                  {/* 顶部：标题 + 轻量按钮 */}
                   <div className="mb-2 flex items-center justify-between px-0.5">
                     <div className="flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-emerald-400" />
@@ -1216,8 +1217,8 @@ export default function DashboardClient({
                         href={hypeStakeItems[stakeIdx].link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex h-7 items-center justify-center rounded-full bg-[#43e5c9] px-3
-                                   text-[12px] font-semibold leading-none text-[#010807] hover:opacity-90"
+                        className="inline-flex h-6 items-center justify-center rounded-full bg-[#43e5c9] px-3
+                                   text-[11px] font-semibold leading-none text-[#010807] hover:opacity-90 transition"
                       >
                         去质押
                       </a>
@@ -1268,18 +1269,19 @@ export default function DashboardClient({
                             </div>
                           </div>
 
-                          <div className="col-span-12 mt-1 flex flex-col items-center">
+                          {/* 底部：极简切换点（更小） */}
+                          <div className="border-t border-[#133136]/60 pt-2">
                             <div className="flex items-center justify-center gap-1.5">
                               {hypeStakeItems.map((_, i) => (
                                 <button
                                   key={i}
                                   onClick={() => setStakeIdx(i)}
+                                  aria-label={`slide-${i}`}
                                   className={
                                     i === stakeIdx
-                                      ? "h-1.5 w-4 rounded-full bg-[#43e5c9] transition-all"
-                                      : "h-1.5 w-1.5 rounded-full bg-[#2a4b45] transition-all"
+                                      ? "h-[2px] w-[18px] rounded-[1px] bg-[#43e5c9] transition-all"
+                                      : "h-[2px] w-[6px] rounded-[1px] bg-[#2a4b45] transition-all"
                                   }
-                                  aria-label={`slide-${i}`}
                                 />
                               ))}
                             </div>
