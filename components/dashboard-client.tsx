@@ -228,6 +228,33 @@ export default function DashboardClient({
     text: "",
   })
 
+  const stakingProjects = [
+    {
+      id: 1,
+      name: "HyperLend",
+      logo: "/hyperlend-logo.jpg",
+      apy: 18.5,
+      tvl: 1200000,
+      updatedAt: "2025-01-04 14:30",
+    },
+    {
+      id: 2,
+      name: "HyperStake",
+      logo: "/hyperstake-logo.jpg",
+      apy: 22.3,
+      tvl: 850000,
+      updatedAt: "2025-01-04 14:25",
+    },
+    {
+      id: 3,
+      name: "LiquidYield",
+      logo: "/liquidyield-logo.jpg",
+      apy: 15.8,
+      tvl: 2100000,
+      updatedAt: "2025-01-04 14:20",
+    },
+  ]
+
   useEffect(() => {
     let cancelled = false
     const run = async () => {
@@ -1428,7 +1455,7 @@ export default function DashboardClient({
             <Card className="col-span-1 lg:col-span-3 lg:col-start-10 lg:row-span-2 lg:h-full lg:self-stretch p-0 overflow-hidden bg-[#101419] border-[#072027]">
               {/* Mobile version: block md:hidden */}
               <div className="block md:hidden">
-                <div className="rounded-2xl bg-[#0F1519] p-3 max-h-[300px] overflow-y-auto">
+                <div className="rounded-2xl bg-[#0F1519] p-3">
                   {/* Title */}
                   <div className="flex items-center gap-2 px-1 mb-3">
                     <span>📊</span>
@@ -1482,6 +1509,116 @@ export default function DashboardClient({
                 </div>
               </div>
             </Card>
+
+            {/* ================= HYPE质押收益率卡片 ================ */}
+            <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
+              {/* Mobile version: block md:hidden */}
+              <div className="block md:hidden">
+                <div className="rounded-2xl bg-[#0F1519] p-3">
+                  {/* Title */}
+                  <div className="flex items-center gap-2 px-1 mb-3">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                    <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
+                  </div>
+
+                  {/* Staking Cards */}
+                  <div className="flex flex-col gap-2">
+                    {stakingProjects.map((project) => (
+                      <div key={project.id} className="rounded-lg border border-[#072027] bg-[#101419] p-3">
+                        {/* Project Header */}
+                        <div className="flex items-center gap-2 mb-2">
+                          <img
+                            src={project.logo || "/placeholder.svg"}
+                            alt={project.name}
+                            className="h-8 w-8 rounded-lg object-cover"
+                          />
+                          <span className="text-sm font-semibold text-white">{project.name}</span>
+                        </div>
+
+                        {/* Metrics */}
+                        <div className="grid grid-cols-2 gap-2 mb-2">
+                          <div>
+                            <div className="text-[10px] text-[#96fce4] mb-0.5">净APY</div>
+                            <div className="text-lg font-bold text-[#43e5c9]">{project.apy}%</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-[#96fce4] mb-0.5">TVL</div>
+                            <div className="text-sm font-semibold text-white">
+                              ${(project.tvl / 1000000).toFixed(2)}M
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Update Time */}
+                        <div className="text-[10px] text-[#96fce4]/60 mb-2">更新时间: {project.updatedAt}</div>
+
+                        {/* Stake Button */}
+                        <button className="w-full rounded-lg bg-[#43e5c9] py-2 text-sm font-semibold text-[#010807] hover:bg-[#2da691] transition-colors">
+                          去质押
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop version: hidden md:block */}
+              <div className="hidden md:block">
+                <div className="h-[180px] px-5 py-4 overflow-hidden">
+                  <div className="mb-3 flex items-center gap-2">
+                    <img
+                      src="https://hyperliquid.gitbook.io/hyperliquid-docs/~gitbook/image?url=https%3A%2F%2F2356094849-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FyUdp569E6w18GdfqlGvJ%252Ficon%252FsIAjqhKKIUysM08ahKPh%252FHL-logoSwitchDISliStat.png%3Falt%3Dmedia%26token%3Da81fa25c-0510-4d97-87ff-3fb8944935b1&width=32&dpr=4&quality=100&sign=3e1219e3&sv=2"
+                      alt="Hyperliquid Logo"
+                      className="h-5 w-5 rounded"
+                    />
+                    <span className="text-sm font-semibold text-[#96fce4]">HYPE 推荐质押收益率</span>
+                  </div>
+
+                  {/* Staking Cards Grid */}
+                  <div className="grid grid-cols-3 gap-2 h-[calc(100%-2rem)]">
+                    {stakingProjects.map((project) => (
+                      <div
+                        key={project.id}
+                        className="rounded-lg border border-[#072027] bg-[#0F1519] p-2 flex flex-col"
+                      >
+                        {/* Project Header */}
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <img
+                            src={project.logo || "/placeholder.svg"}
+                            alt={project.name}
+                            className="h-6 w-6 rounded object-cover"
+                          />
+                          <span className="text-[11px] font-semibold text-white truncate">{project.name}</span>
+                        </div>
+
+                        {/* Main Metric - APY */}
+                        <div className="mb-1.5">
+                          <div className="text-[9px] text-[#96fce4] mb-0.5">净APY</div>
+                          <div className="text-xl font-bold text-[#43e5c9]">{project.apy}%</div>
+                        </div>
+
+                        {/* TVL */}
+                        <div className="mb-1.5">
+                          <div className="text-[9px] text-[#96fce4] mb-0.5">TVL</div>
+                          <div className="text-[11px] font-semibold text-white">
+                            ${(project.tvl / 1000000).toFixed(2)}M
+                          </div>
+                        </div>
+
+                        {/* Update Time */}
+                        <div className="text-[8px] text-[#96fce4]/60 mb-2">{project.updatedAt}</div>
+
+                        {/* Stake Button */}
+                        <button className="mt-auto w-full rounded bg-[#43e5c9] py-1.5 text-[10px] font-semibold text-[#010807] hover:bg-[#2da691] transition-colors">
+                          去质押
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Card>
+            {/* ================= /HYPE质押收益率卡片 ================= */}
 
             {/* 项目列表 —— 左移一格（col-span-9），并缩小卡片尺寸 */}
             <div className="col-span-1 flex flex-col gap-2 overflow-hidden lg:col-span-9 lg:row-start-2 max-[639px]:order-60">
