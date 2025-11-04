@@ -1407,6 +1407,35 @@ export default function DashboardClient({
                 </div>
               </div>
 
+               {/* Desktop version: hidden md:block - 100% unchanged */}
+              <div className="hidden md:block h-full">
+                <div className="h-full overflow-hidden px-5 py-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <span>📊</span>
+                    <span className="text-sm font-semibold text-[#96fce4]">Hyperliquid 热门代币交易量</span>
+                  </div>
+
+                  <div className="flex flex-col gap-2 overflow-hidden lg:grid lg:grid-rows-10">
+                    {(hlTopVolume.length ? hlTopVolume : topGainers).slice(0, 10).map((token, i) => (
+                      <div key={i} className="flex h-[36px] items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-sm text-white">{token.name}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-right text-sm tabular-nums text-white whitespace-nowrap">
+                            {token.price}
+                          </span>
+                          <span className="text-right text-sm tabular-nums text-[#43e5c9] whitespace-nowrap">
+                            {/* @ts-ignore */}
+                            {token.volume24h ? formatVolume(token.volume24h) : formatVolume(0)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
             </Card>
 
             {/* 项目列表 —— 左移一格（col-span-9），并缩小卡片尺寸 */}
