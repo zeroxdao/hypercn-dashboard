@@ -1223,74 +1223,79 @@ export default function DashboardClient({
                         href={hypeStakeItems[stakeIdx].link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded-lg bg-[#43e5c9] px-3 py-1.5 text-xs font-medium text-[#010807] hover:opacity-90"
+                        className="rounded-lg bg-[#43e5c9] px-3 py-1.5 text-[11px] font-medium text-[#010807] hover:opacity-90"
                       >
                         去质押
                       </a>
                     ) : null}
                   </div>
 
-                  {/* 当前项目（不分卡，直接融合在本卡中） */}
-                  {(() => {
-                    const item = hypeStakeItems[stakeIdx]
-                    const tvl = `$${item.tvlUSD.toLocaleString()}`
-                    return (
-                      <div className="px-1">
-                        {/* 项目名 + Logo */}
-                        <div className="mb-2 flex items-center gap-3">
-                          <div className="h-8 w-8 overflow-hidden rounded-lg bg-[#112224]">
-                            {item.logo ? (
-                              <img
-                                src={item.logo || "/placeholder.svg"}
-                                alt={item.name}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : null}
-                          </div>
-                          <div className="truncate text-[14px] font-semibold text-white">{item.name}</div>
-                        </div>
+                  {/* 用一个定高容器替代你原来的图表区域，保持整体视觉高度一致 */}
+                  <div className="h-[160px] w-full overflow-hidden rounded-xl px-1 relative">
+                    {(() => {
+                      const item = hypeStakeItems[stakeIdx]
+                      const tvl = `$${item.tvlUSD.toLocaleString()}`
 
-                        {/* 主数字：净 APY */}
-                        <div className="mb-2 text-[12px] text-[#96fce4]">净 APY</div>
-                        <div className="mb-3 text-3xl font-extrabold leading-none text-white">
-                          {item.netAPY.toFixed(1)}%
-                        </div>
-
-                        {/* TVL / 更新时间（紧凑行） */}
-                        <div className="mb-2 grid grid-cols-2 gap-2 text-xs">
-                          <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-2">
-                            <div className="text-[#96fce4]">TVL</div>
-                            <div className="mt-0.5 font-medium text-white">{tvl}</div>
+                      return (
+                        <div className="absolute inset-0 flex flex-col justify-between p-2">
+                          {/* 顶部：logo + 名称（整体缩小） */}
+                          <div className="flex items-center gap-2">
+                            <div className="h-7 w-7 overflow-hidden rounded-md bg-[#112224]">
+                              {item.logo ? (
+                                <img
+                                  src={item.logo || "/placeholder.svg"}
+                                  alt={item.name}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : null}
+                            </div>
+                            <div className="truncate text-[13px] font-semibold text-white">{item.name}</div>
                           </div>
-                          <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-2">
-                            <div className="text-[#96fce4]">更新时间</div>
-                            <div className="mt-0.5 font-medium text-white">
-                              {dayjs(item.updatedAt).format("YYYY-MM-DD HH:mm")}
+
+                          {/* 中部：净APY（主数字缩小一点） */}
+                          <div>
+                            <div className="text-[11px] text-[#96fce4]">净 APY</div>
+                            <div className="text-[28px] font-extrabold leading-none text-white">
+                              {item.netAPY.toFixed(1)}%
+                            </div>
+                          </div>
+
+                          {/* 底部：TVL / 更新时间（紧凑 chip） */}
+                          <div className="grid grid-cols-2 gap-2 text-[11px]">
+                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
+                              <div className="text-[#96fce4]">TVL</div>
+                              <div className="mt-0.5 font-medium text-white">{tvl}</div>
+                            </div>
+                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
+                              <div className="text-[#96fce4]">更新时间</div>
+                              <div className="mt-0.5 font-medium text-white">
+                                {dayjs(item.updatedAt).format("YYYY-MM-DD HH:mm")}
+                              </div>
                             </div>
                           </div>
                         </div>
+                      )
+                    })()}
+                  </div>
 
-                        {/* 小指示点（更小） */}
-                        <div className="mt-1 flex items-center justify-center gap-2">
-                          {hypeStakeItems.map((_, i) => (
-                            <button
-                              key={i}
-                              onClick={() => setStakeIdx(i)}
-                              className={`h-1 rounded-full transition-all ${
-                                i === stakeIdx ? "w-[10px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
-                              }`}
-                              aria-label={`slide-${i}`}
-                            />
-                          ))}
-                        </div>
+                  {/* 更小的指示点（与你截图一致，整体更细） */}
+                  <div className="mt-2 flex items-center justify-center gap-2">
+                    {hypeStakeItems.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setStakeIdx(i)}
+                        className={`h-1 rounded-full transition-all ${
+                          i === stakeIdx ? "w-[10px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
+                        }`}
+                        aria-label={`slide-${i}`}
+                      />
+                    ))}
+                  </div>
 
-                        {/* 提示文案（和原卡片密度一致） */}
-                        <div className="mt-1 text-center text-[11px] text-[#96fce4]">
-                          {stakePaused ? "已暂停自动切换" : "3.5 秒自动切换（鼠标悬停暂停）"}
-                        </div>
-                      </div>
-                    )
-                  })()}
+                  {/* 文案保持紧凑 */}
+                  <div className="mt-1 text-center text-[11px] text-[#96fce4]">
+                    {stakePaused ? "已暂停自动切换" : "3.5 秒自动切换（鼠标悬停暂停）"}
+                  </div>
                 </div>
               </div>
 
