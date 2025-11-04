@@ -1200,14 +1200,14 @@ export default function DashboardClient({
 
             {/* ================= HYPE 推荐质押收益率（替换原"Hyperliquid手续费"卡片） ================ */}
             <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
-              {/* Mobile version: block md:hidden */}
               <div className="block md:hidden">
                 <div
                   className="rounded-2xl bg-[#0F1519] p-3"
                   onMouseEnter={() => setStakePaused(true)}
                   onMouseLeave={() => setStakePaused(false)}
                 >
-                  <div className="flex items-center justify-between px-1 mb-2">
+                  {/* Title row */}
+                  <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-emerald-400" />
                       <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
@@ -1224,42 +1224,43 @@ export default function DashboardClient({
                     ) : null}
                   </div>
 
-                  <div className="h-[180px] w-full overflow-hidden rounded-xl px-1 relative">
+                  {/* Main content area */}
+                  <div className="h-[180px] w-full rounded-xl px-2 py-3 bg-[#0a0f12] relative">
                     {(() => {
                       const item = hypeStakeItems[stakeIdx]
                       const tvl = `$${item.tvlUSD.toLocaleString()}`
                       return (
-                        <div className="absolute inset-0 flex flex-col justify-between p-2">
-                          <div className="flex items-center gap-2">
-                            <div className="h-6 w-6 overflow-hidden rounded-md bg-[#112224]">
-                              {item.logo ? (
-                                <img
-                                  src={item.logo || "/placeholder.svg"}
-                                  alt={item.name}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : null}
+                        <div className="h-full flex flex-col">
+                          {/* Top row: Logo + Name on left, "3天自由切换" on right */}
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                              <div className="h-7 w-7 overflow-hidden rounded-lg bg-[#112224] flex-shrink-0">
+                                {item.logo ? (
+                                  <img
+                                    src={item.logo || "/placeholder.svg"}
+                                    alt={item.name}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : null}
+                              </div>
+                              <div className="text-sm font-semibold text-white">{item.name}</div>
                             </div>
-                            <div className="truncate text-[12px] font-semibold text-white">{item.name}</div>
+                            <div className="text-[10px] text-[#43e5c9] whitespace-nowrap">3天自由切换</div>
                           </div>
 
-                          <div>
-                            <div className="text-[10px] text-[#96fce4]">净 APY</div>
-                            <div className="text-2xl font-extrabold leading-none text-white">
+                          {/* Center: Main APY */}
+                          <div className="flex-1 flex flex-col justify-center items-start">
+                            <div className="text-[11px] text-[#96fce4] mb-1">净 APY</div>
+                            <div className="text-[32px] font-extrabold leading-none text-white mb-4">
                               {item.netAPY.toFixed(1)}%
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-2 text-[10px]">
-                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1">
-                              <div className="text-[#96fce4]">TVL</div>
-                              <div className="mt-0.5 font-medium text-white">{tvl}</div>
-                            </div>
-                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1">
-                              <div className="text-[#96fce4]">更新时间</div>
-                              <div className="mt-0.5 font-medium text-white">
-                                {dayjs(item.updatedAt).format("MM-DD HH:mm")}
-                              </div>
+                          {/* Bottom: TVL */}
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="text-[10px] text-[#96fce4]">TVL</div>
+                              <div className="text-sm font-semibold text-white">{tvl}</div>
                             </div>
                           </div>
                         </div>
@@ -1267,33 +1268,30 @@ export default function DashboardClient({
                     })()}
                   </div>
 
-                  <div className="mt-2 flex items-center justify-center gap-1.5">
+                  {/* Indicators */}
+                  <div className="mt-3 flex items-center justify-center gap-1.5">
                     {hypeStakeItems.map((_, i) => (
                       <button
                         key={i}
                         onClick={() => setStakeIdx(i)}
                         className={`h-1 rounded-full transition-all ${
-                          i === stakeIdx ? "w-[8px] bg-[#43e5c9]" : "w-[5px] bg-[#2a4b45]"
+                          i === stakeIdx ? "w-[10px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
                         }`}
                         aria-label={`slide-${i}`}
                       />
                     ))}
                   </div>
-
-                  <div className="mt-1 text-center text-[10px] text-[#96fce4]">
-                    {stakePaused ? "已暂停" : "3.5秒切换"}
-                  </div>
                 </div>
               </div>
 
-              {/* Desktop version: hidden md:block */}
               <div className="hidden md:block">
                 <div
-                  className="h-[180px] px-5 py-4 grid grid-cols-12 gap-3 items-start overflow-hidden"
+                  className="h-[180px] px-5 py-4"
                   onMouseEnter={() => setStakePaused(true)}
                   onMouseLeave={() => setStakePaused(false)}
                 >
-                  <div className="col-span-12 mb-2 flex items-center justify-between">
+                  {/* Title row */}
+                  <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <img
                         src="https://hyperliquid.gitbook.io/hyperliquid-docs/~gitbook/image?url=https%3A%2F%2F2356094849-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FyUdp569E6w18GdfqlGvJ%252Ficon%252FsIAjqhKKIUysM08ahKPh%252FHL-logoSwitchDISliStat.png%3Falt%3Dmedia%26token%3Da81fa25c-0510-4d97-87ff-3fb8944935b1&width=32&dpr=4&quality=100&sign=3e1219e3&sv=2"
@@ -1314,68 +1312,63 @@ export default function DashboardClient({
                     ) : null}
                   </div>
 
-                  {(() => {
-                    const item = hypeStakeItems[stakeIdx]
-                    const tvl = `$${item.tvlUSD.toLocaleString()}`
-                    return (
-                      <>
-                        {/* Left column: Logo + Name + Main APY */}
-                        <div className="col-span-5 flex flex-col relative z-10">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="h-7 w-7 overflow-hidden rounded-lg bg-[#112224]">
-                              {item.logo ? (
-                                <img
-                                  src={item.logo || "/placeholder.svg"}
-                                  alt={item.name}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : null}
+                  {/* Main content area */}
+                  <div className="h-[calc(100%-48px)] rounded-xl px-4 py-3 bg-[#0a0f12]">
+                    {(() => {
+                      const item = hypeStakeItems[stakeIdx]
+                      const tvl = `$${item.tvlUSD.toLocaleString()}`
+                      return (
+                        <div className="h-full flex flex-col">
+                          {/* Top row: Logo + Name on left, "3天自由切换" on right */}
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2.5">
+                              <div className="h-8 w-8 overflow-hidden rounded-lg bg-[#112224] flex-shrink-0">
+                                {item.logo ? (
+                                  <img
+                                    src={item.logo || "/placeholder.svg"}
+                                    alt={item.name}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : null}
+                              </div>
+                              <div className="text-base font-semibold text-white">{item.name}</div>
                             </div>
-                            <div className="truncate text-sm font-semibold text-white">{item.name}</div>
+                            <div className="text-xs text-[#43e5c9] whitespace-nowrap">3天自由切换</div>
                           </div>
 
-                          <div className="mb-1">
-                            <div className="text-[10px] text-[#96fce4]">净 APY</div>
-                            <div className="text-3xl font-extrabold leading-none tracking-tight text-white">
+                          {/* Center: Main APY */}
+                          <div className="flex-1 flex flex-col justify-center">
+                            <div className="text-xs text-[#96fce4] mb-1.5">净 APY</div>
+                            <div className="text-[40px] font-extrabold leading-none text-white mb-4">
                               {item.netAPY.toFixed(1)}%
                             </div>
                           </div>
 
-                          <div className="mt-2 space-y-1">
-                            <div className="flex items-center justify-between text-[10px]">
-                              <span className="text-[#96fce4]">TVL</span>
-                              <span className="font-medium text-white">{tvl}</span>
+                          {/* Bottom row: TVL on left, Indicators on right */}
+                          <div className="flex items-end justify-between">
+                            <div>
+                              <div className="text-[11px] text-[#96fce4]">TVL</div>
+                              <div className="text-base font-semibold text-white">{tvl}</div>
                             </div>
-                            <div className="flex items-center justify-between text-[10px]">
-                              <span className="text-[#96fce4]">更新</span>
-                              <span className="font-medium text-white">
-                                {dayjs(item.updatedAt).format("MM-DD HH:mm")}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
 
-                        {/* Right column: Indicators */}
-                        <div className="col-span-7 relative h-full flex flex-col items-center justify-center">
-                          <div className="flex items-center gap-2 mb-2">
-                            {hypeStakeItems.map((_, i) => (
-                              <button
-                                key={i}
-                                onClick={() => setStakeIdx(i)}
-                                className={`h-1 rounded-full transition-all ${
-                                  i === stakeIdx ? "w-[10px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
-                                }`}
-                                aria-label={`slide-${i}`}
-                              />
-                            ))}
-                          </div>
-                          <div className="text-[10px] text-[#96fce4]">
-                            {stakePaused ? "已暂停（鼠标悬停）" : "3.5秒自动切换"}
+                            {/* Indicators */}
+                            <div className="flex items-center gap-2">
+                              {hypeStakeItems.map((_, i) => (
+                                <button
+                                  key={i}
+                                  onClick={() => setStakeIdx(i)}
+                                  className={`h-1.5 rounded-full transition-all ${
+                                    i === stakeIdx ? "w-[12px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
+                                  }`}
+                                  aria-label={`slide-${i}`}
+                                />
+                              ))}
+                            </div>
                           </div>
                         </div>
-                      </>
-                    )
-                  })()}
+                      )
+                    })()}
+                  </div>
                 </div>
               </div>
             </Card>
