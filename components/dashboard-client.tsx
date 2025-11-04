@@ -1198,7 +1198,7 @@ export default function DashboardClient({
               </div>
             </Card>
 
-            {/* ================= HYPE 推荐质押收益率（APY与TVL同排，指示点居中） ================ */}
+            {/* ================= HYPE 推荐质押收益率 ================ */}
             <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
               {/* ========== Mobile：block md:hidden（h-[180px]） ========== */}
               <div className="block md:hidden">
@@ -1270,7 +1270,7 @@ export default function DashboardClient({
                           </div>
 
                           {/* 底部：指示点居中 + 文案 */}
-                          <div className="mt-1 border-t border-[#133136]/60 pt-2">
+                          <div className="mt-1 border-t border-[#133136]/6 pt-2">
                             {/* 底部：指示点居中 */}
                             <div className="flex items-center justify-center gap-1">
                               {hypeStakeItems.map((_, i) => (
