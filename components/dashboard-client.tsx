@@ -1217,9 +1217,7 @@ export default function DashboardClient({
                         href={hypeStakeItems[stakeIdx].link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex h-6 items-center justify-center rounded-full border border-[#43e5c9] px-3
-                                   text-[11px] font-semibold leading-none text-[#43e5c9]
-                                   bg-transparent hover:bg-[#43e5c9]/10 active:bg-[#43e5c9]/15 transition"
+                        className="inline-flex h-6 items-center justify-center rounded-md bg-[#43e5c9] px-2 text-[10px] font-medium leading-none text-[#010807] hover:opacity-90"
                       >
                         去质押
                       </a>
@@ -1272,17 +1270,15 @@ export default function DashboardClient({
 
                           {/* 底部：极简切换点（更小） */}
                           <div className="border-t border-[#133136]/60 pt-2">
-                            <div className="flex items-center justify-center gap-1.5">
+                            <div className="flex items-center justify-center gap-1">
                               {hypeStakeItems.map((_, i) => (
                                 <button
                                   key={i}
                                   onClick={() => setStakeIdx(i)}
                                   aria-label={`slide-${i}`}
-                                  className={
-                                    i === stakeIdx
-                                      ? "h-1.5 w-[18px] rounded-full bg-[#43e5c9] transition-all"
-                                      : "h-1.5 w-1.5 rounded-full bg-[#2a4b45] transition-all"
-                                  }
+                                  className={`rounded-full transition-all ${
+                                    i === stakeIdx ? "h-2 w-2 bg-[#43e5c9]" : "h-1.5 w-1.5 bg-[#2a4b45]"
+                                  }`}
                                 />
                               ))}
                             </div>
@@ -1360,7 +1356,7 @@ export default function DashboardClient({
                           </div>
                         </div>
 
-                        {/* 底部整行：指示点居中 + 文案 */}
+                        {/* 底部整行：指示点居中 */}
                         <div className="col-span-12 mt-1 flex flex-col items-center">
                           <div className="flex items-center justify-center gap-2">
                             {hypeStakeItems.map((_, i) => (
@@ -1411,34 +1407,6 @@ export default function DashboardClient({
                 </div>
               </div>
 
-              {/* Desktop version: hidden md:block - 100% unchanged */}
-              <div className="hidden md:block h-full">
-                <div className="h-full overflow-hidden px-5 py-4">
-                  <div className="mb-3 flex items-center gap-2">
-                    <span>📊</span>
-                    <span className="text-sm font-semibold text-[#96fce4]">Hyperliquid 热门代币交易量</span>
-                  </div>
-
-                  <div className="flex flex-col gap-2 overflow-hidden lg:grid lg:grid-rows-10">
-                    {(hlTopVolume.length ? hlTopVolume : topGainers).slice(0, 10).map((token, i) => (
-                      <div key={i} className="flex h-[36px] items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <span className="truncate text-sm text-white">{token.name}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-right text-sm tabular-nums text-white whitespace-nowrap">
-                            {token.price}
-                          </span>
-                          <span className="text-right text-sm tabular-nums text-[#43e5c9] whitespace-nowrap">
-                            {/* @ts-ignore */}
-                            {token.volume24h ? formatVolume(token.volume24h) : formatVolume(0)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
             </Card>
 
             {/* 项目列表 —— 左移一格（col-span-9），并缩小卡片尺寸 */}
