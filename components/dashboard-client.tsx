@@ -276,7 +276,6 @@ export default function DashboardClient({
     }, 3500) // 3.5 秒自动切换
     return () => clearInterval(t)
   }, [stakePaused])
-  // </CHANGE>
 
   useEffect(() => {
     let cancelled = false
@@ -1206,28 +1205,40 @@ export default function DashboardClient({
             {/* ================= Hyperliquid手续费卡片 ================ */}
             {/* ================= HYPE 推荐质押收益率（替换原"Hyperliquid手续费"卡片） ================ */}
             <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
-              {/* Mobile：block md:hidden */}
+              {/* Mobile：block md:hidden（保持原高度密度） */}
               <div className="block md:hidden">
                 <div
                   className="rounded-2xl bg-[#0F1519] p-3"
                   onMouseEnter={() => setStakePaused(true)}
                   onMouseLeave={() => setStakePaused(false)}
                 >
-                  {/* 标题 */}
-                  <div className="flex items-center gap-2 px-1 mb-3">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                    <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
+                  {/* 标题 + 右上角按钮 */}
+                  <div className="mb-2 flex items-center justify-between px-1">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                      <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
+                    </div>
+                    {hypeStakeItems[stakeIdx]?.link ? (
+                      <a
+                        href={hypeStakeItems[stakeIdx].link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-lg bg-[#43e5c9] px-3 py-1.5 text-xs font-medium text-[#010807] hover:opacity-90"
+                      >
+                        去质押
+                      </a>
+                    ) : null}
                   </div>
 
-                  {/* 内容块（当前项目） */}
+                  {/* 当前项目（不分卡，直接融合在本卡中） */}
                   {(() => {
                     const item = hypeStakeItems[stakeIdx]
                     const tvl = `$${item.tvlUSD.toLocaleString()}`
                     return (
-                      <div className="rounded-xl border border-[#133136] bg-[#0b1416] p-3">
+                      <div className="px-1">
                         {/* 项目名 + Logo */}
-                        <div className="mb-3 flex items-center gap-3">
-                          <div className="h-9 w-9 overflow-hidden rounded-lg bg-[#112224]">
+                        <div className="mb-2 flex items-center gap-3">
+                          <div className="h-8 w-8 overflow-hidden rounded-lg bg-[#112224]">
                             {item.logo ? (
                               <img
                                 src={item.logo || "/placeholder.svg"}
@@ -1236,15 +1247,17 @@ export default function DashboardClient({
                               />
                             ) : null}
                           </div>
-                          <div className="text-[14px] font-semibold text-white">{item.name}</div>
+                          <div className="truncate text-[14px] font-semibold text-white">{item.name}</div>
                         </div>
 
-                        {/* 主数字 */}
+                        {/* 主数字：净 APY */}
                         <div className="mb-2 text-[12px] text-[#96fce4]">净 APY</div>
-                        <div className="mb-3 text-3xl font-extrabold text-white">{item.netAPY.toFixed(1)}%</div>
+                        <div className="mb-3 text-3xl font-extrabold leading-none text-white">
+                          {item.netAPY.toFixed(1)}%
+                        </div>
 
-                        {/* 次要信息 */}
-                        <div className="mb-3 grid grid-cols-2 gap-2 text-xs">
+                        {/* TVL / 更新时间（紧凑行） */}
+                        <div className="mb-2 grid grid-cols-2 gap-2 text-xs">
                           <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-2">
                             <div className="text-[#96fce4]">TVL</div>
                             <div className="mt-0.5 font-medium text-white">{tvl}</div>
@@ -1257,93 +1270,87 @@ export default function DashboardClient({
                           </div>
                         </div>
 
-                        {/* 按钮 */}
-                        <div className="flex items-center justify-between">
-                          <div className="text-[11px] text-[#96fce4]">
-                            {stakePaused ? "已暂停自动切换" : "3.5 秒自动切换（鼠标悬停暂停）"}
-                          </div>
-                          <a
-                            href={item.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="rounded-lg bg-[#43e5c9] px-4 py-2 text-sm font-medium text-[#010807] hover:opacity-90"
-                          >
-                            去质押
-                          </a>
+                        {/* 小指示点（更小） */}
+                        <div className="mt-1 flex items-center justify-center gap-2">
+                          {hypeStakeItems.map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setStakeIdx(i)}
+                              className={`h-1 rounded-full transition-all ${
+                                i === stakeIdx ? "w-[10px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
+                              }`}
+                              aria-label={`slide-${i}`}
+                            />
+                          ))}
+                        </div>
+
+                        {/* 提示文案（和原卡片密度一致） */}
+                        <div className="mt-1 text-center text-[11px] text-[#96fce4]">
+                          {stakePaused ? "已暂停自动切换" : "3.5 秒自动切换（鼠标悬停暂停）"}
                         </div>
                       </div>
                     )
                   })()}
-
-                  {/* 小圆点指示器 */}
-                  <div className="mt-3 flex items-center justify-center gap-2">
-                    {hypeStakeItems.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setStakeIdx(i)}
-                        className={`h-1.5 rounded-full transition-all ${i === stakeIdx ? "w-5 bg-[#43e5c9]" : "w-2 bg-[#2a4b45]"}`}
-                        aria-label={`slide-${i}`}
-                      />
-                    ))}
-                  </div>
                 </div>
               </div>
 
-              {/* Desktop：hidden md:block */}
+              {/* Desktop：hidden md:block（保持原卡密度与宽度） */}
               <div className="hidden md:block">
                 <div
                   className="rounded-2xl bg-[#0F1519] p-4"
                   onMouseEnter={() => setStakePaused(true)}
                   onMouseLeave={() => setStakePaused(false)}
                 >
-                  {/* 标题 */}
-                  <div className="flex items-center gap-2 px-1 mb-4">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                    <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
+                  {/* 标题 + 右上角按钮 */}
+                  <div className="mb-3 flex items-center justify-between px-1">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                      <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
+                    </div>
+                    {hypeStakeItems[stakeIdx]?.link ? (
+                      <a
+                        href={hypeStakeItems[stakeIdx].link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-lg bg-[#43e5c9] px-4 py-2 text-sm font-medium text-[#010807] hover:opacity-90"
+                      >
+                        去质押
+                      </a>
+                    ) : null}
                   </div>
 
-                  {/* 内容块（当前项目） */}
+                  {/* 内容（同一卡内，不再分割） */}
                   {(() => {
                     const item = hypeStakeItems[stakeIdx]
                     const tvl = `$${item.tvlUSD.toLocaleString()}`
                     return (
-                      <div className="rounded-xl border border-[#133136] bg-[#0b1416] p-4">
-                        <div className="flex items-start justify-between gap-4">
-                          {/* 左：项目名与 Logo */}
-                          <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 overflow-hidden rounded-lg bg-[#112224]">
-                              {item.logo ? (
-                                <img
-                                  src={item.logo || "/placeholder.svg"}
-                                  alt={item.name}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : null}
-                            </div>
-                            <div>
-                              <div className="text-[15px] font-semibold text-white">{item.name}</div>
-                              <div className="text-[11px] text-[#96fce4]">
-                                {dayjs(item.updatedAt).format("YYYY-MM-DD HH:mm")} · 更新时间
-                              </div>
+                      <div className="px-1">
+                        {/* 顶部：Logo + 名称 + 更新时间（紧凑排列） */}
+                        <div className="mb-3 flex items-center gap-3">
+                          <div className="h-10 w-10 overflow-hidden rounded-lg bg-[#112224]">
+                            {item.logo ? (
+                              <img
+                                src={item.logo || "/placeholder.svg"}
+                                alt={item.name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : null}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="truncate text-[15px] font-semibold text-white">{item.name}</div>
+                            <div className="text-[11px] text-[#96fce4]">
+                              {dayjs(item.updatedAt).format("YYYY-MM-DD HH:mm")} · 更新时间
                             </div>
                           </div>
-
-                          {/* 右：按钮 */}
-                          <a
-                            href={item.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="rounded-lg bg-[#43e5c9] px-4 py-2 text-sm font-medium text-[#010807] hover:opacity-90"
-                          >
-                            去质押
-                          </a>
                         </div>
 
-                        {/* 主数字 + 补充 */}
-                        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        {/* 主数字 + TVL + 说明（紧凑三列，保持原卡高度） */}
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                           <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] p-3">
                             <div className="text-xs text-[#96fce4]">净 APY</div>
-                            <div className="mt-1 text-4xl font-extrabold text-white">{item.netAPY.toFixed(1)}%</div>
+                            <div className="mt-1 text-4xl font-extrabold leading-none text-white">
+                              {item.netAPY.toFixed(1)}%
+                            </div>
                           </div>
                           <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] p-3">
                             <div className="text-xs text-[#96fce4]">TVL</div>
@@ -1355,13 +1362,15 @@ export default function DashboardClient({
                           </div>
                         </div>
 
-                        {/* 指示器 */}
-                        <div className="mt-4 flex items-center justify-center gap-2">
+                        {/* 更小的指示点（与示例一致） */}
+                        <div className="mt-3 flex items-center justify-center gap-2">
                           {hypeStakeItems.map((_, i) => (
                             <button
                               key={i}
                               onClick={() => setStakeIdx(i)}
-                              className={`h-1.5 rounded-full transition-all ${i === stakeIdx ? "w-6 bg-[#43e5c9]" : "w-2 bg-[#2a4b45]"}`}
+                              className={`h-1 rounded-full transition-all ${
+                                i === stakeIdx ? "w-[12px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
+                              }`}
                               aria-label={`slide-${i}`}
                             />
                           ))}
