@@ -1207,8 +1207,7 @@ export default function DashboardClient({
                   onMouseEnter={() => setStakePaused(true)}
                   onMouseLeave={() => setStakePaused(false)}
                 >
-                  {/* 标题行 + 右上角按钮 */}
-                  <div className="flex items-center justify-between px-1 mb-3">
+                  <div className="flex items-center justify-between px-1 mb-2">
                     <div className="flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-emerald-400" />
                       <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
@@ -1218,23 +1217,21 @@ export default function DashboardClient({
                         href={hypeStakeItems[stakeIdx].link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded-lg bg-[#43e5c9] px-3 py-1.5 text-[11px] font-medium text-[#010807] hover:opacity-90"
+                        className="rounded-lg bg-[#43e5c9] px-2.5 py-1 text-[10px] font-medium text-[#010807] hover:opacity-90"
                       >
                         去质押
                       </a>
                     ) : null}
                   </div>
 
-                  {/* 内容区：沿用原来的定高容器 */}
-                  <div className="h-[160px] w-full overflow-hidden rounded-xl px-1 relative">
+                  <div className="h-[180px] w-full overflow-hidden rounded-xl px-1 relative">
                     {(() => {
                       const item = hypeStakeItems[stakeIdx]
                       const tvl = `$${item.tvlUSD.toLocaleString()}`
                       return (
                         <div className="absolute inset-0 flex flex-col justify-between p-2">
-                          {/* 顶部：Logo + 名称 */}
                           <div className="flex items-center gap-2">
-                            <div className="h-7 w-7 overflow-hidden rounded-md bg-[#112224]">
+                            <div className="h-6 w-6 overflow-hidden rounded-md bg-[#112224]">
                               {item.logo ? (
                                 <img
                                   src={item.logo || "/placeholder.svg"}
@@ -1243,27 +1240,25 @@ export default function DashboardClient({
                                 />
                               ) : null}
                             </div>
-                            <div className="truncate text-[13px] font-semibold text-white">{item.name}</div>
+                            <div className="truncate text-[12px] font-semibold text-white">{item.name}</div>
                           </div>
 
-                          {/* 中部：主数字（净 APY） */}
                           <div>
-                            <div className="text-[11px] text-[#96fce4]">净 APY</div>
-                            <div className="text-[28px] font-extrabold leading-none text-white">
+                            <div className="text-[10px] text-[#96fce4]">净 APY</div>
+                            <div className="text-2xl font-extrabold leading-none text-white">
                               {item.netAPY.toFixed(1)}%
                             </div>
                           </div>
 
-                          {/* 底部：TVL / 更新时间 */}
-                          <div className="grid grid-cols-2 gap-2 text-[11px]">
-                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
+                          <div className="grid grid-cols-2 gap-2 text-[10px]">
+                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1">
                               <div className="text-[#96fce4]">TVL</div>
                               <div className="mt-0.5 font-medium text-white">{tvl}</div>
                             </div>
-                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
+                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1">
                               <div className="text-[#96fce4]">更新时间</div>
                               <div className="mt-0.5 font-medium text-white">
-                                {dayjs(item.updatedAt).format("YYYY-MM-DD HH:mm")}
+                                {dayjs(item.updatedAt).format("MM-DD HH:mm")}
                               </div>
                             </div>
                           </div>
@@ -1272,23 +1267,21 @@ export default function DashboardClient({
                     })()}
                   </div>
 
-                  {/* 指示点 */}
-                  <div className="mt-2 flex items-center justify-center gap-2">
+                  <div className="mt-2 flex items-center justify-center gap-1.5">
                     {hypeStakeItems.map((_, i) => (
                       <button
                         key={i}
                         onClick={() => setStakeIdx(i)}
                         className={`h-1 rounded-full transition-all ${
-                          i === stakeIdx ? "w-[10px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
+                          i === stakeIdx ? "w-[8px] bg-[#43e5c9]" : "w-[5px] bg-[#2a4b45]"
                         }`}
                         aria-label={`slide-${i}`}
                       />
                     ))}
                   </div>
 
-                  {/* 文案 */}
-                  <div className="mt-1 text-center text-[11px] text-[#96fce4]">
-                    {stakePaused ? "已暂停自动切换" : "3.5 秒自动切换（鼠标悬停暂停）"}
+                  <div className="mt-1 text-center text-[10px] text-[#96fce4]">
+                    {stakePaused ? "已暂停" : "3.5秒切换"}
                   </div>
                 </div>
               </div>
@@ -1296,88 +1289,91 @@ export default function DashboardClient({
               {/* Desktop version: hidden md:block */}
               <div className="hidden md:block">
                 <div
-                  className="rounded-2xl bg-[#0F1519] p-4"
+                  className="h-[180px] px-5 py-4 grid grid-cols-12 gap-3 items-start overflow-hidden"
                   onMouseEnter={() => setStakePaused(true)}
                   onMouseLeave={() => setStakePaused(false)}
                 >
-                  {/* 标题 + 右上角按钮 */}
-                  <div className="mb-3 flex items-center justify-between px-1">
+                  <div className="col-span-12 mb-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                      <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
+                      <img
+                        src="https://hyperliquid.gitbook.io/hyperliquid-docs/~gitbook/image?url=https%3A%2F%2F2356094849-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FyUdp569E6w18GdfqlGvJ%252Ficon%252FsIAjqhKKIUysM08ahKPh%252FHL-logoSwitchDISliStat.png%3Falt%3Dmedia%26token%3Da81fa25c-0510-4d97-87ff-3fb8944935b1&width=32&dpr=4&quality=100&sign=3e1219e3&sv=2"
+                        alt="Hyperliquid Logo"
+                        className="h-5 w-5 rounded"
+                      />
+                      <span className="text-sm font-semibold text-[#96fce4]">HYPE 推荐质押收益率</span>
                     </div>
                     {hypeStakeItems[stakeIdx]?.link ? (
                       <a
                         href={hypeStakeItems[stakeIdx].link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded-lg bg-[#43e5c9] px-4 py-2 text-sm font-medium text-[#010807] hover:opacity-90"
+                        className="rounded-lg bg-[#43e5c9] px-3 py-1.5 text-xs font-medium text-[#010807] hover:opacity-90"
                       >
                         去质押
                       </a>
                     ) : null}
                   </div>
 
-                  {/* 信息融合在同一卡片里 */}
                   {(() => {
                     const item = hypeStakeItems[stakeIdx]
                     const tvl = `$${item.tvlUSD.toLocaleString()}`
                     return (
-                      <div className="px-1">
-                        {/* 顶部：Logo + 名称 + 更新时间 */}
-                        <div className="mb-3 flex items-center gap-3">
-                          <div className="h-10 w-10 overflow-hidden rounded-lg bg-[#112224]">
-                            {item.logo ? (
-                              <img
-                                src={item.logo || "/placeholder.svg"}
-                                alt={item.name}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : null}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="truncate text-[15px] font-semibold text-white">{item.name}</div>
-                            <div className="text-[11px] text-[#96fce4]">
-                              {dayjs(item.updatedAt).format("YYYY-MM-DD HH:mm")} · 更新时间
+                      <>
+                        {/* Left column: Logo + Name + Main APY */}
+                        <div className="col-span-5 flex flex-col relative z-10">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="h-7 w-7 overflow-hidden rounded-lg bg-[#112224]">
+                              {item.logo ? (
+                                <img
+                                  src={item.logo || "/placeholder.svg"}
+                                  alt={item.name}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : null}
                             </div>
+                            <div className="truncate text-sm font-semibold text-white">{item.name}</div>
                           </div>
-                        </div>
 
-                        {/* 主数字与补充（三列） */}
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                          <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] p-3">
-                            <div className="text-xs text-[#96fce4]">净 APY</div>
-                            <div className="mt-1 text-4xl font-extrabold leading-none text-white">
+                          <div className="mb-1">
+                            <div className="text-[10px] text-[#96fce4]">净 APY</div>
+                            <div className="text-3xl font-extrabold leading-none tracking-tight text-white">
                               {item.netAPY.toFixed(1)}%
                             </div>
                           </div>
-                          <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] p-3">
-                            <div className="text-xs text-[#96fce4]">TVL</div>
-                            <div className="mt-1 text-xl font-semibold text-white">{tvl}</div>
-                          </div>
-                          <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] p-3">
-                            <div className="text-xs text-[#96fce4]">说明</div>
-                            <div className="mt-1 text-sm text-[#bfeee2]">手动数据示例，可换为你的真实配置</div>
+
+                          <div className="mt-2 space-y-1">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-[#96fce4]">TVL</span>
+                              <span className="font-medium text-white">{tvl}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-[#96fce4]">更新</span>
+                              <span className="font-medium text-white">
+                                {dayjs(item.updatedAt).format("MM-DD HH:mm")}
+                              </span>
+                            </div>
                           </div>
                         </div>
 
-                        {/* 指示点 */}
-                        <div className="mt-3 flex items-center justify-center gap-2">
-                          {hypeStakeItems.map((_, i) => (
-                            <button
-                              key={i}
-                              onClick={() => setStakeIdx(i)}
-                              className={`h-1 rounded-full transition-all ${
-                                i === stakeIdx ? "w-[12px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
-                              }`}
-                              aria-label={`slide-${i}`}
-                            />
-                          ))}
-                          <div className="ml-3 text-[12px] text-[#96fce4]">
-                            {stakePaused ? "已暂停自动切换（鼠标悬停）" : "3.5 秒自动切换"}
+                        {/* Right column: Indicators */}
+                        <div className="col-span-7 relative h-full flex flex-col items-center justify-center">
+                          <div className="flex items-center gap-2 mb-2">
+                            {hypeStakeItems.map((_, i) => (
+                              <button
+                                key={i}
+                                onClick={() => setStakeIdx(i)}
+                                className={`h-1 rounded-full transition-all ${
+                                  i === stakeIdx ? "w-[10px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
+                                }`}
+                                aria-label={`slide-${i}`}
+                              />
+                            ))}
+                          </div>
+                          <div className="text-[10px] text-[#96fce4]">
+                            {stakePaused ? "已暂停（鼠标悬停）" : "3.5秒自动切换"}
                           </div>
                         </div>
-                      </div>
+                      </>
                     )
                   })()}
                 </div>
