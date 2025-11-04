@@ -1273,16 +1273,19 @@ export default function DashboardClient({
                           <div className="border-t border-[#133136]/60 pt-2">
                             <div className="flex items-center justify-center gap-0.5">
                               {hypeStakeItems.map((_, i) => (
-                                <button
+                                <span
                                   key={i}
+                                  role="button"
+                                  tabIndex={0}
                                   onClick={() => setStakeIdx(i)}
-                                  aria-label={`slide-${i}`}
+                                  onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setStakeIdx(i)}
                                   className={
-                                    "inline-block shrink-0 appearance-none p-0 m-0 border-0 outline-none " +
+                                    "inline-block cursor-pointer select-none shrink-0 align-middle " +
                                     (i === stakeIdx
-                                      ? "h-[2px] w-2 rounded-full bg-[#43e5c9] transition-all"
-                                      : "h-[2px] w-1 rounded-full bg-[#2a4b45] transition-all")
+                                      ? "h-[2px] w-[8px] rounded-full bg-[#43e5c9] transition-all"
+                                      : "h-[2px] w-[4px] rounded-full bg-[#2a4b45] transition-all")
                                   }
+                                  aria-label={`slide-${i}`}
                                 />
                               ))}
                             </div>
