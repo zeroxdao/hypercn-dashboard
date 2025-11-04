@@ -1198,7 +1198,7 @@ export default function DashboardClient({
               </div>
             </Card>
 
-            {/* ================= HYPE 推荐质押收益率 ================ */}
+            {/* ================= HYPE 推荐质押收益率 ================= */}
             <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
               <div className="block md:hidden">
                 <div
@@ -1206,7 +1206,6 @@ export default function DashboardClient({
                   onMouseEnter={() => setStakePaused(true)}
                   onMouseLeave={() => setStakePaused(false)}
                 >
-                  {/* 顶部：标题 + 轻量按钮 */}
                   <div className="mb-2 flex items-center justify-between px-0.5">
                     <div className="flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-emerald-400" />
@@ -1217,7 +1216,8 @@ export default function DashboardClient({
                         href={hypeStakeItems[stakeIdx].link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex h-6 items-center justify-center rounded-md bg-[#43e5c9] px-2 text-[10px] font-medium leading-none text-[#010807] hover:opacity-90"
+                        className="inline-flex h-7 items-center justify-center rounded-full bg-[#43e5c9] px-3
+                                   text-[12px] font-semibold leading-none text-[#010807] hover:opacity-90"
                       >
                         去质押
                       </a>
@@ -1268,17 +1268,18 @@ export default function DashboardClient({
                             </div>
                           </div>
 
-                          {/* 底部：极简切换点（更小） */}
-                          <div className="border-t border-[#133136]/60 pt-2">
-                            <div className="flex items-center justify-center gap-1">
+                          <div className="col-span-12 mt-1 flex flex-col items-center">
+                            <div className="flex items-center justify-center gap-1.5">
                               {hypeStakeItems.map((_, i) => (
                                 <button
                                   key={i}
                                   onClick={() => setStakeIdx(i)}
+                                  className={
+                                    i === stakeIdx
+                                      ? "h-1.5 w-4 rounded-full bg-[#43e5c9] transition-all"
+                                      : "h-1.5 w-1.5 rounded-full bg-[#2a4b45] transition-all"
+                                  }
                                   aria-label={`slide-${i}`}
-                                  className={`rounded-full transition-all ${
-                                    i === stakeIdx ? "h-2 w-2 bg-[#43e5c9]" : "h-1.5 w-1.5 bg-[#2a4b45]"
-                                  }`}
                                 />
                               ))}
                             </div>
@@ -1356,7 +1357,7 @@ export default function DashboardClient({
                           </div>
                         </div>
 
-                        {/* 底部整行：指示点居中 */}
+                        {/* 底部整行：指示点居中 + 文案 */}
                         <div className="col-span-12 mt-1 flex flex-col items-center">
                           <div className="flex items-center justify-center gap-2">
                             {hypeStakeItems.map((_, i) => (
@@ -1407,7 +1408,7 @@ export default function DashboardClient({
                 </div>
               </div>
 
-               {/* Desktop version: hidden md:block - 100% unchanged */}
+              {/* Desktop version: hidden md:block - 100% unchanged */}
               <div className="hidden md:block h-full">
                 <div className="h-full overflow-hidden px-5 py-4">
                   <div className="mb-3 flex items-center gap-2">
@@ -1435,7 +1436,6 @@ export default function DashboardClient({
                   </div>
                 </div>
               </div>
-
             </Card>
 
             {/* 项目列表 —— 左移一格（col-span-9），并缩小卡片尺寸 */}
