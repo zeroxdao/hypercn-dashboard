@@ -1234,7 +1234,7 @@ export default function DashboardClient({
                         <div className="absolute inset-0 flex flex-col justify-between p-2">
                           {/* 顶部：Logo + 名称 */}
                           <div className="flex items-center gap-2">
-                            <div className="h-6 w-6 overflow-hidden rounded-md bg-[#112224]">
+                            <div className="h-8 w-8 overflow-hidden rounded-md bg-[#112224]">
                               {item.logo && (
                                 <img
                                   src={item.logo || "/placeholder.svg"}
@@ -1243,7 +1243,7 @@ export default function DashboardClient({
                                 />
                               )}
                             </div>
-                            <div className="truncate text-[12px] font-semibold text-white">{item.name}</div>
+                            <div className="truncate text-sm font-semibold text-white">{item.name}</div>
                           </div>
 
                           {/* 中部：APY 与 TVL 同一排 + 右侧更新时间 */}
@@ -1321,7 +1321,7 @@ export default function DashboardClient({
                       <>
                         {/* 左：Logo + 名称 */}
                         <div className="col-span-4 flex items-center gap-2">
-                          <div className="h-7 w-7 overflow-hidden rounded-lg bg-[#112224]">
+                          <div className="h-10 w-10 overflow-hidden rounded-lg bg-[#112224]">
                             {item.logo && (
                               <img
                                 src={item.logo || "/placeholder.svg"}
@@ -1330,7 +1330,7 @@ export default function DashboardClient({
                               />
                             )}
                           </div>
-                          <div className="truncate text-sm font-semibold text-white">{item.name}</div>
+                          <div className="truncate text-base font-semibold text-white">{item.name}</div>
                         </div>
 
                         {/* 中：APY 与 TVL 同排（Chip 风格） */}
