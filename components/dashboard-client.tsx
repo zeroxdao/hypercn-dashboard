@@ -1198,16 +1198,16 @@ export default function DashboardClient({
               </div>
             </Card>
 
-            {/* ================= HYPE 推荐质押收益率（替换原"Hyperliquid手续费"卡片） ================ */}
+            {/* ================= HYPE 推荐质押收益率 ================ */}
             <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
+              {/* Mobile version: block md:hidden */}
               <div className="block md:hidden">
                 <div
                   className="rounded-2xl bg-[#0F1519] p-3"
                   onMouseEnter={() => setStakePaused(true)}
                   onMouseLeave={() => setStakePaused(false)}
                 >
-                  {/* Title row */}
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between px-1 mb-2">
                     <div className="flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-emerald-400" />
                       <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
@@ -1224,43 +1224,42 @@ export default function DashboardClient({
                     ) : null}
                   </div>
 
-                  {/* Main content area */}
-                  <div className="h-[180px] w-full rounded-xl px-2 py-3 bg-[#0a0f12] relative">
+                  <div className="h-[180px] w-full overflow-hidden rounded-xl px-1 relative">
                     {(() => {
                       const item = hypeStakeItems[stakeIdx]
                       const tvl = `$${item.tvlUSD.toLocaleString()}`
                       return (
-                        <div className="h-full flex flex-col">
-                          {/* Top row: Logo + Name on left, "3天自由切换" on right */}
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                              <div className="h-7 w-7 overflow-hidden rounded-lg bg-[#112224] flex-shrink-0">
-                                {item.logo ? (
-                                  <img
-                                    src={item.logo || "/placeholder.svg"}
-                                    alt={item.name}
-                                    className="h-full w-full object-cover"
-                                  />
-                                ) : null}
-                              </div>
-                              <div className="text-sm font-semibold text-white">{item.name}</div>
+                        <div className="absolute inset-0 flex flex-col justify-between p-2">
+                          <div className="flex items-center gap-2">
+                            <div className="h-6 w-6 overflow-hidden rounded-md bg-[#112224]">
+                              {item.logo ? (
+                                <img
+                                  src={item.logo || "/placeholder.svg"}
+                                  alt={item.name}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : null}
                             </div>
-                            <div className="text-[10px] text-[#43e5c9] whitespace-nowrap">3天自由切换</div>
+                            <div className="truncate text-[12px] font-semibold text-white">{item.name}</div>
                           </div>
 
-                          {/* Center: Main APY */}
-                          <div className="flex-1 flex flex-col justify-center items-start">
-                            <div className="text-[11px] text-[#96fce4] mb-1">净 APY</div>
-                            <div className="text-[32px] font-extrabold leading-none text-white mb-4">
+                          <div>
+                            <div className="text-[10px] text-[#96fce4]">净 APY</div>
+                            <div className="text-2xl font-extrabold leading-none text-white">
                               {item.netAPY.toFixed(1)}%
                             </div>
                           </div>
 
-                          {/* Bottom: TVL */}
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="text-[10px] text-[#96fce4]">TVL</div>
-                              <div className="text-sm font-semibold text-white">{tvl}</div>
+                          <div className="grid grid-cols-2 gap-2 text-[10px]">
+                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1">
+                              <div className="text-[#96fce4]">TVL</div>
+                              <div className="mt-0.5 font-medium text-white">{tvl}</div>
+                            </div>
+                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1">
+                              <div className="text-[#96fce4]">更新时间</div>
+                              <div className="mt-0.5 font-medium text-white">
+                                {dayjs(item.updatedAt).format("MM-DD HH:mm")}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1268,30 +1267,33 @@ export default function DashboardClient({
                     })()}
                   </div>
 
-                  {/* Indicators */}
-                  <div className="mt-3 flex items-center justify-center gap-1.5">
+                  <div className="mt-2 flex items-center justify-center gap-1.5">
                     {hypeStakeItems.map((_, i) => (
                       <button
                         key={i}
                         onClick={() => setStakeIdx(i)}
                         className={`h-1 rounded-full transition-all ${
-                          i === stakeIdx ? "w-[10px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
+                          i === stakeIdx ? "w-[8px] bg-[#43e5c9]" : "w-[5px] bg-[#2a4b45]"
                         }`}
                         aria-label={`slide-${i}`}
                       />
                     ))}
                   </div>
+
+                  <div className="mt-1 text-center text-[10px] text-[#96fce4]">
+                    {stakePaused ? "已暂停" : "3.5秒切换"}
+                  </div>
                 </div>
               </div>
 
+              {/* Desktop version: hidden md:block */}
               <div className="hidden md:block">
                 <div
-                  className="h-[180px] px-5 py-4"
+                  className="h-[180px] px-5 py-4 grid grid-cols-12 gap-3 items-start overflow-hidden"
                   onMouseEnter={() => setStakePaused(true)}
                   onMouseLeave={() => setStakePaused(false)}
                 >
-                  {/* Title row */}
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="col-span-12 mb-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <img
                         src="https://hyperliquid.gitbook.io/hyperliquid-docs/~gitbook/image?url=https%3A%2F%2F2356094849-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FyUdp569E6w18GdfqlGvJ%252Ficon%252FsIAjqhKKIUysM08ahKPh%252FHL-logoSwitchDISliStat.png%3Falt%3Dmedia%26token%3Da81fa25c-0510-4d97-87ff-3fb8944935b1&width=32&dpr=4&quality=100&sign=3e1219e3&sv=2"
@@ -1312,339 +1314,72 @@ export default function DashboardClient({
                     ) : null}
                   </div>
 
-                  {/* Main content area */}
-                  <div className="h-[calc(100%-48px)] rounded-xl px-4 py-3 bg-[#0a0f12]">
-                    {(() => {
-                      const item = hypeStakeItems[stakeIdx]
-                      const tvl = `$${item.tvlUSD.toLocaleString()}`
-                      return (
-                        <div className="h-full flex flex-col">
-                          {/* Top row: Logo + Name on left, "3天自由切换" on right */}
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2.5">
-                              <div className="h-8 w-8 overflow-hidden rounded-lg bg-[#112224] flex-shrink-0">
-                                {item.logo ? (
-                                  <img
-                                    src={item.logo || "/placeholder.svg"}
-                                    alt={item.name}
-                                    className="h-full w-full object-cover"
-                                  />
-                                ) : null}
-                              </div>
-                              <div className="text-base font-semibold text-white">{item.name}</div>
+                  {(() => {
+                    const item = hypeStakeItems[stakeIdx]
+                    const tvl = `$${item.tvlUSD.toLocaleString()}`
+                    return (
+                      <>
+                        {/* Left column: Logo + Name + Main APY */}
+                        <div className="col-span-5 flex flex-col relative z-10">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="h-7 w-7 overflow-hidden rounded-lg bg-[#112224]">
+                              {item.logo ? (
+                                <img
+                                  src={item.logo || "/placeholder.svg"}
+                                  alt={item.name}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : null}
                             </div>
-                            <div className="text-xs text-[#43e5c9] whitespace-nowrap">3天自由切换</div>
+                            <div className="truncate text-sm font-semibold text-white">{item.name}</div>
                           </div>
 
-                          {/* Center: Main APY */}
-                          <div className="flex-1 flex flex-col justify-center">
-                            <div className="text-xs text-[#96fce4] mb-1.5">净 APY</div>
-                            <div className="text-[40px] font-extrabold leading-none text-white mb-4">
+                          <div className="mb-1">
+                            <div className="text-[10px] text-[#96fce4]">净 APY</div>
+                            <div className="text-3xl font-extrabold leading-none tracking-tight text-white">
                               {item.netAPY.toFixed(1)}%
                             </div>
                           </div>
 
-                          {/* Bottom row: TVL on left, Indicators on right */}
-                          <div className="flex items-end justify-between">
-                            <div>
-                              <div className="text-[11px] text-[#96fce4]">TVL</div>
-                              <div className="text-base font-semibold text-white">{tvl}</div>
+                          <div className="mt-2 space-y-1">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-[#96fce4]">TVL</span>
+                              <span className="font-medium text-white">{tvl}</span>
                             </div>
-
-                            {/* Indicators */}
-                            <div className="flex items-center gap-2">
-                              {hypeStakeItems.map((_, i) => (
-                                <button
-                                  key={i}
-                                  onClick={() => setStakeIdx(i)}
-                                  className={`h-1.5 rounded-full transition-all ${
-                                    i === stakeIdx ? "w-[12px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
-                                  }`}
-                                  aria-label={`slide-${i}`}
-                                />
-                              ))}
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-[#96fce4]">更新</span>
+                              <span className="font-medium text-white">
+                                {dayjs(item.updatedAt).format("MM-DD HH:mm")}
+                              </span>
                             </div>
                           </div>
                         </div>
-                      )
-                    })()}
-                  </div>
+
+                        {/* Right column: Indicators */}
+                        <div className="col-span-7 relative h-full flex flex-col items-center justify-center">
+                          <div className="flex items-center gap-2 mb-2">
+                            {hypeStakeItems.map((_, i) => (
+                              <button
+                                key={i}
+                                onClick={() => setStakeIdx(i)}
+                                className={`h-1 rounded-full transition-all ${
+                                  i === stakeIdx ? "w-[10px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
+                                }`}
+                                aria-label={`slide-${i}`}
+                              />
+                            ))}
+                          </div>
+                          <div className="text-[10px] text-[#96fce4]">
+                            {stakePaused ? "已暂停（鼠标悬停）" : "3.5秒自动切换"}
+                          </div>
+                        </div>
+                      </>
+                    )
+                  })()}
                 </div>
               </div>
             </Card>
             {/* ================= /HYPE 推荐质押收益率 ================= */}
-
-            {/* ================= Hyperliquid手续费卡片 ================ */}
-            <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
-              {/* Mobile version: block md:hidden */}
-              <div className="block md:hidden">
-                <div className="rounded-2xl bg-[#0F1519] p-3">
-                  {/* Title */}
-                  <div className="flex items-center gap-2 px-1 mb-3">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                    <span className="text-[13px] font-semibold text-emerald-300">Hyperliquid手续费</span>
-                  </div>
-
-                  {/* KPIs */}
-                  <div className="flex items-center gap-3 flex-wrap px-1 mb-3">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-[11px] text-[#96fce4]">30日</span>
-                      <span className="text-sm font-semibold text-white whitespace-nowrap">
-                        {formatRevenue(revenueKPIs.total30d)}
-                      </span>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-[11px] text-[#96fce4]">7日</span>
-                      <span className="text-sm font-semibold text-white whitespace-nowrap">
-                        {formatRevenue(revenueKPIs.total7d)}
-                      </span>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-[11px] text-[#96fce4]">24小时</span>
-                      <span className="text-sm font-semibold text-white whitespace-nowrap">
-                        {formatRevenue(revenueKPIs.total24h)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div
-                    ref={revenueChartWrapRefMobile}
-                    className="h-[160px] w-full overflow-hidden rounded-xl px-1 relative"
-                  >
-                    {revenueLoading ? (
-                      <div className="flex h-full items-center justify-center">
-                        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#43e5c9] border-t-transparent" />
-                      </div>
-                    ) : defiLlamaRevenue && defiLlamaRevenue.totalDataChart.length > 0 ? (
-                      <>
-                        <svg viewBox="0 0 400 110" className="h-full w-full" preserveAspectRatio="none">
-                          {revenueChartData.data.map(([timestamp, value], i) => {
-                            const margin = { top: 4, right: 8, bottom: 6, left: 8 }
-                            const chartWidth = 400 - margin.left - margin.right
-                            const chartHeight = 110 - margin.top - margin.bottom
-                            const barGap = 0.18
-                            const barWidth = (chartWidth / revenueChartData.data.length) * (1 - barGap)
-                            const barSpacing = chartWidth / revenueChartData.data.length
-                            const x = margin.left + i * barSpacing + (barSpacing * barGap) / 2
-                            const barHeight = (value / revenueChartData.yMax) * chartHeight
-                            const y = margin.top + chartHeight - barHeight
-                            return (
-                              <rect
-                                key={i}
-                                x={x}
-                                y={y}
-                                width={barWidth}
-                                height={barHeight}
-                                fill="#43e5c9"
-                                fillOpacity={hoveredRevenueBar?.index === i ? 0.8 : 1}
-                                rx="2"
-                                onMouseEnter={(e) => {
-                                  const barRect = e.currentTarget.getBoundingClientRect()
-                                  const wrapRect = revenueChartWrapRefMobile.current?.getBoundingClientRect()
-                                  if (!wrapRect) return
-                                  setHoveredRevenueBar({
-                                    index: i,
-                                    x: barRect.left + barRect.width / 2 - wrapRect.left,
-                                    y: barRect.top - wrapRect.top,
-                                  })
-                                }}
-                                onMouseLeave={() => setHoveredRevenueBar(null)}
-                                style={{ cursor: "pointer" }}
-                              />
-                            )
-                          })}
-                        </svg>
-                        {hoveredRevenueBar !== null &&
-                          (() => {
-                            const tooltipWidth = 120
-                            const tooltipHeight = 50
-                            const padding = 10
-                            const wrap = revenueChartWrapRefMobile.current
-                            if (!wrap) return null
-                            const cw = wrap.clientWidth
-                            const ch = wrap.clientHeight
-
-                            // 以 bar 中心为 anchor，不改 left/top，只变对齐方向
-                            const x = hoveredRevenueBar.x
-                            const y = hoveredRevenueBar.y
-
-                            const overflowLeft = x - tooltipWidth / 2 - padding < 0
-                            const overflowRight = x + tooltipWidth / 2 + padding > cw
-                            const overflowTop = y - tooltipHeight - padding < 0
-                            // 水平对齐：优先居中，左/右边缘再贴左/右
-                            const translateX = overflowLeft ? "0%" : overflowRight ? "-100%" : "-50%"
-                            // 垂直对齐：优先在上方，空间不足放到下方
-                            const translateY = overflowTop ? "0%" : "-100%"
-                            const topOffset = y + (overflowTop ? padding : -padding)
-                            const leftOffset = x
-
-                            return (
-                              <div
-                                className="pointer-events-none absolute z-50 rounded-lg bg-[#010807] px-2 py-1 text-[10px] shadow-lg"
-                                style={{
-                                  left: `${leftOffset}px`,
-                                  top: `${topOffset}px`,
-                                  transform: `translate(${translateX}, ${translateY})`,
-                                  border: "1px solid #43e5c9",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                <div className="text-[#96fce4]">
-                                  {dayjs(revenueChartData.data[hoveredRevenueBar.index][0] * 1000).format("YYYY-MM-DD")}
-                                </div>
-                                <div className="font-semibold text-white">
-                                  {formatRevenue(revenueChartData.data[hoveredRevenueBar.index][1])}
-                                </div>
-                              </div>
-                            )
-                          })()}
-                      </>
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-[#96fce4]">暂无数据</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop version: hidden md:block */}
-              <div className="hidden md:block">
-                <div className="h-[180px] px-5 py-4 overflow-hidden">
-                  <div className="mb-3 flex items-center gap-2">
-                    <img
-                      src="https://hyperliquid.gitbook.io/hyperliquid-docs/~gitbook/image?url=https%3A%2F%2F2356094849-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FyUdp569E6w18GdfqlGvJ%252Ficon%252FsIAjqhKKIUysM08ahKPh%252FHL-logoSwitchDISliStat.png%3Falt%3Dmedia%26token%3Da81fa25c-0510-4d97-87ff-3fb8944935b1&width=32&dpr=4&quality=100&sign=3e1219e3&sv=2"
-                      alt="Hyperliquid Logo"
-                      className="h-5 w-5 rounded"
-                    />
-                    <span className="text-sm font-semibold text-[#96fce4]">Hyperliquid手续费</span>
-                  </div>
-
-                  {revenueLoading ? (
-                    <div className="flex h-full items-center justify-center">
-                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#43e5c9] border-t-transparent" />
-                    </div>
-                  ) : defiLlamaRevenue && defiLlamaRevenue.totalDataChart.length > 0 ? (
-                    <div className="grid grid-cols-[minmax(200px,26%)_1fr] xl:grid-cols-[240px_1fr] gap-3 items-start h-[calc(100%-2rem)]">
-                      <div className="flex flex-col gap-1.5 min-w-0">
-                        <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
-                          <span className="text-xs leading-tight text-[#96fce4] truncate">30 日手续费</span>
-                          <span className="text-base font-semibold tabular-nums leading-tight text-white whitespace-nowrap">
-                            {formatRevenue(revenueKPIs.total30d)}
-                          </span>
-                        </div>
-                        <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
-                          <span className="text-xs leading-tight text-[#96fce4] truncate">7 日手续费</span>
-                          <span className="text-base font-semibold tabular-nums leading-tight text-white whitespace-nowrap">
-                            {formatRevenue(revenueKPIs.total7d)}
-                          </span>
-                        </div>
-                        <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
-                          <span className="text-xs leading-tight text-[#96fce4] truncate">24 小时手续费</span>
-                          <span className="text-base font-semibold tabular-nums leading-tight text-white whitespace-nowrap">
-                            {formatRevenue(revenueKPIs.total24h)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div
-                        ref={revenueChartWrapRefDesktop}
-                        className="relative min-w-0 flex items-end justify-end h-full overflow-visible"
-                      >
-                        <div className="w-full h-full">
-                          {revenueChartData.data.length > 0 && (
-                            <>
-                              <svg viewBox="0 0 400 110" className="h-full w-full" preserveAspectRatio="none">
-                                {revenueChartData.data.map(([timestamp, value], i) => {
-                                  const margin = { top: 4, right: 8, bottom: 6, left: 8 }
-                                  const chartWidth = 400 - margin.left - margin.right
-                                  const chartHeight = 110 - margin.top - margin.bottom
-                                  const barGap = 0.18
-                                  const barWidth = (chartWidth / revenueChartData.data.length) * (1 - barGap)
-                                  const barSpacing = chartWidth / revenueChartData.data.length
-                                  const x = margin.left + i * barSpacing + (barSpacing * barGap) / 2
-                                  const barHeight = (value / revenueChartData.yMax) * chartHeight
-                                  const y = margin.top + chartHeight - barHeight
-                                  return (
-                                    <rect
-                                      key={i}
-                                      x={x}
-                                      y={y}
-                                      width={barWidth}
-                                      height={barHeight}
-                                      fill="#43e5c9"
-                                      fillOpacity={hoveredRevenueBar?.index === i ? 0.8 : 1}
-                                      rx="2"
-                                      onMouseEnter={(e) => {
-                                        const barRect = e.currentTarget.getBoundingClientRect()
-                                        const wrapRect = revenueChartWrapRefDesktop.current?.getBoundingClientRect()
-                                        if (!wrapRect) return
-                                        setHoveredRevenueBar({
-                                          index: i,
-                                          x: barRect.left + barRect.width / 2 - wrapRect.left,
-                                          y: barRect.top - wrapRect.top,
-                                        })
-                                      }}
-                                      onMouseLeave={() => setHoveredRevenueBar(null)}
-                                      style={{ cursor: "pointer" }}
-                                    />
-                                  )
-                                })}
-                              </svg>
-                              {hoveredRevenueBar !== null &&
-                                (() => {
-                                  const tooltipWidth = 120
-                                  const tooltipHeight = 50
-                                  const padding = 10
-                                  const wrap = revenueChartWrapRefDesktop.current
-                                  if (!wrap) return null
-                                  const cw = wrap.clientWidth
-                                  const ch = wrap.clientHeight
-
-                                  const x = hoveredRevenueBar.x
-                                  const y = hoveredRevenueBar.y
-
-                                  const overflowLeft = x - tooltipWidth / 2 - padding < 0
-                                  const overflowRight = x + tooltipWidth / 2 + padding > cw
-                                  const overflowTop = y - tooltipHeight - padding < 0
-
-                                  const translateX = overflowLeft ? "0%" : overflowRight ? "-100%" : "-50%"
-                                  const translateY = overflowTop ? "0%" : "-100%"
-                                  const topOffset = y + (overflowTop ? padding : -padding)
-                                  const leftOffset = x
-
-                                  return (
-                                    <div
-                                      className="pointer-events-none absolute z-50 rounded-lg bg-[#010807] px-2 py-1 text-[10px] shadow-lg"
-                                      style={{
-                                        left: `${leftOffset}px`,
-                                        top: `${topOffset}px`,
-                                        transform: `translate(${translateX}, ${translateY})`,
-                                        border: "1px solid #43e5c9",
-                                        whiteSpace: "nowrap",
-                                      }}
-                                    >
-                                      <div className="text-[#96fce4]">
-                                        {dayjs(revenueChartData.data[hoveredRevenueBar.index][0] * 1000).format(
-                                          "YYYY-MM-DD",
-                                        )}
-                                      </div>
-                                      <div className="font-semibold text-white">
-                                        {formatRevenue(revenueChartData.data[hoveredRevenueBar.index][1])}
-                                      </div>
-                                    </div>
-                                  )
-                                })()}
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-[#96fce4]">暂无数据</div>
-                  )}
-                </div>
-              </div>
-            </Card>
-            {/* ================= /Hyperliquid手续费卡片 ================= */}
 
             <Card className="col-span-1 lg:col-span-3 lg:col-start-10 lg:row-span-2 lg:h-full lg:self-stretch p-0 overflow-hidden bg-[#101419] border-[#072027]">
               {/* Mobile version: block md:hidden */}
