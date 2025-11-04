@@ -1241,9 +1241,7 @@ export default function DashboardClient({
                                 href={item.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex h-5 items-center justify-center rounded-md border border-[#43e5c9] px-1.5
-                                           text-[10px] font-semibold leading-none text-[#43e5c9]
-                                           bg-transparent hover:bg-[#43e5c9]/10 active:bg-[#43e5c9]/15 transition"
+                                className="rounded-lg bg-[#43e5c9] px-3 py-1.5 text-xs font-medium text-[#010807] hover:opacity-90"
                               >
                                 去质押
                               </a>
@@ -1273,7 +1271,7 @@ export default function DashboardClient({
                           </div>
 
                           <div className="border-t border-[#133136]/60 pt-2">
-                            <div className="flex items-center justify-center gap-0.5">
+                            <div className="flex items-center justify-center gap-2">
                               {hypeStakeItems.map((_, i) => (
                                 <button
                                   key={i}
@@ -1281,8 +1279,8 @@ export default function DashboardClient({
                                   aria-label={`slide-${i}`}
                                   className={
                                     i === stakeIdx
-                                      ? "h-0.5 w-2 rounded-full bg-[#43e5c9] transition-all"
-                                      : "h-0.5 w-1 rounded-full bg-[#2a4b45] transition-all"
+                                      ? "h-1 w-[10px] rounded-full bg-[#43e5c9] transition-all"
+                                      : "h-1 w-[6px] rounded-full bg-[#2a4b45] transition-all"
                                   }
                                 />
                               ))}
