@@ -1324,193 +1324,129 @@ export default function DashboardClient({
                     <span className="text-sm font-semibold text-[#96fce4]">Hyperliquid手续费</span>
                   </div>
 
-                  {revenueLoading ? (
-                    <div className="flex h-full items-center justify-center">
-                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#43e5c9] border-t-transparent" />
-                    </div>
-                  ) : defiLlamaRevenue && defiLlamaRevenue.totalDataChart.length > 0 ? (
-                    <div className="grid grid-cols-[minmax(200px,26%)_1fr] xl:grid-cols-[240px_1fr] gap-3 items-start h-[calc(100%-2rem)]">
-                      <div className="flex flex-col gap-1.5 min-w-0">
-                        <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
-                          <span className="text-xs leading-tight text-[#96fce4] truncate">30 日手续费</span>
-                          <span className="text-base font-semibold tabular-nums leading-tight text-white whitespace-nowrap">
-                            {formatRevenue(revenueKPIs.total30d)}
-                          </span>
-                        </div>
-                        <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
-                          <span className="text-xs leading-tight text-[#96fce4] truncate">7 日手续费</span>
-                          <span className="text-base font-semibold tabular-nums leading-tight text-white whitespace-nowrap">
-                            {formatRevenue(revenueKPIs.total7d)}
-                          </span>
-                        </div>
-                        <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
-                          <span className="text-xs leading-tight text-[#96fce4] truncate">24 小时手续费</span>
-                          <span className="text-base font-semibold tabular-nums leading-tight text-white whitespace-nowrap">
-                            {formatRevenue(revenueKPIs.total24h)}
-                          </span>
-                        </div>
+                  <div className="grid grid-cols-[minmax(200px,26%)_1fr] xl:grid-cols-[240px_1fr] gap-3 items-start h-[calc(100%-2rem)]">
+                    <div className="flex flex-col gap-1.5 min-w-0">
+                      <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
+                        <span className="text-xs leading-tight text-[#96fce4] truncate">30 日手续费</span>
+                        <span className="text-base font-semibold tabular-nums leading-tight text-white whitespace-nowrap">
+                          {formatRevenue(revenueKPIs.total30d)}
+                        </span>
                       </div>
+                      <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
+                        <span className="text-xs leading-tight text-[#96fce4] truncate">7 日手续费</span>
+                        <span className="text-base font-semibold tabular-nums leading-tight text-white whitespace-nowrap">
+                          {formatRevenue(revenueKPIs.total7d)}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2 min-w-0 w-full">
+                        <span className="text-xs leading-tight text-[#96fce4] truncate">24 小时手续费</span>
+                        <span className="text-base font-semibold tabular-nums leading-tight text-white whitespace-nowrap">
+                          {formatRevenue(revenueKPIs.total24h)}
+                        </span>
+                      </div>
+                    </div>
 
-                      <div
-                        ref={revenueChartWrapRefDesktop}
-                        className="relative min-w-0 flex items-end justify-end h-full overflow-visible"
-                      >
-                        <div className="w-full h-full">
-                          {revenueChartData.data.length > 0 && (
-                            <>
-                              <svg viewBox="0 0 400 110" className="h-full w-full" preserveAspectRatio="none">
-                                {revenueChartData.data.map(([timestamp, value], i) => {
-                                  const margin = { top: 4, right: 8, bottom: 6, left: 8 }
-                                  const chartWidth = 400 - margin.left - margin.right
-                                  const chartHeight = 110 - margin.top - margin.bottom
-                                  const barGap = 0.18
-                                  const barWidth = (chartWidth / revenueChartData.data.length) * (1 - barGap)
-                                  const barSpacing = chartWidth / revenueChartData.data.length
-                                  const x = margin.left + i * barSpacing + (barSpacing * barGap) / 2
-                                  const barHeight = (value / revenueChartData.yMax) * chartHeight
-                                  const y = margin.top + chartHeight - barHeight
-                                  return (
-                                    <rect
-                                      key={i}
-                                      x={x}
-                                      y={y}
-                                      width={barWidth}
-                                      height={barHeight}
-                                      fill="#43e5c9"
-                                      fillOpacity={hoveredRevenueBar?.index === i ? 0.8 : 1}
-                                      rx="2"
-                                      onMouseEnter={(e) => {
-                                        const barRect = e.currentTarget.getBoundingClientRect()
-                                        const wrapRect = revenueChartWrapRefDesktop.current?.getBoundingClientRect()
-                                        if (!wrapRect) return
-                                        setHoveredRevenueBar({
-                                          index: i,
-                                          x: barRect.left + barRect.width / 2 - wrapRect.left,
-                                          y: barRect.top - wrapRect.top,
-                                        })
-                                      }}
-                                      onMouseLeave={() => setHoveredRevenueBar(null)}
-                                      style={{ cursor: "pointer" }}
-                                    />
-                                  )
-                                })}
-                              </svg>
-                              {hoveredRevenueBar !== null &&
-                                (() => {
-                                  const tooltipWidth = 120
-                                  const tooltipHeight = 50
-                                  const padding = 10
-                                  const wrap = revenueChartWrapRefDesktop.current
-                                  if (!wrap) return null
-                                  const cw = wrap.clientWidth
-                                  const ch = wrap.clientHeight
+                    <div
+                      ref={revenueChartWrapRefDesktop}
+                      className="relative min-w-0 flex items-end justify-end h-full overflow-visible"
+                    >
+                      <div className="w-full h-full">
+                        {revenueChartData.data.length > 0 ? (
+                          <>
+                            <svg viewBox="0 0 400 110" className="h-full w-full" preserveAspectRatio="none">
+                              {revenueChartData.data.map(([timestamp, value], i) => {
+                                const margin = { top: 4, right: 8, bottom: 6, left: 8 }
+                                const chartWidth = 400 - margin.left - margin.right
+                                const chartHeight = 110 - margin.top - margin.bottom
+                                const barGap = 0.18
+                                const barWidth = (chartWidth / revenueChartData.data.length) * (1 - barGap)
+                                const barSpacing = chartWidth / revenueChartData.data.length
+                                const x = margin.left + i * barSpacing + (barSpacing * barGap) / 2
+                                const barHeight = (value / revenueChartData.yMax) * chartHeight
+                                const y = margin.top + chartHeight - barHeight
+                                return (
+                                  <rect
+                                    key={i}
+                                    x={x}
+                                    y={y}
+                                    width={barWidth}
+                                    height={barHeight}
+                                    fill="#43e5c9"
+                                    fillOpacity={hoveredRevenueBar?.index === i ? 0.8 : 1}
+                                    rx="2"
+                                    onMouseEnter={(e) => {
+                                      const barRect = e.currentTarget.getBoundingClientRect()
+                                      const wrapRect = revenueChartWrapRefDesktop.current?.getBoundingClientRect()
+                                      if (!wrapRect) return
+                                      setHoveredRevenueBar({
+                                        index: i,
+                                        x: barRect.left + barRect.width / 2 - wrapRect.left,
+                                        y: barRect.top - wrapRect.top,
+                                      })
+                                    }}
+                                    onMouseLeave={() => setHoveredRevenueBar(null)}
+                                    style={{ cursor: "pointer" }}
+                                  />
+                                )
+                              })}
+                            </svg>
+                            {hoveredRevenueBar !== null &&
+                              (() => {
+                                const tooltipWidth = 120
+                                const tooltipHeight = 50
+                                const padding = 10
+                                const wrap = revenueChartWrapRefDesktop.current
+                                if (!wrap) return null
+                                const cw = wrap.clientWidth
+                                const ch = wrap.clientHeight
 
-                                  const x = hoveredRevenueBar.x
-                                  const y = hoveredRevenueBar.y
+                                const x = hoveredRevenueBar.x
+                                const y = hoveredRevenueBar.y
 
-                                  const overflowLeft = x - tooltipWidth / 2 - padding < 0
-                                  const overflowRight = x + tooltipWidth / 2 + padding > cw
-                                  const overflowTop = y - tooltipHeight - padding < 0
+                                const overflowLeft = x - tooltipWidth / 2 - padding < 0
+                                const overflowRight = x + tooltipWidth / 2 + padding > cw
+                                const overflowTop = y - tooltipHeight - padding < 0
 
-                                  const translateX = overflowLeft ? "0%" : overflowRight ? "-100%" : "-50%"
-                                  const translateY = overflowTop ? "0%" : "-100%"
-                                  const topOffset = y + (overflowTop ? padding : -padding)
-                                  const leftOffset = x
+                                const translateX = overflowLeft ? "0%" : overflowRight ? "-100%" : "-50%"
+                                const translateY = overflowTop ? "0%" : "-100%"
+                                const topOffset = y + (overflowTop ? padding : -padding)
+                                const leftOffset = x
 
-                                  return (
-                                    <div
-                                      className="pointer-events-none absolute z-50 rounded-lg bg-[#010807] px-2 py-1 text-[10px] shadow-lg"
-                                      style={{
-                                        left: `${leftOffset}px`,
-                                        top: `${topOffset}px`,
-                                        transform: `translate(${translateX}, ${translateY})`,
-                                        border: "1px solid #43e5c9",
-                                        whiteSpace: "nowrap",
-                                      }}
-                                    >
-                                      <div className="text-[#96fce4]">
-                                        {dayjs(revenueChartData.data[hoveredRevenueBar.index][0] * 1000).format(
-                                          "YYYY-MM-DD",
-                                        )}
-                                      </div>
-                                      <div className="font-semibold text-white">
-                                        {formatRevenue(revenueChartData.data[hoveredRevenueBar.index][1])}
-                                      </div>
+                                return (
+                                  <div
+                                    className="pointer-events-none absolute z-50 rounded-lg bg-[#010807] px-2 py-1 text-[10px] shadow-lg"
+                                    style={{
+                                      left: `${leftOffset}px`,
+                                      top: `${topOffset}px`,
+                                      transform: `translate(${translateX}, ${translateY})`,
+                                      border: "1px solid #43e5c9",
+                                      whiteSpace: "nowrap",
+                                    }}
+                                  >
+                                    <div className="text-[#96fce4]">
+                                      {dayjs(revenueChartData.data[hoveredRevenueBar.index][0] * 1000).format(
+                                        "YYYY-MM-DD",
+                                      )}
                                     </div>
-                                  )
-                                })()}
-                            </>
-                          )}
-                        </div>
+                                    <div className="font-semibold text-white">
+                                      {formatRevenue(revenueChartData.data[hoveredRevenueBar.index][1])}
+                                    </div>
+                                  </div>
+                                )
+                              })()}
+                          </>
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-[#96fce4]">暂无数据</div>
+                        )}
                       </div>
                     </div>
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-[#96fce4]">暂无数据</div>
-                  )}
+                  </div>
                 </div>
               </div>
             </Card>
             {/* ================= /Hyperliquid手续费卡片 ================= */}
 
-            <Card className="col-span-1 lg:col-span-3 lg:col-start-10 lg:row-span-2 lg:h-full lg:self-stretch p-0 overflow-hidden bg-[#101419] border-[#072027]">
-              {/* Mobile version: block md:hidden */}
-              <div className="block md:hidden">
-                <div className="rounded-2xl bg-[#0F1519] p-3">
-                  {/* Title */}
-                  <div className="flex items-center gap-2 px-1 mb-3">
-                    <span>📊</span>
-                    <span className="text-[13px] font-semibold text-emerald-300">Hyperliquid 热门代币交易量</span>
-                  </div>
-
-                  {/* Token List */}
-                  <div className="flex flex-col gap-2">
-                    {(hlTopVolume.length ? hlTopVolume : topGainers).slice(0, 10).map((token, i) => (
-                      <div key={i} className="flex items-center justify-between px-1">
-                        <span className="text-sm text-white truncate">{token.name}</span>
-                        <div className="flex items-center gap-3 ml-2">
-                          <span className="text-sm tabular-nums text-white whitespace-nowrap">{token.price}</span>
-                          <span className="text-sm tabular-nums text-[#43e5c9] whitespace-nowrap">
-                            {/* @ts-ignore */}
-                            {token.volume24h ? formatVolume(token.volume24h) : formatVolume(0)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop version: hidden md:block - 100% unchanged */}
-              <div className="hidden md:block h-full">
-                <div className="h-full overflow-hidden px-5 py-4">
-                  <div className="mb-3 flex items-center gap-2">
-                    <span>📊</span>
-                    <span className="text-sm font-semibold text-[#96fce4]">Hyperliquid 热门代币交易量</span>
-                  </div>
-
-                  <div className="flex flex-col gap-2 overflow-hidden lg:grid lg:grid-rows-10">
-                    {(hlTopVolume.length ? hlTopVolume : topGainers).slice(0, 10).map((token, i) => (
-                      <div key={i} className="flex h-[36px] items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <span className="truncate text-sm text-white">{token.name}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-right text-sm tabular-nums text-white whitespace-nowrap">
-                            {token.price}
-                          </span>
-                          <span className="text-right text-sm tabular-nums text-[#43e5c9] whitespace-nowrap">
-                            {/* @ts-ignore */}
-                            {token.volume24h ? formatVolume(token.volume24h) : formatVolume(0)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* ================= HYPE质押收益率卡片 ================ */}
+            {/* ================= HYPE 推荐质押收益率卡片（替换原Hyperliquid手续费） ================ */}
             <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
               {/* Mobile version: block md:hidden */}
               <div className="block md:hidden">
@@ -1618,7 +1554,65 @@ export default function DashboardClient({
                 </div>
               </div>
             </Card>
-            {/* ================= /HYPE质押收益率卡片 ================= */}
+            {/* ================= /HYPE 推荐质押收益率卡片 ================= */}
+
+            <Card className="col-span-1 lg:col-span-3 lg:col-start-10 lg:row-span-2 lg:h-full lg:self-stretch p-0 overflow-hidden bg-[#101419] border-[#072027]">
+              {/* Mobile version: block md:hidden */}
+              <div className="block md:hidden">
+                <div className="rounded-2xl bg-[#0F1519] p-3">
+                  {/* Title */}
+                  <div className="flex items-center gap-2 px-1 mb-3">
+                    <span>📊</span>
+                    <span className="text-[13px] font-semibold text-emerald-300">Hyperliquid 热门代币交易量</span>
+                  </div>
+
+                  {/* Token List */}
+                  <div className="flex flex-col gap-2">
+                    {(hlTopVolume.length ? hlTopVolume : topGainers).slice(0, 10).map((token, i) => (
+                      <div key={i} className="flex items-center justify-between px-1">
+                        <span className="text-sm text-white truncate">{token.name}</span>
+                        <div className="flex items-center gap-3 ml-2">
+                          <span className="text-sm tabular-nums text-white whitespace-nowrap">{token.price}</span>
+                          <span className="text-sm tabular-nums text-[#43e5c9] whitespace-nowrap">
+                            {/* @ts-ignore */}
+                            {token.volume24h ? formatVolume(token.volume24h) : formatVolume(0)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop version: hidden md:block - 100% unchanged */}
+              <div className="hidden md:block h-full">
+                <div className="h-full overflow-hidden px-5 py-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <span>📊</span>
+                    <span className="text-sm font-semibold text-[#96fce4]">Hyperliquid 热门代币交易量</span>
+                  </div>
+
+                  <div className="flex flex-col gap-2 overflow-hidden lg:grid lg:grid-rows-10">
+                    {(hlTopVolume.length ? hlTopVolume : topGainers).slice(0, 10).map((token, i) => (
+                      <div key={i} className="flex h-[36px] items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-sm text-white">{token.name}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-right text-sm tabular-nums text-white whitespace-nowrap">
+                            {token.price}
+                          </span>
+                          <span className="text-right text-sm tabular-nums text-[#43e5c9] whitespace-nowrap">
+                            {/* @ts-ignore */}
+                            {token.volume24h ? formatVolume(token.volume24h) : formatVolume(0)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Card>
 
             {/* 项目列表 —— 左移一格（col-span-9），并缩小卡片尺寸 */}
             <div className="col-span-1 flex flex-col gap-2 overflow-hidden lg:col-span-9 lg:row-start-2 max-[639px]:order-60">
