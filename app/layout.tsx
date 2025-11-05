@@ -29,6 +29,7 @@ export const metadata: Metadata = {
   },
   icons: { shortcut: "/favicon.ico" },
   applicationName: "Hypeonly",
+    generator: 'v0.app'
 }
 
 export default function RootLayout({
