@@ -317,7 +317,7 @@ export default function DashboardClient({
         const res = await fetch("https://api.hyperliquid.xyz/info", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: "metaAndAssetCtxs" }),
+          body: JSON.JSON.stringify({ type: "metaAndAssetCtxs" }),
         })
         if (!res.ok) {
           return
@@ -687,6 +687,67 @@ export default function DashboardClient({
 
   return (
     <div className="grid min-h-screen grid-rows-[auto_auto_1fr_auto] bg-[#010807] text-white lg:min-h-screen">
+      <style jsx>{`
+        @keyframes shimmer {
+          0% {
+            background-position: -200% center;
+          }
+          100% {
+            background-position: 200% center;
+          }
+        }
+        @keyframes glow-pulse {
+          0%, 100% {
+            box-shadow: 0 0 5px rgba(67, 229, 201, 0.3), 0 0 10px rgba(67, 229, 201, 0.2);
+          }
+          50% {
+            box-shadow: 0 0 10px rgba(67, 229, 201, 0.5), 0 0 20px rgba(67, 229, 201, 0.3), 0 0 30px rgba(67, 229, 201, 0.2);
+          }
+        }
+        @keyframes gradient-shift {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+        .tech-button {
+          position: relative;
+          overflow: hidden;
+          background: linear-gradient(135deg, #43e5c9 0%, #2dd4bf 50%, #14b8a6 100%);
+          background-size: 200% 200%;
+          animation: gradient-shift 3s ease infinite;
+          transition: all 0.3s ease;
+        }
+        .tech-button::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+          );
+          background-size: 200% 100%;
+          animation: shimmer 2.5s infinite;
+        }
+        .tech-button:hover {
+          transform: translateY(-1px);
+          animation: gradient-shift 1.5s ease infinite, glow-pulse 1.5s ease infinite;
+        }
+        .tech-button:active {
+          transform: translateY(0);
+        }
+      `}</style>
+
       <div className="hidden lg:block border-b border-[#072027] bg-[#010807] px-6 py-2.5">
         <div className="flex w-full items-center justify-between text-sm">
           <div className="flex items-center gap-8">
@@ -1267,13 +1328,20 @@ export default function DashboardClient({
                                     href={item.link}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex h-[16px] min-h-0 items-center justify-center
-                               rounded-md bg-[#43e5c9] px-2
-                               text-[10px] leading-[10px] font-medium text-[#010807]
-                               hover:opacity-90"
-                                    style={{ WebkitAppearance: "none", appearance: "none" }}
+                                    className="tech-button inline-flex h-[20px] min-h-0 items-center justify-center gap-1
+                                               rounded-full px-3 text-[11px] leading-none font-bold text-[#010807]
+                                               border border-[#43e5c9]/30"
                                   >
-                                    去质押
+                                    <span>去质押</span>
+                                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" className="opacity-80">
+                                      <path
+                                        d="M2 6H10M10 6L6 2M10 6L6 10"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                    </svg>
                                   </a>
                                 )}
                               </div>
@@ -1349,9 +1417,20 @@ export default function DashboardClient({
                             href={hypeStakeItems[stakeIdx].link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="rounded-lg bg-[#43e5c9] px-3 py-1.5 text-xs font-medium text-[#010807] hover:opacity-90"
+                            className="tech-button inline-flex items-center justify-center gap-1.5
+                                       rounded-full px-4 py-2 text-xs font-bold text-[#010807]
+                                       border border-[#43e5c9]/30"
                           >
-                            去质押
+                            <span>去质押</span>
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="opacity-80">
+                              <path
+                                d="M2 6H10M10 6L6 2M10 6L6 10"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
                           </a>
                         )}
                       </div>
