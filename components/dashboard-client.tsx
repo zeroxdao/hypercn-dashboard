@@ -1241,7 +1241,7 @@ export default function DashboardClient({
                                 href={item.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="rounded-md bg-[#43e5c9] px-2.5 py-0.2 text-[11px] font-medium text-[#010807] hover:opacity-90"
+                                className="inline-flex h-[20px] items-center justify-center rounded-md bg-[#43e5c9] px-2 text-[10px] leading-none text-[#010807] hover:opacity-90"
                               >
                                 去质押
                               </a>
