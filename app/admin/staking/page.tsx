@@ -3,58 +3,40 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 
-type Project = {
+type StakingProject = {
   id: string
   name: string
   logo?: string
-  categories: string[]
-  website?: string
-  social?: string
-  description?: string
+  netAPY: number
+  tvlUSD: number
+  updatedAt: string
+  link: string
 }
-
-const CATEGORY_OPTIONS = [
-  "热门",
-  "最新",
-  "DeFi",
-  "基础设施",
-  "AI",
-  "数据",
-  "工具",
-  "支付",
-  "NFT",
-  "迷因币",
-  "手机端",
-  "社区",
-]
-
-const MAX_DESC = 120
 
 function uid() {
   return Math.random().toString(36).slice(2, 10)
 }
 
-export default function AdminPage() {
+export default function StakingAdminPage() {
   const [name, setName] = useState("")
   const [logo, setLogo] = useState("")
-  const [categories, setCategories] = useState<string[]>([])
-  const [website, setWebsite] = useState("")
-  const [social, setSocial] = useState("")
-  const [description, setDescription] = useState("")
+  const [netAPY, setNetAPY] = useState("")
+  const [tvlUSD, setTvlUSD] = useState("")
+  const [link, setLink] = useState("")
   const [editId, setEditId] = useState<string | null>(null)
 
-  const [list, setList] = useState<Project[]>([])
+  const [list, setList] = useState<StakingProject[]>([])
   const [q, setQ] = useState("")
   const [loading, setLoading] = useState(false)
 
-  // 初始化：只从服务端加载（不再读取 localStorage）
+  // 初始化：从服务端加载
   useEffect(() => {
     const boot = async () => {
       try {
         setLoading(true)
-        const res = await fetch("/api/project", { cache: "no-store" })
+        const res = await fetch("/api/staking", { cache: "no-store" })
         if (!res.ok) throw new Error("load from server failed")
-        const serverList: Project[] = await res.json()
+        const serverList: StakingProject[] = await res.json()
         if (Array.isArray(serverList)) {
           setList(serverList)
         }
@@ -65,35 +47,32 @@ export default function AdminPage() {
     boot()
   }, [])
 
-  const onToggleCategory = (c: string) => {
-    setCategories((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]))
-  }
-
   const resetForm = () => {
     setName("")
     setLogo("")
-    setCategories([])
-    setWebsite("")
-    setSocial("")
-    setDescription("")
+    setNetAPY("")
+    setTvlUSD("")
+    setLink("")
     setEditId(null)
   }
 
   const onSave = async () => {
     if (!name.trim()) return alert("请输入项目名")
-    if (description.length > MAX_DESC) return alert(`简介不能超过 ${MAX_DESC} 字符`)
+    if (!netAPY.trim() || isNaN(Number(netAPY))) return alert("请输入有效的 APY 数值")
+    if (!tvlUSD.trim() || isNaN(Number(tvlUSD))) return alert("请输入有效的 TVL 数值")
+    if (!link.trim()) return alert("请输入质押链接")
 
-    const project: Project = {
+    const project: StakingProject = {
       id: editId ?? uid(),
       name: name.trim(),
       logo: logo.trim(),
-      categories,
-      website: website.trim(),
-      social: social.trim(),
-      description: description.trim(),
+      netAPY: Number(netAPY),
+      tvlUSD: Number(tvlUSD),
+      updatedAt: new Date().toISOString(),
+      link: link.trim(),
     }
 
-    // 本地先行更新（不落地到 localStorage）
+    // 本地先行更新
     const optimistic = editId
       ? list.map((x) => (x.id === project.id ? project : x))
       : [project, ...list.filter((x) => x.id !== project.id)]
@@ -101,7 +80,7 @@ export default function AdminPage() {
 
     // 同步到服务端
     try {
-      const res = await fetch("/api/project", {
+      const res = await fetch("/api/staking", {
         method: editId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ project }),
@@ -110,14 +89,13 @@ export default function AdminPage() {
         const msg = await res.text()
         throw new Error(msg || "保存失败")
       }
-      const serverList: Project[] = await res.json()
-      if (Array.isArray(serverList)) setList(serverList) // 以后端为准
+      const serverList: StakingProject[] = await res.json()
+      if (Array.isArray(serverList)) setList(serverList)
       resetForm()
       alert("已保存到数据库")
     } catch (e) {
       console.error(e)
       alert("保存到数据库失败，请检查 Vercel 环境变量和日志")
-      // 失败不额外处理（保持 UI 当前状态或手动刷新）
     }
   }
 
@@ -127,22 +105,21 @@ export default function AdminPage() {
     setEditId(p.id)
     setName(p.name ?? "")
     setLogo(p.logo ?? "")
-    setCategories(p.categories ?? [])
-    setWebsite(p.website ?? "")
-    setSocial(p.social ?? "")
-    setDescription(p.description ?? "")
+    setNetAPY(String(p.netAPY ?? ""))
+    setTvlUSD(String(p.tvlUSD ?? ""))
+    setLink(p.link ?? "")
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   const onRemove = async (id: string) => {
-    if (!confirm("确定删除该项目？")) return
+    if (!confirm("确定删除该质押项目？")) return
 
-    // 本地先删（不落地到 localStorage）
+    // 本地先删
     const optimistic = list.filter((x) => x.id !== id)
     setList(optimistic)
 
     try {
-      const res = await fetch("/api/project", {
+      const res = await fetch("/api/staking", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
@@ -151,12 +128,11 @@ export default function AdminPage() {
         const msg = await res.text()
         throw new Error(msg || "删除失败")
       }
-      const serverList: Project[] = await res.json()
+      const serverList: StakingProject[] = await res.json()
       if (Array.isArray(serverList)) setList(serverList)
     } catch (e) {
       console.error(e)
       alert("删除失败，请检查服务端日志")
-      // 失败回滚
       setList(list)
     }
   }
@@ -164,24 +140,18 @@ export default function AdminPage() {
   const filtered = useMemo(() => {
     const k = q.trim().toLowerCase()
     if (!k) return list
-    return list.filter(
-      (p) =>
-        p.name.toLowerCase().includes(k) ||
-        (p.website ?? "").toLowerCase().includes(k) ||
-        (p.social ?? "").toLowerCase().includes(k) ||
-        (p.categories ?? []).some((c) => c.toLowerCase().includes(k)),
-    )
+    return list.filter((p) => p.name.toLowerCase().includes(k) || (p.link ?? "").toLowerCase().includes(k))
   }, [list, q])
 
   return (
     <div className="mx-auto min-h-screen max-w-6xl bg-[#010807] px-4 py-6 text-white">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Admin 面板</h1>
+        <h1 className="text-xl font-semibold">质押项目管理</h1>
         <Link
-          href="/admin/staking"
+          href="/admin"
           className="rounded-lg border border-[#1e2c31] bg-[#0f1b1d] px-4 py-2 text-sm hover:bg-[#132224]"
         >
-          管理质押项目
+          返回项目管理
         </Link>
       </div>
 
@@ -193,7 +163,7 @@ export default function AdminPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full rounded-lg border border-[#1e2c31] bg-[#0f1b1d] px-3 py-2 outline-none"
-              placeholder="例如：ApStation"
+              placeholder="例如：DeFiHub"
             />
           </div>
 
@@ -207,65 +177,38 @@ export default function AdminPage() {
             />
           </div>
 
-          <div className="md:col-span-2">
-            <label className="mb-2 block text-sm text-[#96fce4]">项目分类（可多选）</label>
-            <div className="flex flex-wrap gap-2">
-              {CATEGORY_OPTIONS.map((c) => {
-                const active = categories.includes(c)
-                return (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => onToggleCategory(c)}
-                    className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
-                      active
-                        ? "bg-[#43e5c9] text-[#010807]"
-                        : "border border-[#133136] bg-[#0f1b1d] text-white hover:bg-[#132224]"
-                    }`}
-                  >
-                    {c}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
           <div>
-            <label className="mb-1 block text-sm text-[#96fce4]">官网</label>
+            <label className="mb-1 block text-sm text-[#96fce4]">净 APY (%) *</label>
             <input
-              value={website}
-              onChange={(e) => setWebsite(e.target.value)}
+              type="number"
+              step="0.01"
+              value={netAPY}
+              onChange={(e) => setNetAPY(e.target.value)}
               className="w-full rounded-lg border border-[#1e2c31] bg-[#0f1b1d] px-3 py-2 outline-none"
-              placeholder="https://example.com"
+              placeholder="例如：16.7"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm text-[#96fce4]">社交</label>
+            <label className="mb-1 block text-sm text-[#96fce4]">TVL (USD) *</label>
             <input
-              value={social}
-              onChange={(e) => setSocial(e.target.value)}
+              type="number"
+              step="0.01"
+              value={tvlUSD}
+              onChange={(e) => setTvlUSD(e.target.value)}
               className="w-full rounded-lg border border-[#1e2c31] bg-[#0f1b1d] px-3 py-2 outline-none"
-              placeholder="https://x.com/xxx 或其它"
+              placeholder="例如：154000"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="mb-1 block text-sm text-[#96fce4]">简介</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESC))}
-              rows={3}
-              className="w-full resize-none rounded-lg border border-[#1e2c31] bg-[#0f1b1d] px-3 py-2 outline-none"
-              placeholder="一句话介绍"
+            <label className="mb-1 block text-sm text-[#96fce4]">质押链接 *</label>
+            <input
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+              className="w-full rounded-lg border border-[#1e2c31] bg-[#0f1b1d] px-3 py-2 outline-none"
+              placeholder="https://..."
             />
-            <div
-              className={`mt-1 text-right text-xs ${
-                description.length === MAX_DESC ? "text-red-400" : "text-[#96fce4]"
-              }`}
-            >
-              {description.length}/{MAX_DESC}
-            </div>
           </div>
         </div>
 
@@ -274,7 +217,7 @@ export default function AdminPage() {
             onClick={onSave}
             className="rounded-lg bg-[#43e5c9] px-4 py-2 text-sm font-medium text-[#010807] hover:opacity-90"
           >
-            {editId ? "保存修改" : "保存项目"}
+            {editId ? "保存修改" : "添加项目"}
           </button>
           {editId && (
             <button onClick={resetForm} className="rounded-lg border border-[#1e2c31] bg-transparent px-4 py-2 text-sm">
@@ -285,9 +228,9 @@ export default function AdminPage() {
             onClick={async () => {
               try {
                 setLoading(true)
-                const res = await fetch("/api/project", { cache: "no-store" })
+                const res = await fetch("/api/staking", { cache: "no-store" })
                 if (!res.ok) throw new Error("refresh failed")
-                const data: Project[] = await res.json()
+                const data: StakingProject[] = await res.json()
                 if (Array.isArray(data)) setList(data)
               } finally {
                 setLoading(false)
@@ -295,7 +238,7 @@ export default function AdminPage() {
             }}
             className="rounded-lg border border-[#1e2c31] bg-[#0f1b1d] px-4 py-2 text-sm hover:bg-[#132224]"
           >
-            刷新（服务端）
+            刷新
           </button>
           {loading && <span className="text-xs text-[#96fce4]">加载中...</span>}
         </div>
@@ -303,17 +246,17 @@ export default function AdminPage() {
 
       <div className="mt-6 flex items-center justify-between">
         <h2 className="text-base font-semibold">
-          已保存的项目 <span className="text-[#96fce4]">({list.length})</span>
+          质押项目列表 <span className="text-[#96fce4]">({list.length})</span>
         </h2>
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="搜索项目/官网/分类"
+          placeholder="搜索项目名/链接"
           className="w-64 rounded-lg border border-[#1e2c31] bg-[#0f1b1d] px-3 py-2 text-sm outline-none"
         />
       </div>
 
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((p) => (
           <div key={p.id} className="flex items-start gap-2 rounded-xl border border-[#133136] bg-[#0b1416] p-3">
             {/* Logo */}
@@ -323,43 +266,18 @@ export default function AdminPage() {
 
             {/* Info */}
             <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between">
-                <div className="truncate text-[13px] font-semibold">{p.name}</div>
-              </div>
+              <div className="truncate text-[13px] font-semibold">{p.name}</div>
 
-              {/* Categories */}
-              <div className="mt-1 flex flex-wrap gap-1">
-                {(p.categories ?? []).map((c) => (
-                  <span
-                    key={c}
-                    className="rounded-full border border-[#2a4b45] bg-[#0f1b1d] px-2 py-[2px] text-[10px] text-[#96fce4]"
-                  >
-                    {c}
-                  </span>
-                ))}
-              </div>
-
-              {/* Links */}
-              <div className="mt-1 truncate text-[11px] text-[#96fce4]">
-                {p.website ? (
-                  <a href={p.website} target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                    {p.website}
+              <div className="mt-1 space-y-1 text-[11px] text-[#96fce4]">
+                <div>净 APY: {p.netAPY}%</div>
+                <div>TVL: ${p.tvlUSD.toLocaleString()}</div>
+                <div className="truncate">
+                  <a href={p.link} target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                    {p.link}
                   </a>
-                ) : null}
-                {p.social ? (
-                  <>
-                    {" · "}
-                    <a href={p.social} target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                      {p.social}
-                    </a>
-                  </>
-                ) : null}
+                </div>
+                <div className="text-[10px]">更新: {new Date(p.updatedAt).toLocaleString()}</div>
               </div>
-
-              {/* Description */}
-              {p.description ? (
-                <div className="mt-1 line-clamp-2 text-[11px] text-[#bfeee2]">{p.description}</div>
-              ) : null}
 
               {/* Actions */}
               <div className="mt-2 flex gap-2">
@@ -381,7 +299,7 @@ export default function AdminPage() {
         ))}
         {filtered.length === 0 && !loading && (
           <div className="col-span-full rounded-xl border border-[#133136] bg-[#0b1416] p-6 text-sm text-[#96fce4]">
-            暂无项目
+            暂无质押项目
           </div>
         )}
       </div>

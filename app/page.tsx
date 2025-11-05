@@ -164,6 +164,20 @@ export default function LandingPage() {
           0% { transform: rotate(0deg) translateX(260px) rotate(0deg); }
           100% { transform: rotate(360deg) translateX(260px) rotate(-360deg); }
         }
+        
+        /* Added tech button animations for rotating borders and effects */
+        @keyframes rotateBorder {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
+        }
+        @keyframes scan-line {
+          0% { transform: translateY(-100%); }
+          100% { transform: translateY(100%); }
+        }
       `}</style>
 
       <div className="relative z-10">
@@ -245,7 +259,7 @@ export default function LandingPage() {
               {/* Cat image - dramatically increased size to be the main focal point */}
               <div className="relative z-10">
                 <img
-                  src="https://hypeonly.xyz/images/design-mode/Hypurr.png"
+                  src="/images/design-mode/Hypurr(1).png"
                   alt="Hyperliquid 中文社区吉祥物"
                   className="relative h-[280px] w-[280px] object-contain drop-shadow-2xl sm:h-[380px] sm:w-[380px] md:h-[480px] md:w-[480px] lg:h-[550px] lg:w-[550px]"
                   loading="eager"
@@ -268,16 +282,56 @@ export default function LandingPage() {
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/dashboard"
-              className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-[#43e5c9] to-[#2dd4bf] px-8 py-4 text-base font-semibold text-[#0a0e12] shadow-lg shadow-[#43e5c9]/30 transition-all hover:shadow-xl hover:shadow-[#43e5c9]/40"
+              className="tech-button group relative overflow-hidden rounded-xl
+                         inline-flex h-12 w-[180px] items-center justify-center
+                         text-[15px] font-semibold text-white transition-all"
             >
-              <span className="relative z-10">HYPE Only</span>
-              <div className="absolute inset-0 -z-0 bg-gradient-to-r from-[#2dd4bf] to-[#43e5c9] opacity-0 transition-opacity group-hover:opacity-100" />
+              {/* Rotating border lines */}
+              <div className="absolute inset-0 z-10" style={{ animation: "rotateBorder 4s linear infinite" }}>
+                <div className="absolute left-0 top-0 h-[2px] w-1/3 bg-gradient-to-r from-transparent via-[#43e5c9] to-transparent" />
+                <div className="absolute right-0 top-0 h-1/3 w-[2px] bg-gradient-to-b from-transparent via-[#43e5c9] to-transparent" />
+                <div className="absolute bottom-0 right-0 h-[2px] w-1/3 bg-gradient-to-l from-transparent via-[#43e5c9] to-transparent" />
+                <div className="absolute bottom-0 left-0 h-1/3 w-[2px] bg-gradient-to-t from-transparent via-[#43e5c9] to-transparent" />
+              </div>
+
+              {/* Corner accents */}
+              <div className="absolute left-0 top-0 z-10 h-3 w-3 border-l-2 border-t-2 border-[#43e5c9]" />
+              <div className="absolute right-0 top-0 z-10 h-3 w-3 border-r-2 border-t-2 border-[#43e5c9]" />
+              <div className="absolute bottom-0 left-0 z-10 h-3 w-3 border-b-2 border-l-2 border-[#43e5c9]" />
+              <div className="absolute bottom-0 right-0 z-10 h-3 w-3 border-b-2 border-r-2 border-[#43e5c9]" />
+
+              {/* Scanning line effect */}
+              <div className="absolute inset-0 z-10 overflow-hidden">
+                <div
+                  className="h-[2px] w-full bg-gradient-to-r from-transparent via-[#43e5c9] to-transparent opacity-50"
+                  style={{ animation: "scan-line 3s ease-in-out infinite" }}
+                />
+              </div>
+
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 z-20 bg-gradient-to-r from-[#43e5c9]/20 to-[#2dd4bf]/20 opacity-0 transition-opacity group-hover:opacity-100" />
+
+              <span className="relative z-30 flex items-center gap-2">
+                <span className="drop-shadow-[0_0_8px_rgba(67,229,201,0.8)]">HYPE Only</span>
+                <img
+                  src="https://hyperfoundation.org/landing/blob_green.gif"
+                  alt=""
+                  className="h-5 w-5 object-contain"
+                />
+              </span>
+
+              {/* Multiple shadow layers for depth */}
+              <div className="absolute inset-0 -z-10 rounded-xl bg-[#0a0e12] shadow-[0_0_20px_rgba(67,229,201,0.3),0_0_40px_rgba(67,229,201,0.2),0_0_60px_rgba(67,229,201,0.1)] transition-all group-hover:shadow-[0_0_30px_rgba(67,229,201,0.5),0_0_60px_rgba(67,229,201,0.3),0_0_90px_rgba(67,229,201,0.2)]" />
             </Link>
+
             <a
               href="https://t.me/chinesehyperliquid"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-xl border border-[#43e5c9]/30 bg-[#0f1519]/50 px-8 py-4 text-base font-semibold text-[#43e5c9] backdrop-blur-sm transition-all hover:border-[#43e5c9]/50 hover:bg-[#0f1519]/80"
+              className="rounded-xl border border-[#43e5c9]/30 bg-[#0f1519]/50
+                         inline-flex h-12 w-[180px] items-center justify-center
+                         text-[15px] font-semibold text-[#43e5c9] backdrop-blur-sm
+                         transition-all hover:border-[#43e5c9]/50 hover:bg-[#0f1519]/80"
             >
               加入我们
             </a>
