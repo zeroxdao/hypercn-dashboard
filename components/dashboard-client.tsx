@@ -1469,7 +1469,7 @@ export default function DashboardClient({
                                 <div className="grid grid-cols-2 gap-1.5">
                                   <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
                                     <div className="text-[10px] text-[#96fce4] leading-none">净 APY</div>
-                                    <div className="mt-1 text-[13px] font-normal leading-none text-white whitespace-nowrap">
+                                    <div className="mt-1 text-[10px] font-normal leading-none text-white whitespace-nowrap">
                                       {item.netAPY.toFixed(1)}%
                                     </div>
                                   </div>
@@ -1484,7 +1484,7 @@ export default function DashboardClient({
                                 {/* 第二行：TVL 单独一行 */}
                                 <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
                                   <div className="text-[10px] text-[#96fce4] leading-none">TVL</div>
-                                  <div className="mt-1 text-[13px] font-normal leading-none text-white truncate">
+                                  <div className="mt-1 text-[10px] font-normal leading-none text-white truncate">
                                     {tvl}
                                   </div>
                                 </div>
