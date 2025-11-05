@@ -1503,7 +1503,7 @@ export default function DashboardClient({
                                         "inline-block cursor-pointer select-none shrink-0 align-middle " +
                                         (i === stakeIdx
                                           ? "h-[2px] w-[8px] rounded-full bg-[#43e5c9] transition-all"
-                                          : "h-[2px] w-[4px] rounded-full bg-[#2a45] transition-all")
+                                          : "h-[2px] w-[4px] rounded-full bg-[#2a4b45] transition-all")
                                       }
                                       aria-label={`slide-${i}`}
                                     />
