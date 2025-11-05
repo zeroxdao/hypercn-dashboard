@@ -715,83 +715,128 @@ export default function DashboardClient({
             background-position: 0% 50%;
           }
         }
-        /* New futuristic button with holographic glass effect, animated gradient border, and particle glow */
+        /* Enhanced futuristic button with much more visible rotating gradient border and glow effects */
         .futuristic-stake-button {
           position: relative;
-          overflow: hidden;
+          overflow: visible;
           background: linear-gradient(135deg, 
-            rgba(67, 229, 201, 0.15) 0%, 
-            rgba(45, 212, 191, 0.1) 50%, 
-            rgba(20, 184, 166, 0.15) 100%);
-          backdrop-filter: blur(10px);
-          border: 2px solid transparent;
+            rgba(67, 229, 201, 0.2) 0%, 
+            rgba(45, 212, 191, 0.15) 50%, 
+            rgba(20, 184, 166, 0.2) 100%);
+          backdrop-filter: blur(12px);
+          border: 3px solid transparent;
           background-clip: padding-box;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 
+            0 0 20px rgba(67, 229, 201, 0.3),
+            0 0 40px rgba(67, 229, 201, 0.15),
+            inset 0 0 20px rgba(67, 229, 201, 0.1);
         }
         
+        /* Animated rotating gradient border - much more visible */
         .futuristic-stake-button::before {
           content: '';
           position: absolute;
-          inset: -2px;
+          inset: -3px;
           border-radius: inherit;
-          padding: 2px;
+          padding: 3px;
           background: linear-gradient(
-            135deg,
+            90deg,
             #43e5c9 0%,
-            #2dd4bf 25%,
-            #14b8a6 50%,
-            #0d9488 75%,
+            #2dd4bf 12.5%,
+            #14b8a6 25%,
+            #0d9488 37.5%,
+            #0f766e 50%,
+            #0d9488 62.5%,
+            #14b8a6 75%,
+            #2dd4bf 87.5%,
             #43e5c9 100%
           );
-          background-size: 300% 300%;
+          background-size: 400% 400%;
           -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite: xor;
           mask-composite: exclude;
-          animation: gradient-shift 3s ease infinite;
+          animation: gradient-rotate 3s linear infinite;
           z-index: -1;
+          filter: brightness(1.5) saturate(1.5);
         }
         
+        @keyframes gradient-rotate {
+          0% {
+            background-position: 0% 50%;
+          }
+          100% {
+            background-position: 400% 50%;
+          }
+        }
+        
+        /* Shimmer effect - more visible */
         .futuristic-stake-button::after {
           content: '';
           position: absolute;
           top: -50%;
-          left: -50%;
+          left: -100%;
           width: 200%;
           height: 200%;
           background: linear-gradient(
             90deg,
-            transparent,
-            rgba(255, 255, 255, 0.4),
-            transparent
+            transparent 0%,
+            transparent 40%,
+            rgba(255, 255, 255, 0.6) 50%,
+            transparent 60%,
+            transparent 100%
           );
-          transform: rotate(45deg);
-          animation: shimmer 3s infinite;
+          transform: rotate(30deg);
+          animation: shimmer-sweep 3s ease-in-out infinite;
         }
         
+        @keyframes shimmer-sweep {
+          0% {
+            left: -100%;
+          }
+          50%, 100% {
+            left: 200%;
+          }
+        }
+        
+        /* Hover state with enhanced glow */
         .futuristic-stake-button:hover {
           background: linear-gradient(135deg, 
-            rgba(67, 229, 201, 0.25) 0%, 
-            rgba(45, 212, 191, 0.2) 50%, 
-            rgba(20, 184, 166, 0.25) 100%);
-          transform: translateY(-2px) scale(1.02);
+            rgba(67, 229, 201, 0.35) 0%, 
+            rgba(45, 212, 191, 0.25) 50%, 
+            rgba(20, 184, 166, 0.35) 100%);
+          transform: translateY(-3px) scale(1.05);
           box-shadow: 
-            0 0 20px rgba(67, 229, 201, 0.4),
-            0 0 40px rgba(67, 229, 201, 0.2),
-            0 0 60px rgba(67, 229, 201, 0.1),
-            0 10px 30px rgba(0, 0, 0, 0.3);
-          animation: float-up 2s ease-in-out infinite;
+            0 0 30px rgba(67, 229, 201, 0.6),
+            0 0 60px rgba(67, 229, 201, 0.4),
+            0 0 90px rgba(67, 229, 201, 0.2),
+            0 15px 40px rgba(0, 0, 0, 0.4),
+            inset 0 0 30px rgba(67, 229, 201, 0.2);
+          animation: float-pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes float-pulse {
+          0%, 100% {
+            transform: translateY(-3px) scale(1.05);
+          }
+          50% {
+            transform: translateY(-5px) scale(1.06);
+          }
         }
         
         .futuristic-stake-button:active {
-          transform: translateY(0) scale(0.98);
+          transform: translateY(-1px) scale(1.02);
         }
         
+        /* Pulsing glow ring on hover */
         .futuristic-stake-button .button-glow {
           position: absolute;
-          inset: 0;
+          inset: -10px;
           border-radius: inherit;
+          background: radial-gradient(circle, rgba(67, 229, 201, 0.4) 0%, transparent 70%);
           opacity: 0;
           transition: opacity 0.4s ease;
+          z-index: -2;
         }
         
         .futuristic-stake-button:hover .button-glow {
@@ -799,23 +844,49 @@ export default function DashboardClient({
           animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
         
+        @keyframes pulse-ring {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.6;
+          }
+          50% {
+            transform: scale(1.1);
+            opacity: 0.3;
+          }
+        }
+        
+        /* Text with glow */
         .futuristic-stake-button .button-text {
           position: relative;
           z-index: 1;
           font-weight: 700;
           letter-spacing: 0.5px;
-          text-shadow: 0 0 10px rgba(67, 229, 201, 0.5);
+          text-shadow: 
+            0 0 10px rgba(67, 229, 201, 0.8),
+            0 0 20px rgba(67, 229, 201, 0.4);
         }
         
+        /* Animated icon */
         .futuristic-stake-button .button-icon {
           position: relative;
           z-index: 1;
           transition: transform 0.3s ease;
+          filter: drop-shadow(0 0 8px rgba(67, 229, 201, 0.8));
         }
         
         .futuristic-stake-button:hover .button-icon {
-          transform: translateX(3px);
-          filter: drop-shadow(0 0 8px rgba(67, 229, 201, 0.8));
+          transform: translateX(4px);
+          filter: drop-shadow(0 0 12px rgba(67, 229, 201, 1));
+          animation: arrow-pulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes arrow-pulse {
+          0%, 100% {
+            transform: translateX(4px);
+          }
+          50% {
+            transform: translateX(6px);
+          }
         }
       `}</style>
 
