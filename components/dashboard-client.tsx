@@ -1473,7 +1473,7 @@ export default function DashboardClient({
                                     className="futuristic-stake-button inline-flex h-[22px] min-h-0 items-center justify-center gap-1.5
                                                rounded-full px-3 text-[11px] leading-none"
                                   >
-                                    <div className="button-glow" />
+                                    <div className="button-glow hidden" />
                                     <span className="button-text text-[#43e5c9]">去质押</span>
                                     <svg width="10" height="10" viewBox="0 0 12 12" fill="none" className="button-icon">
                                       <path
@@ -1562,7 +1562,7 @@ export default function DashboardClient({
                             className="futuristic-stake-button inline-flex items-center justify-center gap-2
                                        rounded-full px-5 py-2.5 text-xs leading-none"
                           >
-                            <div className="button-glow" />
+                            <div className="button-glow hidden" />
                             <span className="button-text text-[#43e5c9]">去质押</span>
                             <svg width="14" height="14" viewBox="0 0 12 12" fill="none" className="button-icon">
                               <path
