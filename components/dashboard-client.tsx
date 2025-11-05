@@ -716,6 +716,81 @@ export default function DashboardClient({
             background-position: 0% 50%;
           }
         }
+        
+        /* Fire effect for "热门" label */
+        .label-hot {
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .label-hot::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            135deg,
+            rgba(249, 115, 22, 0.4) 0%,
+            rgba(234, 88, 12, 0.3) 25%,
+            rgba(249, 115, 22, 0.5) 50%,
+            rgba(234, 88, 12, 0.2) 75%,
+            rgba(249, 115, 22, 0.4) 100%
+          );
+          background-size: 200% 200%;
+          animation: fire-flicker 3s ease-in-out infinite, fire-glow 2s ease-in-out infinite;
+          z-index: 0;
+          pointer-events: none;
+        }
+        
+        .label-hot > * {
+          position: relative;
+          z-index: 1;
+        }
+        
+        /* Glass shimmer effect for "最新" label */
+        .label-latest {
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .label-latest::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            90deg,
+            rgba(67, 184, 229, 0.1) 0%,
+            rgba(67, 184, 229, 0.3) 50%,
+            rgba(67, 184, 229, 0.1) 100%
+          );
+          background-size: 200% 100%;
+          animation: glass-reflect 3s ease-in-out infinite;
+          z-index: 0;
+          pointer-events: none;
+        }
+        
+        .label-latest::after {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 30%;
+          height: 200%;
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.3) 50%,
+            transparent 100%
+          );
+          animation: glass-shimmer 4s ease-in-out infinite;
+          z-index: 1;
+          pointer-events: none;
+        }
+        
+        .label-latest > * {
+          position: relative;
+          z-index: 2;
+        }
+
         /* Enhanced futuristic button with much more visible rotating gradient border and glow effects */
         .futuristic-stake-button {
           position: relative;
@@ -1706,11 +1781,13 @@ export default function DashboardClient({
                         ? `${base} ${normalActive}`
                         : `${base} ${normalInactive}`
 
+                  const effectClass = isHot ? "label-hot" : isLatest ? "label-latest" : ""
+
                   return (
                     <button
                       key={category}
                       onClick={() => setActiveCategory(category)}
-                      className={`${cls} max-[639px]:px-3 max-[639px]:h-8 max-[639px]:text-xs max-[639px]:rounded-xl max-[639px]:whitespace-nowrap`}
+                      className={`${cls} ${effectClass} max-[639px]:px-3 max-[639px]:h-8 max-[639px]:text-xs max-[639px]:rounded-xl max-[639px]:whitespace-nowrap`}
                     >
                       {category}
                     </button>
