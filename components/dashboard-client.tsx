@@ -1529,11 +1529,16 @@ export default function DashboardClient({
                       onMouseLeave={() => setStakePaused(false)}
                     >
                       {/* 标题 + 右上角按钮 */}
-                      <div className="col-span-12 mb-1.5 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                          <span className="text-sm font-semibold text-[#96fce4]">HYPE 推荐质押收益率</span>
-                        </div>
+                      <div className="hidden md:block">
+                        <div className="h-[180px] px-5 py-4 grid grid-cols-12 gap-3 items-start overflow-hidden">
+                          <div className="col-span-12 mb-2 flex items-center gap-2">
+                            <img
+                              src="https://hyperliquid.gitbook.io/hyperliquid-docs/~gitbook/image?url=https%3A%2F%2F2356094849-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FyUdp569E6w18GdfqlGvJ%252Ficon%252FsIAjqhKKIUysM08ahKPh%252FHL-logoSwitchDISliStat.png%3Falt%3Dmedia%26token%3Da81fa25c-0510-4d97-87ff-3fb8944935b1&width=32&dpr=4&quality=100&sign=3e1219e3&sv=2"
+                              alt="Hyperliquid Logo"
+                              className="h-5 w-5 rounded"
+                            />
+                            <span className="text-sm font-semibold text-[#96fce4]">$HYPE 价格</span>
+                          </div>
                         {hypeStakeItems[stakeIdx]?.link && (
                           <a
                             href={hypeStakeItems[stakeIdx].link}
