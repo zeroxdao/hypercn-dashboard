@@ -1559,8 +1559,7 @@ export default function DashboardClient({
                         const tvl = `$${item.tvlUSD.toLocaleString()}`
                         return (
                           <>
-                            {/* 左：Logo + 名称 */}
-                            <div className="col-span-4 flex items-center gap-2">
+                            <div className="col-span-4 flex items-center gap-2 min-w-0">
                               <div className="h-10 w-10 overflow-hidden rounded-lg bg-[#112224]">
                                 {item.logo && (
                                   <img
@@ -1573,8 +1572,7 @@ export default function DashboardClient({
                               <div className="truncate text-base font-semibold text-white">{item.name}</div>
                             </div>
 
-                            {/* 中：APY 与 TVL 同排（Chip 风格） */}
-                            <div className="col-span-5 flex items-stretch gap-3">
+                            <div className="col-span-5 flex items-stretch gap-3 min-w-0">
                               <div className="flex-1 rounded-lg border border-[#133136] bg-[#0f1b1d] px-3 py-2">
                                 <div className="text-[11px] text-[#96fce4]">净 APY</div>
                                 <div className="mt-0.5 text-base font-semibold text-white">
@@ -1583,15 +1581,14 @@ export default function DashboardClient({
                               </div>
                               <div className="flex-1 rounded-lg border border-[#133136] bg-[#0f1b1d] px-3 py-2">
                                 <div className="text-[11px] text-[#96fce4]">TVL</div>
-                                <div className="mt-0.5 text-base font-semibold text-white">{tvl}</div>
+                                <div className="mt-0.5 text-base font-semibold text-white truncate">{tvl}</div>
                               </div>
                             </div>
 
-                            {/* 右：更新时间 */}
-                            <div className="col-span-3">
+                            <div className="col-span-3 min-w-[172px] flex-shrink-0">
                               <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-3 py-2">
                                 <div className="text-[11px] text-[#96fce4]">更新时间</div>
-                                <div className="mt-0.5 text-sm font-medium text-white">
+                                <div className="mt-0.5 text-sm font-medium text-white whitespace-nowrap">
                                   {dayjs(item.updatedAt).format("YYYY-MM-DD HH:mm")}
                                 </div>
                               </div>
