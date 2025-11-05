@@ -772,31 +772,7 @@ export default function DashboardClient({
         
         /* Shimmer effect - more visible */
         .futuristic-stake-button::after {
-          content: '';
-          position: absolute;
-          top: -50%;
-          left: -100%;
-          width: 200%;
-          height: 200%;
-          background: linear-gradient(
-            90deg,
-            transparent 0%,
-            transparent 40%,
-            rgba(255, 255, 255, 0.6) 50%,
-            transparent 60%,
-            transparent 100%
-          );
-          transform: rotate(30deg);
-          animation: shimmer-sweep 3s ease-in-out infinite;
-        }
-        
-        @keyframes shimmer-sweep {
-          0% {
-            left: -100%;
-          }
-          50%, 100% {
-            left: 200%;
-          }
+          content: none !important;
         }
         
         /* Hover state with enhanced glow */
