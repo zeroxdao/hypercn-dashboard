@@ -1200,6 +1200,7 @@ export default function DashboardClient({
 
             {/* ================= HYPE 推荐质押收益率 ================= */}
             <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
+              {/* Mobile version: block md:hidden */}
               <div className="block md:hidden">
                 <div
                   className="rounded-2xl bg-[#0F1519] p-3"
@@ -1241,7 +1242,11 @@ export default function DashboardClient({
                                 href={item.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex h-[5px] items-center justify-center rounded-md bg-[#43e5c9] px-2 text-[10px] leading-none text-[#010807] hover:opacity-90"
+                                className="inline-flex h-[16px] min-h-0 items-center justify-center
+                               rounded-md bg-[#43e5c9] px-2
+                               text-[10px] leading-[10px] font-medium text-[#010807]
+                               hover:opacity-90"
+                                style={{ WebkitAppearance: "none", appearance: "none" }}
                               >
                                 去质押
                               </a>
