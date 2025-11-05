@@ -1242,7 +1242,7 @@ export default function DashboardClient({
                                 href={item.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex h-[20px] min-h-0 items-center justify-center
+                                className="inline-flex h-[16px] min-h-0 items-center justify-center
                                rounded-md bg-[#43e5c9] px-2
                                text-[10px] leading-[10px] font-medium text-[#010807]
                                hover:opacity-90"
@@ -1253,24 +1253,28 @@ export default function DashboardClient({
                             )}
                           </div>
 
-                          {/* 中部：APY / TVL / 更新时间 —— 同排等高卡片 */}
-                          <div className="grid grid-cols-3 gap-1.5">
-                            <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
-                              <div className="text-[10px] text-[#96fce4] leading-none">净 APY</div>
-                              <div className="mt-1 text-[13px] font-semibold leading-none text-white whitespace-nowrap">
-                                {item.netAPY.toFixed(1)}%
+                          <div className="flex flex-col gap-1.5">
+                            {/* 第一行：APY + 更新时间 */}
+                            <div className="grid grid-cols-2 gap-1.5">
+                              <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
+                                <div className="text-[10px] text-[#96fce4] leading-none">净 APY</div>
+                                <div className="mt-1 text-[13px] font-semibold leading-none text-white whitespace-nowrap">
+                                  {item.netAPY.toFixed(1)}%
+                                </div>
+                              </div>
+                              <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
+                                <div className="text-[10px] text-[#96fce4] leading-none">更新时间</div>
+                                <div className="mt-1 text-[12px] font-medium leading-none text-white whitespace-nowrap">
+                                  {dayjs(item.updatedAt).format("MM-DD HH:mm")}
+                                </div>
                               </div>
                             </div>
-                            <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
+
+                            {/* 第二行：TVL 单独一行 */}
+                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
                               <div className="text-[10px] text-[#96fce4] leading-none">TVL</div>
                               <div className="mt-1 text-[13px] font-semibold leading-none text-white truncate">
                                 {tvl}
-                              </div>
-                            </div>
-                            <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
-                              <div className="text-[10px] text-[#96fce4] leading-none">更新时间</div>
-                              <div className="mt-1 text-[12px] font-medium leading-none text-white whitespace-nowrap">
-                                {dayjs(item.updatedAt).format("MM-DD HH:mm")}
                               </div>
                             </div>
                           </div>
