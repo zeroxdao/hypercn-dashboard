@@ -715,15 +715,43 @@ export default function DashboardClient({
             background-position: 0% 50%;
           }
         }
-        .tech-button {
+        /* New futuristic button with holographic glass effect, animated gradient border, and particle glow */
+        .futuristic-stake-button {
           position: relative;
           overflow: hidden;
-          background: linear-gradient(135deg, #43e5c9 0%, #2dd4bf 50%, #14b8a6 100%);
-          background-size: 200% 200%;
-          animation: gradient-shift 3s ease infinite;
-          transition: all 0.3s ease;
+          background: linear-gradient(135deg, 
+            rgba(67, 229, 201, 0.15) 0%, 
+            rgba(45, 212, 191, 0.1) 50%, 
+            rgba(20, 184, 166, 0.15) 100%);
+          backdrop-filter: blur(10px);
+          border: 2px solid transparent;
+          background-clip: padding-box;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .tech-button::before {
+        
+        .futuristic-stake-button::before {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          border-radius: inherit;
+          padding: 2px;
+          background: linear-gradient(
+            135deg,
+            #43e5c9 0%,
+            #2dd4bf 25%,
+            #14b8a6 50%,
+            #0d9488 75%,
+            #43e5c9 100%
+          );
+          background-size: 300% 300%;
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          animation: gradient-shift 3s ease infinite;
+          z-index: -1;
+        }
+        
+        .futuristic-stake-button::after {
           content: '';
           position: absolute;
           top: -50%;
@@ -733,18 +761,61 @@ export default function DashboardClient({
           background: linear-gradient(
             90deg,
             transparent,
-            rgba(255, 255, 255, 0.3),
+            rgba(255, 255, 255, 0.4),
             transparent
           );
-          background-size: 200% 100%;
-          animation: shimmer 2.5s infinite;
+          transform: rotate(45deg);
+          animation: shimmer 3s infinite;
         }
-        .tech-button:hover {
-          transform: translateY(-1px);
-          animation: gradient-shift 1.5s ease infinite, glow-pulse 1.5s ease infinite;
+        
+        .futuristic-stake-button:hover {
+          background: linear-gradient(135deg, 
+            rgba(67, 229, 201, 0.25) 0%, 
+            rgba(45, 212, 191, 0.2) 50%, 
+            rgba(20, 184, 166, 0.25) 100%);
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 
+            0 0 20px rgba(67, 229, 201, 0.4),
+            0 0 40px rgba(67, 229, 201, 0.2),
+            0 0 60px rgba(67, 229, 201, 0.1),
+            0 10px 30px rgba(0, 0, 0, 0.3);
+          animation: float-up 2s ease-in-out infinite;
         }
-        .tech-button:active {
-          transform: translateY(0);
+        
+        .futuristic-stake-button:active {
+          transform: translateY(0) scale(0.98);
+        }
+        
+        .futuristic-stake-button .button-glow {
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          opacity: 0;
+          transition: opacity 0.4s ease;
+        }
+        
+        .futuristic-stake-button:hover .button-glow {
+          opacity: 1;
+          animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .futuristic-stake-button .button-text {
+          position: relative;
+          z-index: 1;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+          text-shadow: 0 0 10px rgba(67, 229, 201, 0.5);
+        }
+        
+        .futuristic-stake-button .button-icon {
+          position: relative;
+          z-index: 1;
+          transition: transform 0.3s ease;
+        }
+        
+        .futuristic-stake-button:hover .button-icon {
+          transform: translateX(3px);
+          filter: drop-shadow(0 0 8px rgba(67, 229, 201, 0.8));
         }
       `}</style>
 
@@ -1328,15 +1399,15 @@ export default function DashboardClient({
                                     href={item.link}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="tech-button inline-flex h-[20px] min-h-0 items-center justify-center gap-1
-                                               rounded-full px-3 text-[11px] leading-none font-bold text-[#010807]
-                                               border border-[#43e5c9]/30"
+                                    className="futuristic-stake-button inline-flex h-[22px] min-h-0 items-center justify-center gap-1.5
+                                               rounded-full px-3 text-[11px] leading-none"
                                   >
-                                    <span>去质押</span>
-                                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" className="opacity-80">
+                                    <div className="button-glow" />
+                                    <span className="button-text text-[#43e5c9]">去质押</span>
+                                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" className="button-icon">
                                       <path
                                         d="M2 6H10M10 6L6 2M10 6L6 10"
-                                        stroke="currentColor"
+                                        stroke="#43e5c9"
                                         strokeWidth="2"
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
@@ -1385,7 +1456,7 @@ export default function DashboardClient({
                                         "inline-block cursor-pointer select-none shrink-0 align-middle " +
                                         (i === stakeIdx
                                           ? "h-[2px] w-[8px] rounded-full bg-[#43e5c9] transition-all"
-                                          : "h-[2px] w-[4px] rounded-full bg-[#2a4b45] transition-all")
+                                          : "h-[2px] w-[4px] rounded-full bg-[#2a45] transition-all")
                                       }
                                       aria-label={`slide-${i}`}
                                     />
@@ -1417,15 +1488,15 @@ export default function DashboardClient({
                             href={hypeStakeItems[stakeIdx].link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="tech-button inline-flex items-center justify-center gap-1.5
-                                       rounded-full px-4 py-2 text-xs font-bold text-[#010807]
-                                       border border-[#43e5c9]/30"
+                            className="futuristic-stake-button inline-flex items-center justify-center gap-2
+                                       rounded-full px-5 py-2.5 text-xs leading-none"
                           >
-                            <span>去质押</span>
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="opacity-80">
+                            <div className="button-glow" />
+                            <span className="button-text text-[#43e5c9]">去质押</span>
+                            <svg width="14" height="14" viewBox="0 0 12 12" fill="none" className="button-icon">
                               <path
                                 d="M2 6H10M10 6L6 2M10 6L6 10"
-                                stroke="currentColor"
+                                stroke="#43e5c9"
                                 strokeWidth="2"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
