@@ -1575,11 +1575,11 @@ export default function DashboardClient({
                             <div className="col-span-5 min-w-0 flex items-stretch gap-3">
                               <div className="flex-1 rounded-lg border border-[#133136] bg-[#0f1b1d] px-3 py-2">
                                 <div className="text-[11px] text-[#96fce4]">净 APY</div>
-                                <div className="mt-0.5 text-base font-normal text-white">{item.netAPY.toFixed(1)}%</div>
+                                <div className="mt-0.5 text-sm font-normal text-white">{item.netAPY.toFixed(1)}%</div>
                               </div>
                               <div className="flex-1 rounded-lg border border-[#133136] bg-[#0f1b1d] px-3 py-2">
                                 <div className="text-[11px] text-[#96fce4]">TVL</div>
-                                <div className="mt-0.5 text-base font-normal text-white truncate">{tvl}</div>
+                                <div className="mt-0.5 text-sm font-normal text-white truncate">{tvl}</div>
                               </div>
                             </div>
 
