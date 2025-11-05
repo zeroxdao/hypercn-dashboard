@@ -164,35 +164,19 @@ export default function LandingPage() {
           0% { transform: rotate(0deg) translateX(260px) rotate(0deg); }
           100% { transform: rotate(360deg) translateX(260px) rotate(-360deg); }
         }
-        @keyframes catRun {
-          0% {
-            left: -40px;
-            transform: translateY(0px) scaleX(1);
-          }
-          25% {
-            transform: translateY(-3px) scaleX(1);
-          }
-          50% {
-            transform: translateY(0px) scaleX(1);
-          }
-          75% {
-            transform: translateY(-3px) scaleX(1);
-          }
-          100% {
-            left: calc(100% + 40px);
-            transform: translateY(0px) scaleX(1);
-          }
+        
+        /* Added tech button animations for rotating borders and effects */
+        @keyframes rotateBorder {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
-        .running-cat {
-          position: absolute;
-          width: 32px;
-          height: 32px;
-          top: 50%;
-          margin-top: -16px;
-          animation: catRun 3s linear infinite;
-          pointer-events: none;
-          filter: brightness(0) saturate(100%);
-          opacity: 0.6;
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
+        }
+        @keyframes scan-line {
+          0% { transform: translateY(-100%); }
+          100% { transform: translateY(100%); }
         }
       `}</style>
 
@@ -298,26 +282,49 @@ export default function LandingPage() {
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/dashboard"
-              className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-[#43e5c9] to-[#2dd4bf] px-8 py-4 text-base font-semibold text-[#0a0e12] shadow-lg shadow-[#43e5c9]/30 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-[#43e5c9]/50"
+              className="tech-button group relative overflow-hidden rounded-xl px-8 py-4 text-base font-semibold text-white transition-all"
             >
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 h-full w-full object-cover opacity-60 transition-all duration-300 group-hover:opacity-80"
-                style={{ mixBlendMode: "multiply" }}
-              >
-                <source
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Side-profile%2C_facing_right._A_looping_in-place_run_cycle_of_the_exact_same_chibi_cat_as_the_referenc_seed3627068871-KUZgrOMnUNT0ht6q53v0a1MCUoHtTH.mp4"
-                  type="video/mp4"
+              {/* Green blob GIF background */}
+              <div className="absolute inset-0 z-0 opacity-60">
+                <img
+                  src="https://hyperfoundation.org/landing/blob_green.gif"
+                  alt=""
+                  className="h-full w-full object-cover"
                 />
-              </video>
-              <span className="relative z-10 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:drop-shadow-[0_0_8px_rgba(10,14,18,0.8)]">
-                HYPE Only
-              </span>
-              <div className="absolute inset-0 -z-0 bg-gradient-to-r from-[#2dd4bf] to-[#43e5c9] opacity-0 transition-all duration-300 group-hover:opacity-100" />
+              </div>
+
+              {/* Rotating border lines */}
+              <div className="absolute inset-0 z-10" style={{ animation: "rotateBorder 4s linear infinite" }}>
+                <div className="absolute left-0 top-0 h-[2px] w-1/3 bg-gradient-to-r from-transparent via-[#43e5c9] to-transparent" />
+                <div className="absolute right-0 top-0 h-1/3 w-[2px] bg-gradient-to-b from-transparent via-[#43e5c9] to-transparent" />
+                <div className="absolute bottom-0 right-0 h-[2px] w-1/3 bg-gradient-to-l from-transparent via-[#43e5c9] to-transparent" />
+                <div className="absolute bottom-0 left-0 h-1/3 w-[2px] bg-gradient-to-t from-transparent via-[#43e5c9] to-transparent" />
+              </div>
+
+              {/* Corner accents */}
+              <div className="absolute left-0 top-0 z-10 h-3 w-3 border-l-2 border-t-2 border-[#43e5c9]" />
+              <div className="absolute right-0 top-0 z-10 h-3 w-3 border-r-2 border-t-2 border-[#43e5c9]" />
+              <div className="absolute bottom-0 left-0 z-10 h-3 w-3 border-b-2 border-l-2 border-[#43e5c9]" />
+              <div className="absolute bottom-0 right-0 z-10 h-3 w-3 border-b-2 border-r-2 border-[#43e5c9]" />
+
+              {/* Scanning line effect */}
+              <div className="absolute inset-0 z-10 overflow-hidden">
+                <div
+                  className="h-[2px] w-full bg-gradient-to-r from-transparent via-[#43e5c9] to-transparent opacity-50"
+                  style={{ animation: "scan-line 3s ease-in-out infinite" }}
+                />
+              </div>
+
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 z-20 bg-gradient-to-r from-[#43e5c9]/20 to-[#2dd4bf]/20 opacity-0 transition-opacity group-hover:opacity-100" />
+
+              {/* Text */}
+              <span className="relative z-30 drop-shadow-[0_0_8px_rgba(67,229,201,0.8)]">HYPE Only</span>
+
+              {/* Multiple shadow layers for depth */}
+              <div className="absolute inset-0 -z-10 rounded-xl bg-[#0a0e12] shadow-[0_0_20px_rgba(67,229,201,0.3),0_0_40px_rgba(67,229,201,0.2),0_0_60px_rgba(67,229,201,0.1)] transition-all group-hover:shadow-[0_0_30px_rgba(67,229,201,0.5),0_0_60px_rgba(67,229,201,0.3),0_0_90px_rgba(67,229,201,0.2)]" />
             </Link>
+
             <a
               href="https://t.me/chinesehyperliquid"
               target="_blank"
