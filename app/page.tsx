@@ -284,15 +284,6 @@ export default function LandingPage() {
               href="/dashboard"
               className="tech-button group relative overflow-hidden rounded-xl px-8 py-4 text-base font-semibold text-white transition-all"
             >
-              {/* Green blob GIF background */}
-              <div className="absolute inset-0 z-0 opacity-60">
-                <img
-                  src="https://hyperfoundation.org/landing/blob_green.gif"
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              </div>
-
               {/* Rotating border lines */}
               <div className="absolute inset-0 z-10" style={{ animation: "rotateBorder 4s linear infinite" }}>
                 <div className="absolute left-0 top-0 h-[2px] w-1/3 bg-gradient-to-r from-transparent via-[#43e5c9] to-transparent" />
@@ -318,8 +309,14 @@ export default function LandingPage() {
               {/* Gradient overlay */}
               <div className="absolute inset-0 z-20 bg-gradient-to-r from-[#43e5c9]/20 to-[#2dd4bf]/20 opacity-0 transition-opacity group-hover:opacity-100" />
 
-              {/* Text */}
-              <span className="relative z-30 drop-shadow-[0_0_8px_rgba(67,229,201,0.8)]">HYPE Only</span>
+              <span className="relative z-30 flex items-center gap-2">
+                <span className="drop-shadow-[0_0_8px_rgba(67,229,201,0.8)]">HYPE Only</span>
+                <img
+                  src="https://hyperfoundation.org/landing/blob_green.gif"
+                  alt=""
+                  className="h-6 w-6 object-contain"
+                />
+              </span>
 
               {/* Multiple shadow layers for depth */}
               <div className="absolute inset-0 -z-10 rounded-xl bg-[#0a0e12] shadow-[0_0_20px_rgba(67,229,201,0.3),0_0_40px_rgba(67,229,201,0.2),0_0_60px_rgba(67,229,201,0.1)] transition-all group-hover:shadow-[0_0_30px_rgba(67,229,201,0.5),0_0_60px_rgba(67,229,201,0.3),0_0_90px_rgba(67,229,201,0.2)]" />
