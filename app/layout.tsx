@@ -7,20 +7,28 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Hypeonly",
-  description: "Hyperliquid ecosystem dashboard and analytics platform",
-  generator: "v0.app",
+  metadataBase: new URL("https://hypeonly.xyz"),
+  title: {
+    default: "Hypeonly",
+    template: "%s — Hypeonly",
+  },
+  description: "Hypeonly – Hyperliquid L1 ecosystem dashboard.",
   openGraph: {
-    title: "Hypeonly",
-    description: "Hyperliquid ecosystem dashboard and analytics platform",
-    siteName: "Hypeonly",
     type: "website",
+    url: "https://hypeonly.xyz",
+    siteName: "Hypeonly",
+    title: "Hypeonly",
+    description: "Hypeonly – Hyperliquid L1 ecosystem dashboard.",
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "Hypeonly" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Hypeonly",
-    description: "Hyperliquid ecosystem dashboard and analytics platform",
+    description: "Hypeonly – Hyperliquid L1 ecosystem dashboard.",
+    images: ["/og.jpg"],
   },
+  icons: { shortcut: "/favicon.ico" },
+  applicationName: "Hypeonly",
 }
 
 export default function RootLayout({
