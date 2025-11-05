@@ -1265,7 +1265,7 @@ export default function DashboardClient({
                               <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
                                 <div className="text-[10px] text-[#96fce4] leading-none">更新时间</div>
                                 <div className="mt-1 text-[12px] font-medium leading-none text-white whitespace-nowrap">
-                                  {dayjs(item.updatedAt).format("MM-DD HH:mm")}
+                                  {dayjs(item.updatedAt).format("YYYY-MM-DD HH:mm")}
                                 </div>
                               </div>
                             </div>
@@ -1367,7 +1367,7 @@ export default function DashboardClient({
                           <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-3 py-2">
                             <div className="text-[11px] text-[#96fce4]">更新时间</div>
                             <div className="mt-0.5 text-sm font-medium text-white">
-                              {dayjs(item.updatedAt).format("MM-DD HH:mm")}
+                              {dayjs(item.updatedAt).format("YYYY-MM-DD HH:mm")}
                             </div>
                           </div>
                         </div>
