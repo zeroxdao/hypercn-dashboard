@@ -1588,8 +1588,8 @@ export default function DashboardClient({
                             <div className="col-span-3 min-w-0">
                               <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-3 py-2">
                                 <div className="text-[11px] text-[#96fce4]">更新时间</div>
-                                <div className="mt-0.5 text-sm font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis tabular-nums">
-                                  {dayjs(item.updatedAt).format("MM-DD HH:mm")}
+                                <div className="mt-0.5 text-base font-semibold text-white whitespace-nowrap overflow-hidden text-ellipsis tabular-nums">
+                                  {dayjs(item.updatedAt).format("YYYY-MM-DD HH:mm")}
                                 </div>
                               </div>
                             </div>
