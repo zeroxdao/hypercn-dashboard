@@ -300,7 +300,19 @@ export default function LandingPage() {
               href="/dashboard"
               className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-[#43e5c9] to-[#2dd4bf] px-8 py-4 text-base font-semibold text-[#0a0e12] shadow-lg shadow-[#43e5c9]/30 transition-all hover:shadow-xl hover:shadow-[#43e5c9]/40"
             >
-              <img src="/images/design-mode/Hypurr(1).png" alt="Running cat" className="running-cat" />
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 h-full w-full object-cover opacity-40"
+                style={{ mixBlendMode: "multiply" }}
+              >
+                <source
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Side-profile%2C_facing_right._A_looping_in-place_run_cycle_of_the_exact_same_chibi_cat_as_the_referenc_seed3627068871-KUZgrOMnUNT0ht6q53v0a1MCUoHtTH.mp4"
+                  type="video/mp4"
+                />
+              </video>
               <span className="relative z-10">HYPE Only</span>
               <div className="absolute inset-0 -z-0 bg-gradient-to-r from-[#2dd4bf] to-[#43e5c9] opacity-0 transition-opacity group-hover:opacity-100" />
             </Link>
