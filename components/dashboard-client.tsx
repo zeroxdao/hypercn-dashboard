@@ -1242,7 +1242,7 @@ export default function DashboardClient({
                                 href={item.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex h-[16px] min-h-0 items-center justify-center
+                                className="inline-flex h-[20px] min-h-0 items-center justify-center
                                rounded-md bg-[#43e5c9] px-2
                                text-[10px] leading-[10px] font-medium text-[#010807]
                                hover:opacity-90"
