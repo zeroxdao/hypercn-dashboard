@@ -1675,7 +1675,7 @@ export default function DashboardClient({
               </div>
 
               {/* Desktop version: hidden md:block - 100% unchanged */}
-              <div className="hidden md:block h-full">
+              <div className="hidden md:block">
                 <div className="h-full overflow-hidden px-5 py-4">
                   <div className="mb-3 flex items-center gap-2">
                     <span>📊</span>
