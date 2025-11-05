@@ -13,11 +13,9 @@ import type { DashboardStats, HypePrice, BuybackData, RevenueData, TokenInfo } f
  */
 export async function getDashboardStats(): Promise<DashboardStats> {
   try {
-    const [hypeData, defiLlamaData, perpsVolume] = await Promise.all([
-      getHypeTokenData(),
-      getHyperliquidData(),
-      fetchPerpsVolume(),
-    ])
+    const [hypeData, defiLlamaData] = await Promise.all([getHypeTokenData(), getHyperliquidData()])
+
+    const perpsVolume = await fetchPerpsVolume()
 
     const tvl = defiLlamaData.tvl || 0
 

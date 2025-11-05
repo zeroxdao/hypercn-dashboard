@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import Link from "next/link"
 
 type Project = {
   id: string
@@ -175,15 +174,7 @@ export default function AdminPage() {
 
   return (
     <div className="mx-auto min-h-screen max-w-6xl bg-[#010807] px-4 py-6 text-white">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Admin 面板</h1>
-        <Link
-          href="/admin/staking"
-          className="rounded-lg border border-[#1e2c31] bg-[#0f1b1d] px-4 py-2 text-sm hover:bg-[#132224]"
-        >
-          管理质押项目
-        </Link>
-      </div>
+      <h1 className="mb-4 text-xl font-semibold">Admin 面板</h1>
 
       <div className="rounded-xl border border-[#133136] bg-[#0b1416] p-4">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
