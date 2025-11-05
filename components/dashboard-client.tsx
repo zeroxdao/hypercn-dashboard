@@ -717,6 +717,60 @@ export default function DashboardClient({
           }
         }
         
+        /* Added missing keyframes for fire and glass effects */
+        @keyframes fire-flicker {
+          0%, 100% {
+            background-position: 0% 50%;
+            opacity: 0.6;
+          }
+          25% {
+            background-position: 50% 25%;
+            opacity: 0.8;
+          }
+          50% {
+            background-position: 100% 50%;
+            opacity: 0.7;
+          }
+          75% {
+            background-position: 50% 75%;
+            opacity: 0.9;
+          }
+        }
+        
+        @keyframes fire-glow {
+          0%, 100% {
+            opacity: 0.6;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
+        
+        @keyframes glass-reflect {
+          0%, 100% {
+            background-position: 0% 50%;
+            opacity: 0.5;
+          }
+          50% {
+            background-position: 200% 50%;
+            opacity: 0.8;
+          }
+        }
+        
+        @keyframes glass-shimmer {
+          0% {
+            left: -50%;
+            opacity: 0;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            left: 150%;
+            opacity: 0;
+          }
+        }
+        
         /* Fire effect for "热门" label */
         .label-hot {
           position: relative;
