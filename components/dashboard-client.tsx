@@ -1217,32 +1217,154 @@ export default function DashboardClient({
 
             {/* ================= HYPE 推荐质押收益率 ================= */}
             <Card className="col-span-1 lg:col-span-6 p-0 overflow-hidden bg-[#101419] border-[#072027]">
-              {/* Mobile version: block md:hidden */}
-              <div className="block md:hidden">
-                <div
-                  className="rounded-2xl bg-[#0F1519] p-3"
-                  onMouseEnter={() => setStakePaused(true)}
-                  onMouseLeave={() => setStakePaused(false)}
-                >
-                  {/* 顶部：仅标题（移除按钮） */}
-                  <div className="mb-2 flex items-center justify-between px-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                      <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
+              {hypeStakeItems.length === 0 ? (
+                // Loading state when no data
+                <div className="h-[180px] flex items-center justify-center">
+                  <div className="text-[#96fce4]/60 text-sm">加载中...</div>
+                </div>
+              ) : (
+                <>
+                  {/* Mobile version: block md:hidden */}
+                  <div className="block md:hidden">
+                    <div
+                      className="rounded-2xl bg-[#0F1519] p-3"
+                      onMouseEnter={() => setStakePaused(true)}
+                      onMouseLeave={() => setStakePaused(false)}
+                    >
+                      {/* 顶部：仅标题（移除按钮） */}
+                      <div className="mb-2 flex items-center justify-between px-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                          <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
+                        </div>
+                      </div>
+
+                      {/* 内容区 */}
+                      <div className="relative w-full rounded-xl">
+                        {(() => {
+                          const item = hypeStakeItems[stakeIdx]
+                          if (!item) return null
+                          const tvl = `$${item.tvlUSD.toLocaleString()}`
+                          return (
+                            <div className="flex flex-col gap-3 p-1.5">
+                              {/* 顶部：Logo + 名称 + （右侧）去质押 按钮 */}
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <div className="h-6 w-6 overflow-hidden rounded-md bg-[#112224] flex-shrink-0">
+                                    {item.logo && (
+                                      <img
+                                        src={item.logo || "/placeholder.svg"}
+                                        alt={item.name}
+                                        className="h-full w-full object-cover"
+                                      />
+                                    )}
+                                  </div>
+                                  <div className="truncate text-[12px] font-semibold text-white">{item.name}</div>
+                                </div>
+
+                                {item?.link && (
+                                  <a
+                                    href={item.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex h-[16px] min-h-0 items-center justify-center
+                               rounded-md bg-[#43e5c9] px-2
+                               text-[10px] leading-[10px] font-medium text-[#010807]
+                               hover:opacity-90"
+                                    style={{ WebkitAppearance: "none", appearance: "none" }}
+                                  >
+                                    去质押
+                                  </a>
+                                )}
+                              </div>
+
+                              <div className="flex flex-col gap-1.5">
+                                {/* 第一行：APY + 更新时间 */}
+                                <div className="grid grid-cols-2 gap-1.5">
+                                  <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
+                                    <div className="text-[10px] text-[#96fce4] leading-none">净 APY</div>
+                                    <div className="mt-1 text-[13px] font-semibold leading-none text-white whitespace-nowrap">
+                                      {item.netAPY.toFixed(1)}%
+                                    </div>
+                                  </div>
+                                  <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
+                                    <div className="text-[10px] text-[#96fce4] leading-none">更新时间</div>
+                                    <div className="mt-1 text-[12px] font-medium leading-none text-white whitespace-nowrap">
+                                      {dayjs(item.updatedAt).format("YYYY-MM-DD HH:mm")}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* 第二行：TVL 单独一行 */}
+                                <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
+                                  <div className="text-[10px] text-[#96fce4] leading-none">TVL</div>
+                                  <div className="mt-1 text-[13px] font-semibold leading-none text-white truncate">
+                                    {tvl}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="border-t border-[#133136]/60 pt-2">
+                                <div className="flex items-center justify-center gap-0.5">
+                                  {hypeStakeItems.map((_, i) => (
+                                    <span
+                                      key={i}
+                                      role="button"
+                                      tabIndex={0}
+                                      onClick={() => setStakeIdx(i)}
+                                      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setStakeIdx(i)}
+                                      className={
+                                        "inline-block cursor-pointer select-none shrink-0 align-middle " +
+                                        (i === stakeIdx
+                                          ? "h-[2px] w-[8px] rounded-full bg-[#43e5c9] transition-all"
+                                          : "h-[2px] w-[4px] rounded-full bg-[#2a4b45] transition-all")
+                                      }
+                                      aria-label={`slide-${i}`}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })()}
+                      </div>
                     </div>
                   </div>
 
-                  {/* 内容区 */}
-                  <div className="relative w-full rounded-xl">
-                    {(() => {
-                      const item = hypeStakeItems[stakeIdx]
-                      const tvl = `$${item.tvlUSD.toLocaleString()}`
-                      return (
-                        <div className="flex flex-col gap-3 p-1.5">
-                          {/* 顶部：Logo + 名称 + （右侧）去质押 按钮 */}
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <div className="h-6 w-6 overflow-hidden rounded-md bg-[#112224] flex-shrink-0">
+                  {/* ========== Desktop 保持不变 ========== */}
+                  <div className="hidden md:block">
+                    <div
+                      className="grid h-[180px] grid-cols-12 items-start gap-3 overflow-hidden px-5 py-4"
+                      onMouseEnter={() => setStakePaused(true)}
+                      onMouseLeave={() => setStakePaused(false)}
+                    >
+                      {/* 标题 + 右上角按钮 */}
+                      <div className="col-span-12 mb-1.5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                          <span className="text-sm font-semibold text-[#96fce4]">HYPE 推荐质押收益率</span>
+                        </div>
+                        {hypeStakeItems[stakeIdx]?.link && (
+                          <a
+                            href={hypeStakeItems[stakeIdx].link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="rounded-lg bg-[#43e5c9] px-3 py-1.5 text-xs font-medium text-[#010807] hover:opacity-90"
+                          >
+                            去质押
+                          </a>
+                        )}
+                      </div>
+
+                      {(() => {
+                        const item = hypeStakeItems[stakeIdx]
+                        if (!item) return null
+                        const tvl = `$${item.tvlUSD.toLocaleString()}`
+                        return (
+                          <>
+                            {/* 左：Logo + 名称 */}
+                            <div className="col-span-4 flex items-center gap-2">
+                              <div className="h-10 w-10 overflow-hidden rounded-lg bg-[#112224]">
                                 {item.logo && (
                                   <img
                                     src={item.logo || "/placeholder.svg"}
@@ -1251,164 +1373,55 @@ export default function DashboardClient({
                                   />
                                 )}
                               </div>
-                              <div className="truncate text-[12px] font-semibold text-white">{item.name}</div>
+                              <div className="truncate text-base font-semibold text-white">{item.name}</div>
                             </div>
 
-                            {item?.link && (
-                              <a
-                                href={item.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex h-[16px] min-h-0 items-center justify-center
-                               rounded-md bg-[#43e5c9] px-2
-                               text-[10px] leading-[10px] font-medium text-[#010807]
-                               hover:opacity-90"
-                                style={{ WebkitAppearance: "none", appearance: "none" }}
-                              >
-                                去质押
-                              </a>
-                            )}
-                          </div>
-
-                          <div className="flex flex-col gap-1.5">
-                            {/* 第一行：APY + 更新时间 */}
-                            <div className="grid grid-cols-2 gap-1.5">
-                              <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
-                                <div className="text-[10px] text-[#96fce4] leading-none">净 APY</div>
-                                <div className="mt-1 text-[13px] font-semibold leading-none text-white whitespace-nowrap">
+                            {/* 中：APY 与 TVL 同排（Chip 风格） */}
+                            <div className="col-span-5 flex items-stretch gap-3">
+                              <div className="flex-1 rounded-lg border border-[#133136] bg-[#0f1b1d] px-3 py-2">
+                                <div className="text-[11px] text-[#96fce4]">净 APY</div>
+                                <div className="mt-0.5 text-base font-semibold text-white">
                                   {item.netAPY.toFixed(1)}%
                                 </div>
                               </div>
-                              <div className="min-w-0 rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
-                                <div className="text-[10px] text-[#96fce4] leading-none">更新时间</div>
-                                <div className="mt-1 text-[12px] font-medium leading-none text-white whitespace-nowrap">
+                              <div className="flex-1 rounded-lg border border-[#133136] bg-[#0f1b1d] px-3 py-2">
+                                <div className="text-[11px] text-[#96fce4]">TVL</div>
+                                <div className="mt-0.5 text-base font-semibold text-white">{tvl}</div>
+                              </div>
+                            </div>
+
+                            {/* 右：更新时间 */}
+                            <div className="col-span-3">
+                              <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-3 py-2">
+                                <div className="text-[11px] text-[#96fce4]">更新时间</div>
+                                <div className="mt-0.5 text-sm font-medium text-white">
                                   {dayjs(item.updatedAt).format("YYYY-MM-DD HH:mm")}
                                 </div>
                               </div>
                             </div>
 
-                            {/* 第二行：TVL 单独一行 */}
-                            <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-2 py-1.5">
-                              <div className="text-[10px] text-[#96fce4] leading-none">TVL</div>
-                              <div className="mt-1 text-[13px] font-semibold leading-none text-white truncate">
-                                {tvl}
+                            {/* 底部整行：指示点居中 + 文案 */}
+                            <div className="col-span-12 mt-1 flex flex-col items-center">
+                              <div className="flex items-center justify-center gap-2">
+                                {hypeStakeItems.map((_, i) => (
+                                  <button
+                                    key={i}
+                                    onClick={() => setStakeIdx(i)}
+                                    className={`h-1 rounded-full transition-all ${
+                                      i === stakeIdx ? "w-[10px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
+                                    }`}
+                                    aria-label={`slide-${i}`}
+                                  />
+                                ))}
                               </div>
                             </div>
-                          </div>
-
-                          <div className="border-t border-[#133136]/60 pt-2">
-                            <div className="flex items-center justify-center gap-0.5">
-                              {hypeStakeItems.map((_, i) => (
-                                <span
-                                  key={i}
-                                  role="button"
-                                  tabIndex={0}
-                                  onClick={() => setStakeIdx(i)}
-                                  onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setStakeIdx(i)}
-                                  className={
-                                    "inline-block cursor-pointer select-none shrink-0 align-middle " +
-                                    (i === stakeIdx
-                                      ? "h-[2px] w-[8px] rounded-full bg-[#43e5c9] transition-all"
-                                      : "h-[2px] w-[4px] rounded-full bg-[#2a4b45] transition-all")
-                                  }
-                                  aria-label={`slide-${i}`}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })()}
-                  </div>
-                </div>
-              </div>
-
-              {/* ========== Desktop 保持不变 ========== */}
-              <div className="hidden md:block">
-                <div
-                  className="grid h-[180px] grid-cols-12 items-start gap-3 overflow-hidden px-5 py-4"
-                  onMouseEnter={() => setStakePaused(true)}
-                  onMouseLeave={() => setStakePaused(false)}
-                >
-                  {/* 标题 + 右上角按钮 */}
-                  <div className="col-span-12 mb-1.5 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                      <span className="text-sm font-semibold text-[#96fce4]">HYPE 推荐质押收益率</span>
+                          </>
+                        )
+                      })()}
                     </div>
-                    {hypeStakeItems[stakeIdx]?.link && (
-                      <a
-                        href={hypeStakeItems[stakeIdx].link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded-lg bg-[#43e5c9] px-3 py-1.5 text-xs font-medium text-[#010807] hover:opacity-90"
-                      >
-                        去质押
-                      </a>
-                    )}
                   </div>
-
-                  {(() => {
-                    const item = hypeStakeItems[stakeIdx]
-                    const tvl = `$${item.tvlUSD.toLocaleString()}`
-                    return (
-                      <>
-                        {/* 左：Logo + 名称 */}
-                        <div className="col-span-4 flex items-center gap-2">
-                          <div className="h-10 w-10 overflow-hidden rounded-lg bg-[#112224]">
-                            {item.logo && (
-                              <img
-                                src={item.logo || "/placeholder.svg"}
-                                alt={item.name}
-                                className="h-full w-full object-cover"
-                              />
-                            )}
-                          </div>
-                          <div className="truncate text-base font-semibold text-white">{item.name}</div>
-                        </div>
-
-                        {/* 中：APY 与 TVL 同排（Chip 风格） */}
-                        <div className="col-span-5 flex items-stretch gap-3">
-                          <div className="flex-1 rounded-lg border border-[#133136] bg-[#0f1b1d] px-3 py-2">
-                            <div className="text-[11px] text-[#96fce4]">净 APY</div>
-                            <div className="mt-0.5 text-base font-semibold text-white">{item.netAPY.toFixed(1)}%</div>
-                          </div>
-                          <div className="flex-1 rounded-lg border border-[#133136] bg-[#0f1b1d] px-3 py-2">
-                            <div className="text-[11px] text-[#96fce4]">TVL</div>
-                            <div className="mt-0.5 text-base font-semibold text-white">{tvl}</div>
-                          </div>
-                        </div>
-
-                        {/* 右：更新时间 */}
-                        <div className="col-span-3">
-                          <div className="rounded-lg border border-[#133136] bg-[#0f1b1d] px-3 py-2">
-                            <div className="text-[11px] text-[#96fce4]">更新时间</div>
-                            <div className="mt-0.5 text-sm font-medium text-white">
-                              {dayjs(item.updatedAt).format("YYYY-MM-DD HH:mm")}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* 底部整行：指示点居中 + 文案 */}
-                        <div className="col-span-12 mt-1 flex flex-col items-center">
-                          <div className="flex items-center justify-center gap-2">
-                            {hypeStakeItems.map((_, i) => (
-                              <button
-                                key={i}
-                                onClick={() => setStakeIdx(i)}
-                                className={`h-1 rounded-full transition-all ${
-                                  i === stakeIdx ? "w-[10px] bg-[#43e5c9]" : "w-[6px] bg-[#2a4b45]"
-                                }`}
-                                aria-label={`slide-${i}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )
-                  })()}
-                </div>
-              </div>
+                </>
+              )}
             </Card>
             {/* ================= /HYPE 推荐质押收益率 ================= */}
 
