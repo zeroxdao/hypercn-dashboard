@@ -317,7 +317,7 @@ export default function DashboardClient({
         const res = await fetch("https://api.hyperliquid.xyz/info", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.JSON.stringify({ type: "metaAndAssetCtxs" }),
+          body: JSON.stringify({ type: "metaAndAssetCtxs" }),
         })
         if (!res.ok) {
           return
