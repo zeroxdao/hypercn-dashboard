@@ -1572,8 +1572,8 @@ export default function DashboardClient({
                                 href={item.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="futuristic-stake-button inline-flex h-[22px] min-h-0 items-center justify-center gap-1.5
-                                               rounded-full px-3 text-[11px] leading-none"
+                                className={`futuristic-stake-button inline-flex h-[22px] min-h-0 items-center justify-center gap-1.5
+                                               rounded-full px-3 text-[11px] leading-none`}
                               >
                                 <div className="button-glow hidden" />
                                 <span className="button-text text-[#43e5c9]">去质押</span>

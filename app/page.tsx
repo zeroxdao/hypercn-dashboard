@@ -328,10 +328,7 @@ export default function LandingPage() {
               href="https://t.me/chinesehyperliquid"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-xl border border-[#43e5c9]/30 bg-[#0f1519]/50
-                         inline-flex h-12 w-[180px] items-center justify-center
-                         text-[15px] font-semibold text-[#43e5c9] backdrop-blur-sm
-                         transition-all hover:border-[#43e5c9]/50 hover:bg-[#0f1519]/80"
+              className={`rounded-xl border border-[#43e5c9]/30 bg-[#0f1519]/50 inline-flex h-12 w-[180px] items-center justify-center text-[15px] font-semibold text-[#43e5c9] backdrop-blur-sm transition-all hover:border-[#43e5c9]/50 hover:bg-[#0f1519]/80`}
             >
               加入我们
             </a>
