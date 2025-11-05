@@ -182,6 +182,7 @@ export default function DashboardClient({
   const revenueChartWrapRefDesktop = useRef<HTMLDivElement>(null)
 
   type StakeItem = {
+    id: string
     name: string
     logo?: string
     netAPY: number
@@ -190,41 +191,57 @@ export default function DashboardClient({
     link: string
   }
 
-  const hypeStakeItems: StakeItem[] = [
-    {
-      name: "ApStation",
-      logo: "/apstation-logo.jpg",
-      netAPY: 18.0,
-      tvlUSD: 120000000,
-      updatedAt: new Date().toISOString(),
-      link: "https://example.com/stake/apstation",
-    },
-    {
-      name: "FlowMax",
-      logo: "/flowmax-logo.jpg",
-      netAPY: 21.5,
-      tvlUSD: 89000000,
-      updatedAt: new Date().toISOString(),
-      link: "https://example.com/stake/flowmax",
-    },
-    {
-      name: "DeFiHub",
-      logo: "/defihub-logo.jpg",
-      netAPY: 16.7,
-      tvlUSD: 154000000,
-      updatedAt: new Date().toISOString(),
-      link: "https://example.com/stake/defihub",
-    },
-  ]
-
+  const [hypeStakeItems, setHypeStakeItems] = useState<StakeItem[]>([])
   const [stakeIdx, setStakeIdx] = useState(0)
   const [stakePaused, setStakePaused] = useState(false)
+
+  useEffect(() => {
+    const loadStakingProjects = async () => {
+      try {
+        const res = await fetch("/api/staking", { cache: "no-store" })
+        if (res.ok) {
+          const data: StakeItem[] = await res.json()
+          if (Array.isArray(data) && data.length > 0) {
+            setHypeStakeItems(data)
+          } else {
+            // Fallback to default data if API returns empty
+            setHypeStakeItems([
+              {
+                id: "default-1",
+                name: "ApStation",
+                logo: "/apstation-logo.jpg",
+                netAPY: 18.0,
+                tvlUSD: 120000000,
+                updatedAt: new Date().toISOString(),
+                link: "https://example.com/stake/apstation",
+              },
+            ])
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load staking projects:", error)
+        // Fallback to default data on error
+        setHypeStakeItems([
+          {
+            id: "default-1",
+            name: "ApStation",
+            logo: "/apstation-logo.jpg",
+            netAPY: 18.0,
+            tvlUSD: 120000000,
+            updatedAt: new Date().toISOString(),
+            link: "https://example.com/stake/apstation",
+          },
+        ])
+      }
+    }
+    loadStakingProjects()
+  }, [])
 
   useEffect(() => {
     if (stakePaused || hypeStakeItems.length <= 1) return
     const t = setInterval(() => setStakeIdx((i) => (i + 1) % hypeStakeItems.length), 3500)
     return () => clearInterval(t)
-  }, [stakePaused])
+  }, [stakePaused, hypeStakeItems.length])
 
   // 分页（每页 9 项）
   const [currentPage, setCurrentPage] = useState(1)
