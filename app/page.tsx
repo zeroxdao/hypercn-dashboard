@@ -164,6 +164,36 @@ export default function LandingPage() {
           0% { transform: rotate(0deg) translateX(260px) rotate(0deg); }
           100% { transform: rotate(360deg) translateX(260px) rotate(-360deg); }
         }
+        @keyframes catRun {
+          0% {
+            left: -40px;
+            transform: translateY(0px) scaleX(1);
+          }
+          25% {
+            transform: translateY(-3px) scaleX(1);
+          }
+          50% {
+            transform: translateY(0px) scaleX(1);
+          }
+          75% {
+            transform: translateY(-3px) scaleX(1);
+          }
+          100% {
+            left: calc(100% + 40px);
+            transform: translateY(0px) scaleX(1);
+          }
+        }
+        .running-cat {
+          position: absolute;
+          width: 32px;
+          height: 32px;
+          top: 50%;
+          margin-top: -16px;
+          animation: catRun 3s linear infinite;
+          pointer-events: none;
+          filter: brightness(0) saturate(100%);
+          opacity: 0.6;
+        }
       `}</style>
 
       <div className="relative z-10">
@@ -270,6 +300,7 @@ export default function LandingPage() {
               href="/dashboard"
               className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-[#43e5c9] to-[#2dd4bf] px-8 py-4 text-base font-semibold text-[#0a0e12] shadow-lg shadow-[#43e5c9]/30 transition-all hover:shadow-xl hover:shadow-[#43e5c9]/40"
             >
+              <img src="/images/design-mode/Hypurr(1).png" alt="Running cat" className="running-cat" />
               <span className="relative z-10">HYPE Only</span>
               <div className="absolute inset-0 -z-0 bg-gradient-to-r from-[#2dd4bf] to-[#43e5c9] opacity-0 transition-opacity group-hover:opacity-100" />
             </Link>
