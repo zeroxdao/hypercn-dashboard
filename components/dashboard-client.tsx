@@ -1072,7 +1072,6 @@ export default function DashboardClient({
                 <div className="rounded-2xl bg-[#0F1519] p-3">
                   {/* Title */}
                   <div className="flex items-center gap-2 px-1 mb-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
                     <span className="text-[13px] font-semibold text-emerald-300">$HYPE 价格</span>
                   </div>
 
@@ -1406,13 +1405,12 @@ export default function DashboardClient({
                 >
                   {/* 顶部：仅标题（移除按钮） */}
                   <div className="mb-2 flex items-center justify-between px-0.5">
-                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <img
                         src="https://hyperliquid.gitbook.io/hyperliquid-docs/~gitbook/image?url=https%3A%2F%2F2356094849-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FyUdp569E6w18GdfqlGvJ%252Ficon%252FsIAjqhKKIUysM08ahKPh%252FHL-logoSwitchDISliStat.png%3Falt%3Dmedia%26token%3Da81fa25c-0510-4d97-87ff-3fb8944935b1&width=32&dpr=4&quality=100&sign=3e1219e3&sv=2"
                         alt="Hyperliquid Logo"
                         className="h-4 w-4 rounded"
                       />
-                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
                       <span className="text-[13px] font-semibold text-emerald-300">HYPE 推荐质押收益率</span>
                     </div>
                   </div>
@@ -1529,7 +1527,6 @@ export default function DashboardClient({
                         alt="Hyperliquid Logo"
                         className="h-5 w-5 rounded"
                       />
-                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
                       <span className="text-sm font-semibold text-[#96fce4]">HYPE 推荐质押收益率</span>
                     </div>
 
