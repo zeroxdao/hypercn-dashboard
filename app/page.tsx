@@ -298,14 +298,14 @@ export default function LandingPage() {
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/dashboard"
-              className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-[#43e5c9] to-[#2dd4bf] px-8 py-4 text-base font-semibold text-[#0a0e12] shadow-lg shadow-[#43e5c9]/30 transition-all hover:shadow-xl hover:shadow-[#43e5c9]/40"
+              className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-[#43e5c9] to-[#2dd4bf] px-8 py-4 text-base font-semibold text-[#0a0e12] shadow-lg shadow-[#43e5c9]/30 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-[#43e5c9]/50"
             >
               <video
                 autoPlay
                 loop
                 muted
                 playsInline
-                className="absolute inset-0 h-full w-full object-cover opacity-40"
+                className="absolute inset-0 h-full w-full object-cover opacity-60 transition-all duration-300 group-hover:opacity-80"
                 style={{ mixBlendMode: "multiply" }}
               >
                 <source
@@ -313,8 +313,10 @@ export default function LandingPage() {
                   type="video/mp4"
                 />
               </video>
-              <span className="relative z-10">HYPE Only</span>
-              <div className="absolute inset-0 -z-0 bg-gradient-to-r from-[#2dd4bf] to-[#43e5c9] opacity-0 transition-opacity group-hover:opacity-100" />
+              <span className="relative z-10 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:drop-shadow-[0_0_8px_rgba(10,14,18,0.8)]">
+                HYPE Only
+              </span>
+              <div className="absolute inset-0 -z-0 bg-gradient-to-r from-[#2dd4bf] to-[#43e5c9] opacity-0 transition-all duration-300 group-hover:opacity-100" />
             </Link>
             <a
               href="https://t.me/chinesehyperliquid"
