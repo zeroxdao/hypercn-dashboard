@@ -8,8 +8,19 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Hypeonly",
-  description: "Created with v0",
+  description: "Hyperliquid ecosystem dashboard and analytics platform",
   generator: "v0.app",
+  openGraph: {
+    title: "Hypeonly",
+    description: "Hyperliquid ecosystem dashboard and analytics platform",
+    siteName: "Hypeonly",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Hypeonly",
+    description: "Hyperliquid ecosystem dashboard and analytics platform",
+  },
 }
 
 export default function RootLayout({
