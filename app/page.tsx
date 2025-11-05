@@ -165,11 +165,50 @@ export default function LandingPage() {
           100% { transform: rotate(360deg) translateX(260px) rotate(-360deg); }
         }
         
-        /* Added tech button animations for rotating borders and effects */
-        @keyframes rotateBorder {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        /* Updated border animation to travel around perimeter */
+        @keyframes borderChase {
+          0% { 
+            background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%;
+          }
+          25% { 
+            background-position: 100% 0%, 100% 0%, 100% 100%, 0% 100%;
+          }
+          50% { 
+            background-position: 100% 0%, 100% 100%, 100% 100%, 0% 100%;
+          }
+          75% { 
+            background-position: 100% 0%, 100% 100%, 0% 100%, 0% 100%;
+          }
+          100% { 
+            background-position: 100% 0%, 100% 100%, 0% 100%, 0% 0%;
+          }
         }
+        
+        @keyframes rotateBorder {
+          0% { 
+            background: conic-gradient(
+              from 0deg at 50% 50%,
+              transparent 0deg,
+              transparent 60deg,
+              #43e5c9 90deg,
+              #43e5c9 120deg,
+              transparent 150deg,
+              transparent 360deg
+            );
+          }
+          100% { 
+            background: conic-gradient(
+              from 360deg at 50% 50%,
+              transparent 0deg,
+              transparent 60deg,
+              #43e5c9 90deg,
+              #43e5c9 120deg,
+              transparent 150deg,
+              transparent 360deg
+            );
+          }
+        }
+        
         @keyframes pulse-glow {
           0%, 100% { opacity: 0.5; }
           50% { opacity: 1; }
@@ -284,22 +323,33 @@ export default function LandingPage() {
               href="/dashboard"
               className="tech-button group relative overflow-hidden rounded-xl px-8 py-4 text-base font-semibold text-white transition-all"
             >
-              {/* Rotating border lines */}
-              <div className="absolute inset-0 z-10" style={{ animation: "rotateBorder 4s linear infinite" }}>
-                <div className="absolute left-0 top-0 h-[2px] w-1/3 bg-gradient-to-r from-transparent via-[#43e5c9] to-transparent" />
-                <div className="absolute right-0 top-0 h-1/3 w-[2px] bg-gradient-to-b from-transparent via-[#43e5c9] to-transparent" />
-                <div className="absolute bottom-0 right-0 h-[2px] w-1/3 bg-gradient-to-l from-transparent via-[#43e5c9] to-transparent" />
-                <div className="absolute bottom-0 left-0 h-1/3 w-[2px] bg-gradient-to-t from-transparent via-[#43e5c9] to-transparent" />
-              </div>
+              <div
+                className="absolute inset-[-2px] z-0 rounded-xl opacity-80"
+                style={{
+                  animation: "rotateBorder 3s linear infinite",
+                  background: `conic-gradient(
+                    from 0deg at 50% 50%,
+                    transparent 0deg,
+                    transparent 60deg,
+                    #43e5c9 90deg,
+                    #43e5c9 120deg,
+                    transparent 150deg,
+                    transparent 360deg
+                  )`,
+                }}
+              />
+
+              {/* Inner background to create border effect */}
+              <div className="absolute inset-0 z-10 rounded-xl bg-[#0a0e12]" />
 
               {/* Corner accents */}
-              <div className="absolute left-0 top-0 z-10 h-3 w-3 border-l-2 border-t-2 border-[#43e5c9]" />
-              <div className="absolute right-0 top-0 z-10 h-3 w-3 border-r-2 border-t-2 border-[#43e5c9]" />
-              <div className="absolute bottom-0 left-0 z-10 h-3 w-3 border-b-2 border-l-2 border-[#43e5c9]" />
-              <div className="absolute bottom-0 right-0 z-10 h-3 w-3 border-b-2 border-r-2 border-[#43e5c9]" />
+              <div className="absolute left-0 top-0 z-20 h-3 w-3 border-l-2 border-t-2 border-[#43e5c9]" />
+              <div className="absolute right-0 top-0 z-20 h-3 w-3 border-r-2 border-t-2 border-[#43e5c9]" />
+              <div className="absolute bottom-0 left-0 z-20 h-3 w-3 border-b-2 border-l-2 border-[#43e5c9]" />
+              <div className="absolute bottom-0 right-0 z-20 h-3 w-3 border-b-2 border-r-2 border-[#43e5c9]" />
 
               {/* Scanning line effect */}
-              <div className="absolute inset-0 z-10 overflow-hidden">
+              <div className="absolute inset-0 z-20 overflow-hidden">
                 <div
                   className="h-[2px] w-full bg-gradient-to-r from-transparent via-[#43e5c9] to-transparent opacity-50"
                   style={{ animation: "scan-line 3s ease-in-out infinite" }}
