@@ -271,12 +271,12 @@ export default function LandingPage() {
 
           <h1 className="mb-6 text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
             <span className="bg-gradient-to-r from-white via-[#43e5c9] to-white bg-clip-text text-transparent">
-              Hyperliquid 生态与项目导航
+              Hyperliquid 中文信息中心
             </span>
           </h1>
 
           <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-[#bfeee2] md:text-xl">
-            HyperEVM 一站式手续费、营收趋势与生态项目。轻量、实时、面向中文用户优化。
+            专为华语社区打造的Hyperliquid 生态系统信息枢纽
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
@@ -330,12 +330,12 @@ export default function LandingPage() {
               rel="noopener noreferrer"
               className={`rounded-xl border border-[#43e5c9]/30 bg-[#0f1519]/50 inline-flex h-12 w-[180px] items-center justify-center text-[15px] font-semibold text-[#43e5c9] backdrop-blur-sm transition-all hover:border-[#43e5c9]/50 hover:bg-[#0f1519]/80`}
             >
-              加入我们
+              加入社群
             </a>
           </div>
         </section>
-
-        <section className="border-t border-[#1a2329] bg-[#0a0e12]/50 py-16 backdrop-blur-sm">
+        
+        {/* <section className="border-t border-[#1a2329] bg-[#0a0e12]/50 py-16 backdrop-blur-sm">
           <div className="mx-auto max-w-7xl px-6">
             <h2 className="mb-4 text-center text-3xl font-bold">
               <span className="bg-gradient-to-r from-[#43e5c9] to-[#2dd4bf] bg-clip-text text-transparent">
@@ -378,7 +378,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Footer */}
         <footer className="border-t border-[#1a2329] bg-[#0a0e12]/80 py-8 text-center backdrop-blur-sm">

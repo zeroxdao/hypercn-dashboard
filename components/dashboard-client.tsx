@@ -1021,7 +1021,7 @@ export default function DashboardClient({
           <div>
             <a href="https://t.me/chinesehyperliquid" target="_blank" rel="noopener noreferrer">
               <Button className="h-11 px-6 text-base rounded-xl bg-[#43e5c9] text-[#010807] hover:bg-[#2da691] font-medium">
-                加入我们
+                加入社群
               </Button>
             </a>
           </div>
@@ -1181,7 +1181,7 @@ export default function DashboardClient({
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Button className="mx-auto block text-sm md:text-base h-9 md:h-11 px-4 md:px-6 w-[75%] max-w-[280px] md:w-auto rounded-xl bg-[#43e5c9] text-[#010807] hover:bg-[#2da691] font-medium">
-                      加入我们
+                      加入社群
                     </Button>
                   </a>
                 </div>
